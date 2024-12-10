@@ -1,4 +1,4 @@
-package com.faltenreich.camaps
+package com.faltenreich.camaps.camaps
 
 import android.content.ComponentName
 import android.content.Intent
@@ -11,7 +11,7 @@ import java.util.ArrayList
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.isAccessible
 
-class NotificationListener : NotificationListenerService() {
+class CamApsFxNotificationListenerService : NotificationListenerService() {
 
     private var componentName: ComponentName? = null
 
@@ -49,12 +49,12 @@ class NotificationListener : NotificationListenerService() {
 
     override fun onListenerConnected() {
         super.onListenerConnected()
-        Log.d("NotificationListener", "onListenerConnected")
+        Log.d("CamApsFxNotificationListenerService", "onListenerConnected")
     }
 
     override fun onListenerDisconnected() {
         super.onListenerDisconnected()
-        Log.d("NotificationListener", "onListenerDisconnected")
+        Log.d("CamApsFxNotificationListenerService", "onListenerDisconnected")
 
         if (componentName == null) {
             componentName = ComponentName(this, this::class.java)
@@ -64,7 +64,7 @@ class NotificationListener : NotificationListenerService() {
     }
 
     override fun onNotificationPosted(sbn: StatusBarNotification?) {
-        Log.d("NotificationListener", "onNotificationPosted: $sbn")
+        Log.d("CamApsFxNotificationListenerService", "onNotificationPosted: $sbn")
 
         val statusBarNotification = sbn?.takeIf { it.packageName == "com.camdiab.fx_alert.mgdl" }
         val notification = statusBarNotification?.notification ?: return
@@ -81,7 +81,7 @@ class NotificationListener : NotificationListenerService() {
         valueProperty.isAccessible = true
         val value = valueProperty.getter.call(action)
 
-        Log.d("NotificationListener", "mg/dL: $value")
+        Log.d("CamApsFxNotificationListenerService", "mg/dL: $value")
     }
 
 }
