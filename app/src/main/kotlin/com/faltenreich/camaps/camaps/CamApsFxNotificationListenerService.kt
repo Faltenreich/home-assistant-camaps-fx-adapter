@@ -7,12 +7,14 @@ import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Log
 import android.widget.RemoteViews
+import com.faltenreich.camaps.homeassistant.Networking
 import java.util.ArrayList
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.isAccessible
 
 class CamApsFxNotificationListenerService : NotificationListenerService() {
 
+    private val networking = Networking()
     private var componentName: ComponentName? = null
 
     override fun onCreate() {
@@ -22,7 +24,7 @@ class CamApsFxNotificationListenerService : NotificationListenerService() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
 
-        if(componentName == null) {
+        if (componentName == null) {
             componentName = ComponentName(this, this::class.java)
         }
 
@@ -82,6 +84,7 @@ class CamApsFxNotificationListenerService : NotificationListenerService() {
         val value = valueProperty.getter.call(action)
 
         Log.d("CamApsFxNotificationListenerService", "mg/dL: $value")
-    }
 
+        // TODO: networking.request()
+    }
 }

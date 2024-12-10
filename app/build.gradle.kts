@@ -52,4 +52,7 @@ dependencies {
     implementation(libs.androidx.material3)
 
     implementation(kotlin("reflect"))
+
+    implementation(libs.ktor.core)
+    implementation(libs.ktor.okhttp)
 }
