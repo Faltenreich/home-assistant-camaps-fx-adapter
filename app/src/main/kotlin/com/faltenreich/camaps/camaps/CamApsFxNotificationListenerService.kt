@@ -7,18 +7,26 @@ import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Log
 import android.widget.RemoteViews
-import com.faltenreich.camaps.homeassistant.Networking
+import com.faltenreich.camaps.homeassistant.HomeAssistantApi
+import com.faltenreich.camaps.homeassistant.NetworkClient
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.okhttp.OkHttp
 import java.util.ArrayList
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.isAccessible
 
 class CamApsFxNotificationListenerService : NotificationListenerService() {
 
-    private val networking = Networking()
     private var componentName: ComponentName? = null
+
+    private val homeAssistantApi = HomeAssistantApi(
+        host = "http://homeassistant.local:8123",
+        client = NetworkClient(httpClient = HttpClient(OkHttp)),
+    )
 
     override fun onCreate() {
         super.onCreate()
+        // TODO: homeAssistantApi.register()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -84,7 +92,5 @@ class CamApsFxNotificationListenerService : NotificationListenerService() {
         val value = valueProperty.getter.call(action)
 
         Log.d("CamApsFxNotificationListenerService", "mg/dL: $value")
-
-        // TODO: networking.request()
     }
 }
