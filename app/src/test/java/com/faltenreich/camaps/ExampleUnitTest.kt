@@ -1,4 +1,4 @@
-package com.example.myapplication
+package com.faltenreich.camaps
 
 import org.junit.Test
 

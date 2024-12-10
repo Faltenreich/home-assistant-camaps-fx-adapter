@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.myapplication"
+    namespace = "com.faltenreich.camaps"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.myapplication"
+        applicationId = "com.faltenreich.camaps"
         minSdk = 24
         targetSdk = 35
         versionCode = 1

@@ -1,4 +1,4 @@
-package com.example.myapplication
+package com.faltenreich.camaps
 
 import android.content.ComponentName
 import android.content.Intent
