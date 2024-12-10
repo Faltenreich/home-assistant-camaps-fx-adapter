@@ -11,22 +11,36 @@ import com.faltenreich.camaps.homeassistant.HomeAssistantApi
 import com.faltenreich.camaps.homeassistant.NetworkClient
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import java.util.ArrayList
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.isAccessible
 
 class CamApsFxNotificationListenerService : NotificationListenerService() {
 
-    private var componentName: ComponentName? = null
+    private val job = SupervisorJob()
+    private val scope = CoroutineScope(Dispatchers.IO + job)
 
     private val homeAssistantApi = HomeAssistantApi(
         host = "http://homeassistant.local:8123",
         client = NetworkClient(httpClient = HttpClient(OkHttp)),
     )
 
+    private var componentName: ComponentName? = null
+
     override fun onCreate() {
         super.onCreate()
-        // TODO: homeAssistantApi.register()
+        scope.launch {
+            homeAssistantApi.register()
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        job.cancel()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
