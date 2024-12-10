@@ -22,6 +22,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "CamAPS FX Adapter"
+rootProject.name = "camaps"
 
 include(":app")
