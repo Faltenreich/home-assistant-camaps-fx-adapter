@@ -11,6 +11,8 @@ import com.faltenreich.camaps.homeassistant.HomeAssistantApi
 import com.faltenreich.camaps.homeassistant.NetworkClient
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -26,7 +28,11 @@ class CamApsFxNotificationListenerService : NotificationListenerService() {
 
     private val homeAssistantApi = HomeAssistantApi(
         host = "http://homeassistant.local:8123",
-        client = NetworkClient(httpClient = HttpClient(OkHttp)),
+        client = NetworkClient(
+            httpClient = HttpClient(OkHttp) {
+                install(ContentNegotiation) { json() }
+            },
+        ),
     )
 
     private var componentName: ComponentName? = null

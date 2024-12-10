@@ -55,4 +55,6 @@ dependencies {
 
     implementation(libs.ktor.core)
     implementation(libs.ktor.okhttp)
+    implementation(libs.ktor.contentnegotiation)
+    implementation(libs.ktor.json)
 }
