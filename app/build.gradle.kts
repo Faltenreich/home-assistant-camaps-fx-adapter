@@ -53,8 +53,9 @@ dependencies {
 
     implementation(kotlin("reflect"))
 
-    implementation(libs.ktor.core)
-    implementation(libs.ktor.okhttp)
+    implementation(libs.ktor.auth)
     implementation(libs.ktor.contentnegotiation)
+    implementation(libs.ktor.core)
     implementation(libs.ktor.json)
+    implementation(libs.ktor.okhttp)
 }

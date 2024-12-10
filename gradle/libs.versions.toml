@@ -19,10 +19,11 @@ androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
-ktor-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
-ktor-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+ktor-auth = { module = "io.ktor:ktor-client-auth", version.ref = "ktor" }
 ktor-contentnegotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
+ktor-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
+ktor-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "android-gradle" }
