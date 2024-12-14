@@ -12,7 +12,7 @@ import com.faltenreich.camaps.BuildConfig
 import com.faltenreich.camaps.homeassistant.HomeAssistantClient
 import com.faltenreich.camaps.homeassistant.device.HomeAssistantRegisterDeviceRequestBody
 import com.faltenreich.camaps.homeassistant.sensor.HomeAssistantRegisterSensorRequestBody
-import com.faltenreich.camaps.homeassistant.sensor.HomeAssistantRegisterSensorRequestBody.Data
+import com.faltenreich.camaps.homeassistant.sensor.HomeAssistantUpdateSensorRequestBody
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -33,7 +33,7 @@ class CamApsFxNotificationListenerService : NotificationListenerService() {
     override fun onCreate() {
         super.onCreate()
         scope.launch {
-            val registrationRequestBody = HomeAssistantRegisterDeviceRequestBody(
+            val registerDeviceRequestBody = HomeAssistantRegisterDeviceRequestBody(
                 deviceId = "deviceId", // TODO: Find unique and consistent identifier?
                 appId = BuildConfig.APPLICATION_ID,
                 appName = "CamAPS FX Adapter",
@@ -45,24 +45,34 @@ class CamApsFxNotificationListenerService : NotificationListenerService() {
                 osVersion = Build.VERSION.SDK_INT.toString(),
                 supportsEncryption = false,
             )
-            Log.d(TAG, "Registering device: $registrationRequestBody")
-            val registrationResponse = homeAssistantClient.register(registrationRequestBody)
-            Log.d(TAG, "Registered device: $registrationResponse")
-            val bloodSugarRequestBody = HomeAssistantRegisterSensorRequestBody(
-                type = "fire_event",
-                data = Data(
-                    eventType = "blood_sugar",
-                    eventData = Data.EventData(
-                        value = "120",
-                    ),
+            Log.d(TAG, "Registering device: $registerDeviceRequestBody")
+            val registerDeviceResponse = homeAssistantClient.registerDevice(registerDeviceRequestBody)
+            Log.d(TAG, "Registered device: $registerDeviceResponse")
+
+            // FIXME: HTTP 200 but no sensor is visible in home assistant
+            val registerSensorRequestBody = HomeAssistantRegisterSensorRequestBody(
+                data = HomeAssistantRegisterSensorRequestBody.Data(
+                    state = 120f,
                 ),
             )
-            Log.d(TAG, "Sending event data: $bloodSugarRequestBody")
-            val fireEventResponse = homeAssistantClient.fireEvent(
-                requestBody = bloodSugarRequestBody,
-                webhookId = registrationResponse.webhookId,
+            Log.d(TAG, "Registering sensor: $registerSensorRequestBody")
+            val registerSensorResponse = homeAssistantClient.registerSensor(
+                requestBody = registerSensorRequestBody,
+                webhookId = registerDeviceResponse.webhookId,
             )
-            Log.d(TAG, "Sent event data: $fireEventResponse")
+            Log.d(TAG, "Registered sensor: $registerSensorResponse")
+
+            val updateSensorRequestBody = HomeAssistantUpdateSensorRequestBody(
+                data = HomeAssistantUpdateSensorRequestBody.Data(
+                    state = 120f,
+                ),
+            )
+            Log.d(TAG, "Updating sensor: $updateSensorRequestBody")
+            val updateSensorResponse = homeAssistantClient.updateSensor(
+                requestBody = updateSensorRequestBody,
+                webhookId = registerDeviceResponse.webhookId,
+            )
+            Log.d(TAG, "Updated sensor: $updateSensorResponse")
         }
     }
 
