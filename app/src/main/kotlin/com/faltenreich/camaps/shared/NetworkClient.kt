@@ -1,4 +1,4 @@
-package com.faltenreich.camaps.homeassistant
+package com.faltenreich.camaps.shared
 
 import android.util.Log
 import io.ktor.client.HttpClient
@@ -11,7 +11,6 @@ import io.ktor.http.Url
 import io.ktor.http.contentType
 
 class NetworkClient(@PublishedApi internal val httpClient: HttpClient) {
-
 
     suspend inline fun <reified Response> get(url: Url): Response {
         Log.d(TAG, "Requesting: GET $url")

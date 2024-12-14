@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class RegistrationResponse(
+data class HomeAssistantRegistrationResponse(
     @SerialName("cloudhook_url")
     val cloudhookUrl: String?,
     @SerialName("remote_ui_url")

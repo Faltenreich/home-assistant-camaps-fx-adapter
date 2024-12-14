@@ -7,21 +7,11 @@ import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Log
 import android.widget.RemoteViews
-import com.faltenreich.camaps.BuildConfig
-import com.faltenreich.camaps.homeassistant.HomeAssistantApi
-import com.faltenreich.camaps.homeassistant.NetworkClient
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.okhttp.OkHttp
-import io.ktor.client.plugins.auth.Auth
-import io.ktor.client.plugins.auth.providers.BearerTokens
-import io.ktor.client.plugins.auth.providers.bearer
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.serialization.kotlinx.json.json
+import com.faltenreich.camaps.homeassistant.HomeAssistantClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
 import java.util.ArrayList
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.isAccessible
@@ -30,40 +20,16 @@ class CamApsFxNotificationListenerService : NotificationListenerService() {
 
     private val job = SupervisorJob()
     private val scope = CoroutineScope(Dispatchers.IO + job)
-    private val accessToken = BuildConfig.HOME_ASSISTANT_TOKEN
 
-    private val homeAssistantApi = HomeAssistantApi(
-        host = "http://homeassistant.local:8123",
-        client = NetworkClient(
-            httpClient = HttpClient(OkHttp) {
-                install(ContentNegotiation) {
-                    json(
-                        Json {
-                            prettyPrint = true
-                            isLenient = true
-                        }
-                    )
-                }
-                install(Auth) {
-                    bearer {
-                        loadTokens {
-                            BearerTokens(
-                                accessToken = accessToken,
-                                refreshToken = null,
-                            )
-                        }
-                    }
-                }
-            },
-        ),
-    )
+    private val homeAssistantClient = HomeAssistantClient()
 
     private var componentName: ComponentName? = null
 
     override fun onCreate() {
         super.onCreate()
         scope.launch {
-            homeAssistantApi.register()
+            val registrationResponse = homeAssistantClient.register()
+            Log.d(TAG, "Registered device: $registrationResponse")
         }
     }
 

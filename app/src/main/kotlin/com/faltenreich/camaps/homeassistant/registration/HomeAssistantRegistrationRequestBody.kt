@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class RegistrationRequestBody(
+data class HomeAssistantRegistrationRequestBody(
     @SerialName("device_id")
     val deviceId: String,
     @SerialName("app_id")
