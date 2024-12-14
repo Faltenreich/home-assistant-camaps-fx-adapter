@@ -7,11 +7,22 @@ class HomeAssistantApi(
     private val client: NetworkClient,
 ) {
 
-    private suspend inline fun <reified T> request(path: String): T {
-        return client.request(Url("$host/$path"))
-    }
-
     suspend fun register() {
-        request<Any>("api/mobile_app/registrations")
+        val body = RegistrationBody(
+            deviceId = "deviceId",
+            appId = "appId",
+            appName = "appName",
+            appVersion = "appVersion",
+            deviceName = "deviceName",
+            manufacturer = "manufacturer",
+            model = "model",
+            osName = "osName",
+            osVersion = "osVersion",
+            supportsEncryption = false,
+        )
+        client.post<RegistrationBody, Any>(
+            url = Url("$host/api/mobile_app/registrations"),
+            body = body,
+        )
     }
 }

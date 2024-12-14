@@ -21,6 +21,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 import java.util.ArrayList
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.isAccessible
@@ -35,7 +36,14 @@ class CamApsFxNotificationListenerService : NotificationListenerService() {
         host = "http://homeassistant.local:8123",
         client = NetworkClient(
             httpClient = HttpClient(OkHttp) {
-                install(ContentNegotiation) { json() }
+                install(ContentNegotiation) {
+                    json(
+                        Json {
+                            prettyPrint = true
+                            isLenient = true
+                        }
+                    )
+                }
                 install(Auth) {
                     bearer {
                         loadTokens {
