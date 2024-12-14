@@ -3,6 +3,7 @@ package com.faltenreich.camaps.homeassistant
 import com.faltenreich.camaps.BuildConfig
 import com.faltenreich.camaps.homeassistant.registration.HomeAssistantRegistrationRequestBody
 import com.faltenreich.camaps.homeassistant.registration.HomeAssistantRegistrationResponse
+import com.faltenreich.camaps.homeassistant.webhook.HomeAssistantWebhookRequestBody
 import com.faltenreich.camaps.shared.NetworkClient
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
@@ -23,6 +24,13 @@ class HomeAssistantClient(
     override suspend fun register(requestBody: HomeAssistantRegistrationRequestBody): HomeAssistantRegistrationResponse {
         return networkClient.post(
             url = Url("$host/api/mobile_app/registrations"),
+            requestBody = requestBody,
+        )
+    }
+
+    override suspend fun fireEvent(requestBody: HomeAssistantWebhookRequestBody, webhookId: String): Any {
+        return networkClient.post(
+            url = Url("$host/api/webhook/$webhookId"),
             requestBody = requestBody,
         )
     }

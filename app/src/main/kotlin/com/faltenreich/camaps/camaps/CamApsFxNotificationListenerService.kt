@@ -11,12 +11,12 @@ import android.widget.RemoteViews
 import com.faltenreich.camaps.BuildConfig
 import com.faltenreich.camaps.homeassistant.HomeAssistantClient
 import com.faltenreich.camaps.homeassistant.registration.HomeAssistantRegistrationRequestBody
+import com.faltenreich.camaps.homeassistant.webhook.HomeAssistantWebhookRequestBody
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import java.util.ArrayList
-import java.util.UUID
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.isAccessible
 
@@ -33,11 +33,11 @@ class CamApsFxNotificationListenerService : NotificationListenerService() {
         super.onCreate()
         scope.launch {
             val registrationRequestBody = HomeAssistantRegistrationRequestBody(
-                deviceId = UUID.randomUUID().toString(),
+                deviceId = "deviceId", // TODO: Find unique and consistent identifier?
                 appId = BuildConfig.APPLICATION_ID,
                 appName = "CamAPS FX Adapter",
                 appVersion = BuildConfig.VERSION_NAME,
-                deviceName = Build.DEVICE,
+                deviceName = "${Build.MANUFACTURER} ${Build.MODEL}",
                 manufacturer = Build.MANUFACTURER,
                 model = Build.MODEL,
                 osName = "Android",
@@ -47,6 +47,13 @@ class CamApsFxNotificationListenerService : NotificationListenerService() {
             Log.d(TAG, "Registering device: $registrationRequestBody")
             val registrationResponse = homeAssistantClient.register(registrationRequestBody)
             Log.d(TAG, "Registered device: $registrationResponse")
+            val bloodSugarRequestBody = HomeAssistantWebhookRequestBody.bloodSugar(value = "120")
+            Log.d(TAG, "Sending event data: $bloodSugarRequestBody")
+            val fireEventResponse = homeAssistantClient.fireEvent(
+                requestBody = bloodSugarRequestBody,
+                webhookId = registrationResponse.webhookId,
+            )
+            Log.d(TAG, "Sent event data: $fireEventResponse")
         }
     }
 
