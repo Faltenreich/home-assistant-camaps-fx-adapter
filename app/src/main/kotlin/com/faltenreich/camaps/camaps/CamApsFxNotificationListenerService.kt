@@ -94,12 +94,12 @@ class CamApsFxNotificationListenerService : NotificationListenerService() {
 
     override fun onListenerConnected() {
         super.onListenerConnected()
-        Log.d("CamApsFxNotificationListenerService", "onListenerConnected")
+        Log.d(TAG, "onListenerConnected")
     }
 
     override fun onListenerDisconnected() {
         super.onListenerDisconnected()
-        Log.d("CamApsFxNotificationListenerService", "onListenerDisconnected")
+        Log.d(TAG, "onListenerDisconnected")
 
         if (componentName == null) {
             componentName = ComponentName(this, this::class.java)
@@ -108,9 +108,9 @@ class CamApsFxNotificationListenerService : NotificationListenerService() {
         componentName?.let { requestRebind(it) }
     }
 
+    @Suppress("DEPRECATION")
     override fun onNotificationPosted(sbn: StatusBarNotification?) {
-        Log.d("CamApsFxNotificationListenerService", "onNotificationPosted: $sbn")
-
+        // Notification
         val statusBarNotification = sbn?.takeIf { it.packageName == "com.camdiab.fx_alert.mgdl" }
         val notification = statusBarNotification?.notification ?: return
         val contentView = notification.contentView ?: return
@@ -126,6 +126,11 @@ class CamApsFxNotificationListenerService : NotificationListenerService() {
         valueProperty.isAccessible = true
         val value = valueProperty.getter.call(action)
 
-        Log.d("CamApsFxNotificationListenerService", "mg/dL: $value")
+        Log.d(TAG, "onNotificationPosted: $value mg/dL")
+    }
+
+    companion object {
+
+        private val TAG = CamApsFxNotificationListenerService::class.java.simpleName
     }
 }
