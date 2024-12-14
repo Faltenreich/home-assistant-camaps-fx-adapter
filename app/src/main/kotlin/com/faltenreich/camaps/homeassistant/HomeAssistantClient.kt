@@ -20,19 +20,7 @@ class HomeAssistantClient(
     private val networkClient: NetworkClient,
 ) : HomeAssistantApi {
 
-    override suspend fun register(): HomeAssistantRegistrationResponse {
-        val requestBody = HomeAssistantRegistrationRequestBody(
-            deviceId = "deviceId",
-            appId = "appId",
-            appName = "appName",
-            appVersion = "appVersion",
-            deviceName = "deviceName",
-            manufacturer = "manufacturer",
-            model = "model",
-            osName = "osName",
-            osVersion = "osVersion",
-            supportsEncryption = false,
-        )
+    override suspend fun register(requestBody: HomeAssistantRegistrationRequestBody): HomeAssistantRegistrationResponse {
         return networkClient.post(
             url = Url("$host/api/mobile_app/registrations"),
             requestBody = requestBody,

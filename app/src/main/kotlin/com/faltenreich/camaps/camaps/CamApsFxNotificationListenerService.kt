@@ -3,16 +3,20 @@ package com.faltenreich.camaps.camaps
 import android.content.ComponentName
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Log
 import android.widget.RemoteViews
+import com.faltenreich.camaps.BuildConfig
 import com.faltenreich.camaps.homeassistant.HomeAssistantClient
+import com.faltenreich.camaps.homeassistant.registration.HomeAssistantRegistrationRequestBody
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import java.util.ArrayList
+import java.util.UUID
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.isAccessible
 
@@ -28,7 +32,20 @@ class CamApsFxNotificationListenerService : NotificationListenerService() {
     override fun onCreate() {
         super.onCreate()
         scope.launch {
-            val registrationResponse = homeAssistantClient.register()
+            val registrationRequestBody = HomeAssistantRegistrationRequestBody(
+                deviceId = UUID.randomUUID().toString(),
+                appId = BuildConfig.APPLICATION_ID,
+                appName = "CamAPS FX Adapter",
+                appVersion = BuildConfig.VERSION_NAME,
+                deviceName = Build.DEVICE,
+                manufacturer = Build.MANUFACTURER,
+                model = Build.MODEL,
+                osName = "Android",
+                osVersion = Build.VERSION.SDK_INT.toString(),
+                supportsEncryption = false,
+            )
+            Log.d(TAG, "Registering device: $registrationRequestBody")
+            val registrationResponse = homeAssistantClient.register(registrationRequestBody)
             Log.d(TAG, "Registered device: $registrationResponse")
         }
     }
