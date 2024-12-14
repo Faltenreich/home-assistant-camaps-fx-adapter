@@ -1,5 +1,8 @@
 package com.faltenreich.camaps.homeassistant
 
+import android.util.Log
+import com.faltenreich.camaps.homeassistant.registration.RegistrationRequestBody
+import com.faltenreich.camaps.homeassistant.registration.RegistrationResponse
 import io.ktor.http.Url
 
 class HomeAssistantApi(
@@ -8,7 +11,7 @@ class HomeAssistantApi(
 ) {
 
     suspend fun register() {
-        val body = RegistrationBody(
+        val requestBody = RegistrationRequestBody(
             deviceId = "deviceId",
             appId = "appId",
             appName = "appName",
@@ -20,9 +23,15 @@ class HomeAssistantApi(
             osVersion = "osVersion",
             supportsEncryption = false,
         )
-        client.post<RegistrationBody, Any>(
+        val response = client.post<RegistrationRequestBody, RegistrationResponse>(
             url = Url("$host/api/mobile_app/registrations"),
-            body = body,
+            requestBody = requestBody,
         )
+        Log.d(TAG, "Registered device: $response")
+    }
+
+    companion object {
+
+        private val TAG = HomeAssistantApi::class.java.simpleName
     }
 }
