@@ -1,6 +1,5 @@
 package com.faltenreich.camaps.homeassistant
 
-import android.util.Log
 import com.faltenreich.camaps.BuildConfig
 import com.faltenreich.camaps.homeassistant.registration.HomeAssistantRegistrationRequestBody
 import com.faltenreich.camaps.homeassistant.registration.HomeAssistantRegistrationResponse
@@ -14,32 +13,11 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.http.Url
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
+import kotlin.String
 
 class HomeAssistantClient(
-    private val host: String = "http://homeassistant.local:8123",
-    private val accessToken: String = BuildConfig.HOME_ASSISTANT_TOKEN,
-    private val networkClient: NetworkClient = NetworkClient(
-        httpClient = HttpClient(OkHttp) {
-            install(ContentNegotiation) {
-                json(
-                    Json {
-                        prettyPrint = true
-                        isLenient = true
-                    }
-                )
-            }
-            install(Auth) {
-                bearer {
-                    loadTokens {
-                        BearerTokens(
-                            accessToken = accessToken,
-                            refreshToken = null,
-                        )
-                    }
-                }
-            }
-        }
-    ),
+    private val host: String,
+    private val networkClient: NetworkClient,
 ) : HomeAssistantApi {
 
     override suspend fun register(): HomeAssistantRegistrationResponse {
@@ -59,5 +37,36 @@ class HomeAssistantClient(
             url = Url("$host/api/mobile_app/registrations"),
             requestBody = requestBody,
         )
+    }
+
+    companion object {
+
+        fun local(): HomeAssistantApi {
+            return HomeAssistantClient(
+                host = "http://homeassistant.local:8123",
+                networkClient = NetworkClient(
+                    httpClient = HttpClient(OkHttp) {
+                        install(ContentNegotiation) {
+                            json(
+                                Json {
+                                    prettyPrint = true
+                                    isLenient = true
+                                }
+                            )
+                        }
+                        install(Auth) {
+                            bearer {
+                                loadTokens {
+                                    BearerTokens(
+                                        accessToken = BuildConfig.HOME_ASSISTANT_TOKEN,
+                                        refreshToken = null,
+                                    )
+                                }
+                            }
+                        }
+                    }
+                ),
+            )
+        }
     }
 }

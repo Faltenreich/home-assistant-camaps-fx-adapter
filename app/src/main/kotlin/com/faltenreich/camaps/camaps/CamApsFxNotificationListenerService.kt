@@ -21,7 +21,7 @@ class CamApsFxNotificationListenerService : NotificationListenerService() {
     private val job = SupervisorJob()
     private val scope = CoroutineScope(Dispatchers.IO + job)
 
-    private val homeAssistantClient = HomeAssistantClient()
+    private val homeAssistantClient = HomeAssistantClient.local()
 
     private var componentName: ComponentName? = null
 
