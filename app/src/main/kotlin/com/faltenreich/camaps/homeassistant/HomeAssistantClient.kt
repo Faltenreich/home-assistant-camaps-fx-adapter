@@ -1,9 +1,9 @@
 package com.faltenreich.camaps.homeassistant
 
 import com.faltenreich.camaps.BuildConfig
-import com.faltenreich.camaps.homeassistant.registration.HomeAssistantRegistrationRequestBody
-import com.faltenreich.camaps.homeassistant.registration.HomeAssistantRegistrationResponse
-import com.faltenreich.camaps.homeassistant.webhook.HomeAssistantWebhookRequestBody
+import com.faltenreich.camaps.homeassistant.device.HomeAssistantRegisterDeviceRequestBody
+import com.faltenreich.camaps.homeassistant.device.HomeAssistantRegisterDeviceResponse
+import com.faltenreich.camaps.homeassistant.sensor.HomeAssistantRegisterSensorRequestBody
 import com.faltenreich.camaps.shared.NetworkClient
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
@@ -21,14 +21,14 @@ class HomeAssistantClient(
     private val networkClient: NetworkClient,
 ) : HomeAssistantApi {
 
-    override suspend fun register(requestBody: HomeAssistantRegistrationRequestBody): HomeAssistantRegistrationResponse {
+    override suspend fun register(requestBody: HomeAssistantRegisterDeviceRequestBody): HomeAssistantRegisterDeviceResponse {
         return networkClient.post(
             url = Url("$host/api/mobile_app/registrations"),
             requestBody = requestBody,
         )
     }
 
-    override suspend fun fireEvent(requestBody: HomeAssistantWebhookRequestBody, webhookId: String): Any {
+    override suspend fun fireEvent(requestBody: HomeAssistantRegisterSensorRequestBody, webhookId: String): Any {
         return networkClient.post(
             url = Url("$host/api/webhook/$webhookId"),
             requestBody = requestBody,

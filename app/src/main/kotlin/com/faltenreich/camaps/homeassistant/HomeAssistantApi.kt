@@ -1,12 +1,12 @@
 package com.faltenreich.camaps.homeassistant
 
-import com.faltenreich.camaps.homeassistant.registration.HomeAssistantRegistrationRequestBody
-import com.faltenreich.camaps.homeassistant.registration.HomeAssistantRegistrationResponse
-import com.faltenreich.camaps.homeassistant.webhook.HomeAssistantWebhookRequestBody
+import com.faltenreich.camaps.homeassistant.device.HomeAssistantRegisterDeviceRequestBody
+import com.faltenreich.camaps.homeassistant.device.HomeAssistantRegisterDeviceResponse
+import com.faltenreich.camaps.homeassistant.sensor.HomeAssistantRegisterSensorRequestBody
 
 interface HomeAssistantApi {
 
-    suspend fun register(requestBody: HomeAssistantRegistrationRequestBody): HomeAssistantRegistrationResponse
+    suspend fun register(requestBody: HomeAssistantRegisterDeviceRequestBody): HomeAssistantRegisterDeviceResponse
 
-    suspend fun fireEvent(requestBody: HomeAssistantWebhookRequestBody, webhookId: String): Any
+    suspend fun fireEvent(requestBody: HomeAssistantRegisterSensorRequestBody, webhookId: String): Any
 }

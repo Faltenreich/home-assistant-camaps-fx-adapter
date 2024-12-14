@@ -1,10 +1,10 @@
-package com.faltenreich.camaps.homeassistant.registration
+package com.faltenreich.camaps.homeassistant.device
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class HomeAssistantRegistrationRequestBody(
+data class HomeAssistantRegisterDeviceRequestBody(
     @SerialName("device_id")
     val deviceId: String,
     @SerialName("app_id")

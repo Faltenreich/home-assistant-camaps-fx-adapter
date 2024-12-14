@@ -10,8 +10,9 @@ import android.util.Log
 import android.widget.RemoteViews
 import com.faltenreich.camaps.BuildConfig
 import com.faltenreich.camaps.homeassistant.HomeAssistantClient
-import com.faltenreich.camaps.homeassistant.registration.HomeAssistantRegistrationRequestBody
-import com.faltenreich.camaps.homeassistant.webhook.HomeAssistantWebhookRequestBody
+import com.faltenreich.camaps.homeassistant.device.HomeAssistantRegisterDeviceRequestBody
+import com.faltenreich.camaps.homeassistant.sensor.HomeAssistantRegisterSensorRequestBody
+import com.faltenreich.camaps.homeassistant.sensor.HomeAssistantRegisterSensorRequestBody.Data
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -32,7 +33,7 @@ class CamApsFxNotificationListenerService : NotificationListenerService() {
     override fun onCreate() {
         super.onCreate()
         scope.launch {
-            val registrationRequestBody = HomeAssistantRegistrationRequestBody(
+            val registrationRequestBody = HomeAssistantRegisterDeviceRequestBody(
                 deviceId = "deviceId", // TODO: Find unique and consistent identifier?
                 appId = BuildConfig.APPLICATION_ID,
                 appName = "CamAPS FX Adapter",
@@ -47,7 +48,15 @@ class CamApsFxNotificationListenerService : NotificationListenerService() {
             Log.d(TAG, "Registering device: $registrationRequestBody")
             val registrationResponse = homeAssistantClient.register(registrationRequestBody)
             Log.d(TAG, "Registered device: $registrationResponse")
-            val bloodSugarRequestBody = HomeAssistantWebhookRequestBody.bloodSugar(value = "120")
+            val bloodSugarRequestBody = HomeAssistantRegisterSensorRequestBody(
+                type = "fire_event",
+                data = Data(
+                    eventType = "blood_sugar",
+                    eventData = Data.EventData(
+                        value = "120",
+                    ),
+                ),
+            )
             Log.d(TAG, "Sending event data: $bloodSugarRequestBody")
             val fireEventResponse = homeAssistantClient.fireEvent(
                 requestBody = bloodSugarRequestBody,

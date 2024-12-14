@@ -1,10 +1,10 @@
-package com.faltenreich.camaps.homeassistant.registration
+package com.faltenreich.camaps.homeassistant.device
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class HomeAssistantRegistrationResponse(
+data class HomeAssistantRegisterDeviceResponse(
     @SerialName("cloudhook_url")
     val cloudhookUrl: String?,
     @SerialName("remote_ui_url")
