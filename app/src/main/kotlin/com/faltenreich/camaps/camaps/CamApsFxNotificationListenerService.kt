@@ -7,6 +7,7 @@ import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Log
 import android.widget.RemoteViews
+import com.faltenreich.camaps.BuildConfig
 import com.faltenreich.camaps.homeassistant.HomeAssistantApi
 import com.faltenreich.camaps.homeassistant.NetworkClient
 import io.ktor.client.HttpClient
@@ -28,6 +29,7 @@ class CamApsFxNotificationListenerService : NotificationListenerService() {
 
     private val job = SupervisorJob()
     private val scope = CoroutineScope(Dispatchers.IO + job)
+    private val accessToken = BuildConfig.HOME_ASSISTANT_TOKEN
 
     private val homeAssistantApi = HomeAssistantApi(
         host = "http://homeassistant.local:8123",
@@ -38,7 +40,7 @@ class CamApsFxNotificationListenerService : NotificationListenerService() {
                     bearer {
                         loadTokens {
                             BearerTokens(
-                                accessToken = "ABCDEFGH", // TODO
+                                accessToken = accessToken,
                                 refreshToken = null,
                             )
                         }

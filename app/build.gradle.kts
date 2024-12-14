@@ -1,3 +1,5 @@
+import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -17,6 +19,9 @@ android {
     }
 
     buildTypes {
+        getByName("debug") {
+            buildConfigField("String", "HOME_ASSISTANT_TOKEN", gradleLocalProperties(rootDir, providers).getProperty("homeAssistantToken"))
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"))
@@ -33,6 +38,7 @@ android {
     }
 
     buildFeatures {
+        buildConfig = true
         compose = true
     }
 }
