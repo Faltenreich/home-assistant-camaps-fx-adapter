@@ -4,6 +4,7 @@ import android.content.ComponentName
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import android.os.IBinder
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Log
@@ -32,6 +33,8 @@ class CamApsFxNotificationListenerService : NotificationListenerService() {
 
     override fun onCreate() {
         super.onCreate()
+        Log.d(TAG, "onCreate")
+        // FIXME: Gets called repeatedly on every onListenerDisconnected
         scope.launch {
             val registerDeviceRequestBody = HomeAssistantRegisterDeviceRequestBody(
                 deviceId = "deviceId", // TODO: Find unique and consistent identifier?
@@ -76,13 +79,20 @@ class CamApsFxNotificationListenerService : NotificationListenerService() {
         }
     }
 
+    override fun onBind(intent: Intent?): IBinder? {
+        Log.d(TAG, "onBind")
+        return super.onBind(intent)
+    }
+
     override fun onDestroy() {
         super.onDestroy()
+        Log.d(TAG, "onDestroy")
         job.cancel()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
+        Log.d(TAG, "onStartCommand")
 
         if (componentName == null) {
             componentName = ComponentName(this, this::class.java)
