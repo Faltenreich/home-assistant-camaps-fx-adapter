@@ -76,8 +76,6 @@ class CamApsFxNotificationListenerService : NotificationListenerService() {
             Log.d(TAG, "Registered sensor: $registerSensorResponse")
 
             webhookId = registerDeviceResponse.webhookId
-
-            updateSensor(120f)
         }
     }
 
@@ -154,10 +152,10 @@ class CamApsFxNotificationListenerService : NotificationListenerService() {
         val valueProperty = action::class.memberProperties.first { it.name == "value" }
         valueProperty.isAccessible = true
         val value = valueProperty.getter.call(action)
-
         Log.d(TAG, "onNotificationPosted: $value mg/dL")
 
-        updateSensor(120f)
+        val mgDl = (value as? String)?.toFloatOrNull() ?: return
+        updateSensor(mgDl)
     }
 
     private fun updateSensor(value: Float) = scope.launch {
