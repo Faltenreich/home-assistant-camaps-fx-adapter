@@ -8,7 +8,6 @@ import android.os.IBinder
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Log
-import android.widget.RemoteViews
 import com.faltenreich.camaps.BuildConfig
 import com.faltenreich.camaps.homeassistant.HomeAssistantClient
 import com.faltenreich.camaps.homeassistant.device.HomeAssistantRegisterDeviceRequestBody
@@ -18,15 +17,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import java.util.ArrayList
-import kotlin.reflect.full.memberProperties
-import kotlin.reflect.jvm.isAccessible
 
 class CamApsFxNotificationListenerService : NotificationListenerService() {
 
     private val job = SupervisorJob()
     private val scope = CoroutineScope(Dispatchers.IO + job)
 
+    private val notificationMapper = CamApsFxNotificationMapper()
     private val homeAssistantClient = HomeAssistantClient.local()
 
     private var componentName: ComponentName? = null
@@ -135,26 +132,9 @@ class CamApsFxNotificationListenerService : NotificationListenerService() {
         componentName?.let { requestRebind(it) }
     }
 
-    @Suppress("DEPRECATION")
-    override fun onNotificationPosted(sbn: StatusBarNotification?) {
-        // Notification
-        val statusBarNotification = sbn?.takeIf { it.packageName == "com.camdiab.fx_alert.mgdl" }
-        val notification = statusBarNotification?.notification ?: return
-        val contentView = notification.contentView ?: return
-
-        // RemoteViews
-        val actionsProperty = RemoteViews::class.memberProperties.first { it.name == "mActions" }
-        actionsProperty.isAccessible = true
-        val actions = actionsProperty.get(contentView) as ArrayList<*>
-
-        // CamAPS FX
-        val action = actions[2]// TODO: Get action for setText with numeric String als value
-        val valueProperty = action::class.memberProperties.first { it.name == "value" }
-        valueProperty.isAccessible = true
-        val value = valueProperty.getter.call(action)
-        Log.d(TAG, "onNotificationPosted: $value mg/dL")
-
-        val mgDl = (value as? String)?.toFloatOrNull() ?: return
+    override fun onNotificationPosted(statusBarNotification: StatusBarNotification?) {
+        Log.d(TAG, "Reading notification")
+        val mgDl = statusBarNotification?.let(notificationMapper::invoke) ?: return
         updateSensor(mgDl)
     }
 
