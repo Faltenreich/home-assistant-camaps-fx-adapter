@@ -11,30 +11,44 @@ class CamApsFxNotificationMapper {
 
     @Suppress("DEPRECATION")
     operator fun invoke(statusBarNotification: StatusBarNotification): BloodSugarEvent? {
-        // Notification
         val notification = statusBarNotification
             .takeIf { it.packageName == CAM_APS_FX_PACKAGE_NAME }
             ?.notification
             ?: return null
         val contentView = notification.contentView ?: return null
+        val actions = contentView.actions
 
-        // RemoteViews
-        val actionsProperty = RemoteViews::class.memberProperties.first { it.name == "mActions" }
-        actionsProperty.isAccessible = true
-        val actions = actionsProperty.get(contentView) as ArrayList<*>
-
-        // CamAPS FX
-        val action = actions[2] // TODO: Get action for setText with numeric String als value
-        val valueProperty = action::class.memberProperties.first { it.name == "value" }
-        valueProperty.isAccessible = true
-        val value = valueProperty.getter.call(action)
-        val mgDl = (value as? String)?.toFloatOrNull() ?: return null
+        val mgDl = actions
+            .filter { it.methodName == "setText" }
+            .mapNotNull { (it.value as? String)?.toFloatOrNull() }
+            .first()
 
         return BloodSugarEvent(
             mgDl = mgDl,
             trend = BloodSugarEvent.Trend.STEADY, // TODO
         )
     }
+
+    private val RemoteViews.actions: List<RemoteViewAction>
+        get() {
+            val actionsProperty = RemoteViews::class.memberProperties.first { it.name == "mActions" }
+            actionsProperty.isAccessible = true
+            val actions = actionsProperty.get(this) as ArrayList<*>
+
+            return actions.map { action ->
+                val memberProperties = action::class.memberProperties
+
+                val methodNameProperty = memberProperties.first { it.name == "methodName" }
+                methodNameProperty.isAccessible = true
+                val methodName = methodNameProperty.getter.call(action) as String
+
+                val valueProperty = memberProperties.first { it.name == "value" }
+                valueProperty.isAccessible = true
+                val value = valueProperty.getter.call(action)
+
+                RemoteViewAction(methodName, value)
+            }
+        }
 
     companion object {
 
