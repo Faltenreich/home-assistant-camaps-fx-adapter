@@ -9,7 +9,7 @@ import kotlin.reflect.jvm.isAccessible
 class CamApsFxNotificationMapper {
 
     @Suppress("DEPRECATION")
-    operator fun invoke(statusBarNotification: StatusBarNotification): Float? {
+    operator fun invoke(statusBarNotification: StatusBarNotification): CamApsNotification? {
         // Notification
         val notification = statusBarNotification
             .takeIf { it.packageName == CAM_APS_FX_PACKAGE_NAME }
@@ -27,7 +27,12 @@ class CamApsFxNotificationMapper {
         val valueProperty = action::class.memberProperties.first { it.name == "value" }
         valueProperty.isAccessible = true
         val value = valueProperty.getter.call(action)
-        return (value as? String)?.toFloatOrNull()
+        val mgDl = (value as? String)?.toFloatOrNull() ?: return null
+
+        return CamApsNotification(
+            mgDl = mgDl,
+            trend = CamApsNotification.Trend.STEADY, // TODO
+        )
     }
 
     companion object {

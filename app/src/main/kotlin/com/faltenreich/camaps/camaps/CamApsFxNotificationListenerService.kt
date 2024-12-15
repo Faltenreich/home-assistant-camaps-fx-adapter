@@ -138,14 +138,14 @@ class CamApsFxNotificationListenerService : NotificationListenerService() {
         updateSensor(mgDl)
     }
 
-    private fun updateSensor(value: Float) = scope.launch {
+    private fun updateSensor(notification: CamApsNotification) = scope.launch {
         val webhookId = webhookId ?: run {
             Log.d(TAG, "Skipping update due to missing webhook")
             return@launch
         }
         val updateSensorRequestBody = HomeAssistantUpdateSensorRequestBody(
             data = HomeAssistantUpdateSensorRequestBody.Data(
-                state = value,
+                state = notification.mgDl,
             ),
         )
         Log.d(TAG, "Updating sensor: $updateSensorRequestBody")
