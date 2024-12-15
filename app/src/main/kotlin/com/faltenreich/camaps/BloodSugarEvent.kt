@@ -1,8 +1,8 @@
-package com.faltenreich.camaps.camaps
+package com.faltenreich.camaps
 
-data class CamApsNotification(
+data class BloodSugarEvent(
     val mgDl: Float,
-    val trend: Trend = Trend.STEADY,
+    val trend: Trend,
 ) {
 
     enum class Trend {

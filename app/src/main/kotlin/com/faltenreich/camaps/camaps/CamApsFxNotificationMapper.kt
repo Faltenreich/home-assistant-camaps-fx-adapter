@@ -2,6 +2,7 @@ package com.faltenreich.camaps.camaps
 
 import android.service.notification.StatusBarNotification
 import android.widget.RemoteViews
+import com.faltenreich.camaps.BloodSugarEvent
 import java.util.ArrayList
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.isAccessible
@@ -9,7 +10,7 @@ import kotlin.reflect.jvm.isAccessible
 class CamApsFxNotificationMapper {
 
     @Suppress("DEPRECATION")
-    operator fun invoke(statusBarNotification: StatusBarNotification): CamApsNotification? {
+    operator fun invoke(statusBarNotification: StatusBarNotification): BloodSugarEvent? {
         // Notification
         val notification = statusBarNotification
             .takeIf { it.packageName == CAM_APS_FX_PACKAGE_NAME }
@@ -29,9 +30,9 @@ class CamApsFxNotificationMapper {
         val value = valueProperty.getter.call(action)
         val mgDl = (value as? String)?.toFloatOrNull() ?: return null
 
-        return CamApsNotification(
+        return BloodSugarEvent(
             mgDl = mgDl,
-            trend = CamApsNotification.Trend.STEADY, // TODO
+            trend = BloodSugarEvent.Trend.STEADY, // TODO
         )
     }
 
