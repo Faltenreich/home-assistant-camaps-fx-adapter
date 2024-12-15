@@ -22,7 +22,12 @@ class HomeAssistantService {
     private val scope = CoroutineScope(Dispatchers.IO + job)
 
     fun start() = scope.launch {
-        val registerDeviceRequestBody = HomeAssistantRegisterDeviceRequestBody(
+        registerDevice()
+        registerSensor()
+    }
+
+    private suspend fun registerDevice() {
+        val requestBody = HomeAssistantRegisterDeviceRequestBody(
             deviceId = "deviceId", // TODO: Find unique and consistent identifier?
             appId = BuildConfig.APPLICATION_ID,
             appName = "CamAPS FX Adapter",
@@ -34,57 +39,59 @@ class HomeAssistantService {
             osVersion = Build.VERSION.SDK_INT.toString(),
             supportsEncryption = false,
         )
-        Log.d(TAG, "Registering device: $registerDeviceRequestBody")
-        val registerDeviceResponse = try {
-            homeAssistantClient.registerDevice(registerDeviceRequestBody)
+        Log.d(TAG, "Registering device: $requestBody")
+        try {
+            val response = homeAssistantClient.registerDevice(requestBody)
+            webhookId = response.webhookId
+            Log.d(TAG, "Registered device: $response")
         } catch (exception: Exception) {
             Log.e(TAG, "Registering device failed: $exception")
-            return@launch
         }
-        Log.d(TAG, "Registered device: $registerDeviceResponse")
+    }
 
-        // FIXME: HTTP 200 but no sensor is visible in home assistant
-        val registerSensorRequestBody = HomeAssistantRegisterSensorRequestBody(
+    private suspend fun registerSensor() {
+        val webhookId = webhookId ?: run {
+            Log.d(TAG, "Skipping registration of sensor due to missing webhook")
+            return
+        }
+        val requestBody = HomeAssistantRegisterSensorRequestBody(
             data = HomeAssistantRegisterSensorRequestBody.Data(
                 state = 120f,
             ),
         )
-        Log.d(TAG, "Registering sensor: $registerSensorRequestBody")
-        val registerSensorResponse = try {
+        Log.d(TAG, "Registering sensor: $requestBody")
+        try {
             homeAssistantClient.registerSensor(
-                requestBody = registerSensorRequestBody,
-                webhookId = registerDeviceResponse.webhookId,
+                requestBody = requestBody,
+                webhookId = webhookId,
             )
+            Log.d(TAG, "Registered sensor")
         } catch (exception: Exception) {
             Log.e(TAG, "Registering sensor failed: $exception")
-            return@launch
         }
-        Log.d(TAG, "Registered sensor: $registerSensorResponse")
-
-        webhookId = registerDeviceResponse.webhookId
     }
 
     fun update(event: BloodSugarEvent) = scope.launch {
         val webhookId = webhookId ?: run {
-            Log.d(TAG, "Skipping update due to missing webhook")
+            Log.d(TAG, "Skipping update of sensor due to missing webhook")
             return@launch
         }
-        val updateSensorRequestBody = HomeAssistantUpdateSensorRequestBody(
+        val requestBody = HomeAssistantUpdateSensorRequestBody(
             data = HomeAssistantUpdateSensorRequestBody.Data(
                 state = event.mgDl,
             ),
         )
-        Log.d(TAG, "Updating sensor: $updateSensorRequestBody")
-        val updateSensorResponse = try {
+        Log.d(TAG, "Updating sensor: $requestBody")
+        try {
             homeAssistantClient.updateSensor(
-                requestBody = updateSensorRequestBody,
+                requestBody = requestBody,
                 webhookId = webhookId,
             )
         } catch (exception: Exception) {
             Log.e(TAG, "Updating sensor failed: $exception")
             return@launch
         }
-        Log.d(TAG, "Updated sensor: $updateSensorResponse")
+        Log.d(TAG, "Updated sensor")
     }
 
     fun stop() {
