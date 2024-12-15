@@ -49,7 +49,12 @@ class CamApsFxNotificationListenerService : NotificationListenerService() {
                 supportsEncryption = false,
             )
             Log.d(TAG, "Registering device: $registerDeviceRequestBody")
-            val registerDeviceResponse = homeAssistantClient.registerDevice(registerDeviceRequestBody)
+            val registerDeviceResponse = try {
+                homeAssistantClient.registerDevice(registerDeviceRequestBody)
+            } catch (exception: Exception) {
+                Log.e(TAG, "Registering device failed: $exception")
+                return@launch
+            }
             Log.d(TAG, "Registered device: $registerDeviceResponse")
 
             // FIXME: HTTP 200 but no sensor is visible in home assistant
@@ -59,10 +64,15 @@ class CamApsFxNotificationListenerService : NotificationListenerService() {
                 ),
             )
             Log.d(TAG, "Registering sensor: $registerSensorRequestBody")
-            val registerSensorResponse = homeAssistantClient.registerSensor(
-                requestBody = registerSensorRequestBody,
-                webhookId = registerDeviceResponse.webhookId,
-            )
+            val registerSensorResponse = try {
+                homeAssistantClient.registerSensor(
+                    requestBody = registerSensorRequestBody,
+                    webhookId = registerDeviceResponse.webhookId,
+                )
+            } catch (exception: Exception) {
+                Log.e(TAG, "Registering sensor failed: $exception")
+                return@launch
+            }
             Log.d(TAG, "Registered sensor: $registerSensorResponse")
 
             webhookId = registerDeviceResponse.webhookId
@@ -161,10 +171,15 @@ class CamApsFxNotificationListenerService : NotificationListenerService() {
             ),
         )
         Log.d(TAG, "Updating sensor: $updateSensorRequestBody")
-        val updateSensorResponse = homeAssistantClient.updateSensor(
-            requestBody = updateSensorRequestBody,
-            webhookId = webhookId,
-        )
+        val updateSensorResponse = try {
+            homeAssistantClient.updateSensor(
+                requestBody = updateSensorRequestBody,
+                webhookId = webhookId,
+            )
+        } catch (exception: Exception) {
+            Log.e(TAG, "Updating sensor failed: $exception")
+            return@launch
+        }
         Log.d(TAG, "Updated sensor: $updateSensorResponse")
     }
 

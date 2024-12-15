@@ -58,6 +58,7 @@ class HomeAssistantClient(
                 host = "http://homeassistant.local:8123",
                 networkClient = NetworkClient(
                     httpClient = HttpClient(OkHttp) {
+                        expectSuccess = true
                         install(ContentNegotiation) {
                             json(
                                 Json {
