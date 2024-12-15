@@ -30,11 +30,11 @@ class CamApsFxNotificationListenerService : NotificationListenerService() {
     private val homeAssistantClient = HomeAssistantClient.local()
 
     private var componentName: ComponentName? = null
+    private var webhookId: String? = null
 
     override fun onCreate() {
         super.onCreate()
         Log.d(TAG, "onCreate")
-        // FIXME: Gets called repeatedly on every onListenerDisconnected
         scope.launch {
             val registerDeviceRequestBody = HomeAssistantRegisterDeviceRequestBody(
                 deviceId = "deviceId", // TODO: Find unique and consistent identifier?
@@ -65,17 +65,9 @@ class CamApsFxNotificationListenerService : NotificationListenerService() {
             )
             Log.d(TAG, "Registered sensor: $registerSensorResponse")
 
-            val updateSensorRequestBody = HomeAssistantUpdateSensorRequestBody(
-                data = HomeAssistantUpdateSensorRequestBody.Data(
-                    state = 120f,
-                ),
-            )
-            Log.d(TAG, "Updating sensor: $updateSensorRequestBody")
-            val updateSensorResponse = homeAssistantClient.updateSensor(
-                requestBody = updateSensorRequestBody,
-                webhookId = registerDeviceResponse.webhookId,
-            )
-            Log.d(TAG, "Updated sensor: $updateSensorResponse")
+            webhookId = registerDeviceResponse.webhookId
+
+            updateSensor(120f)
         }
     }
 
@@ -154,6 +146,26 @@ class CamApsFxNotificationListenerService : NotificationListenerService() {
         val value = valueProperty.getter.call(action)
 
         Log.d(TAG, "onNotificationPosted: $value mg/dL")
+
+        updateSensor(120f)
+    }
+
+    private fun updateSensor(value: Float) = scope.launch {
+        val webhookId = webhookId ?: run {
+            Log.d(TAG, "Skipping update due to missing webhook")
+            return@launch
+        }
+        val updateSensorRequestBody = HomeAssistantUpdateSensorRequestBody(
+            data = HomeAssistantUpdateSensorRequestBody.Data(
+                state = value,
+            ),
+        )
+        Log.d(TAG, "Updating sensor: $updateSensorRequestBody")
+        val updateSensorResponse = homeAssistantClient.updateSensor(
+            requestBody = updateSensorRequestBody,
+            webhookId = webhookId,
+        )
+        Log.d(TAG, "Updated sensor: $updateSensorResponse")
     }
 
     companion object {

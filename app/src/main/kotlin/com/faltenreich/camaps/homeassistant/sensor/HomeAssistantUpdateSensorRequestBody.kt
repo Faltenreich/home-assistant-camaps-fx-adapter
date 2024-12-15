@@ -13,7 +13,13 @@ data class HomeAssistantUpdateSensorRequestBody(
 
     @Serializable
     data class Data(
+        @SerialName("icon")
+        val icon: String = "mdi:water_drop",
         @SerialName("state")
         val state: Float,
+        @SerialName("type")
+        val type: String = "sensor",
+        @SerialName("unique_id")
+        val uniqueId: String = "blood_sugar",
     )
 }
