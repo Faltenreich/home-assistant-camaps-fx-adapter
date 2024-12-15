@@ -62,6 +62,7 @@ class HomeAssistantClient(
                         install(ContentNegotiation) {
                             json(
                                 Json {
+                                    encodeDefaults = true
                                     prettyPrint = true
                                     isLenient = true
                                 }
