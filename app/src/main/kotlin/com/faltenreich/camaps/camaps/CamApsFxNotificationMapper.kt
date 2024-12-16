@@ -1,6 +1,7 @@
 package com.faltenreich.camaps.camaps
 
 import android.service.notification.StatusBarNotification
+import android.util.Log
 import android.widget.RemoteViews
 import com.faltenreich.camaps.BloodSugarEvent
 import java.util.ArrayList
@@ -9,40 +10,58 @@ import kotlin.reflect.jvm.isAccessible
 
 class CamApsFxNotificationMapper {
 
-    @Suppress("DEPRECATION")
     operator fun invoke(statusBarNotification: StatusBarNotification): BloodSugarEvent? {
-        val notification = statusBarNotification
+        val camApsFxNotification = statusBarNotification
             .takeIf { it.packageName == CAM_APS_FX_PACKAGE_NAME }
             ?.notification
             ?: return null
-        val contentView = notification.contentView ?: return null
-        val actions = contentView.actions
+        @Suppress("DEPRECATION")
+        val contentView = camApsFxNotification.contentView ?: return null
+        val actions = contentView.actions.takeIf(List<*>::isNotEmpty) ?: return null
+
+        Log.d("CamApsFxNotificationMapper", "Mapping actions: $actions")
 
         val mgDl = actions
             .filter { it.methodName == "setText" }
             .mapNotNull { (it.value as? String)?.toFloatOrNull() }
-            .first()
+            .firstOrNull()
+            ?: return null
+
+        val trendImageResourceId = actions
+            .filter { it.methodName == "setImage" }
+            .mapNotNull { it.value as? Int }
+            .lastOrNull()
+        val trend = BloodSugarEvent.Trend.entries.firstOrNull {
+            it.imageResourceId == trendImageResourceId
+        }
 
         return BloodSugarEvent(
             mgDl = mgDl,
-            trend = BloodSugarEvent.Trend.STEADY, // TODO
+            trend = trend,
         )
     }
 
     private val RemoteViews.actions: List<RemoteViewAction>
         get() {
-            val actionsProperty = RemoteViews::class.memberProperties.first { it.name == "mActions" }
+            val actionsProperty = RemoteViews::class.memberProperties
+                .firstOrNull { it.name == "mActions" }
+                ?: return emptyList()
             actionsProperty.isAccessible = true
-            val actions = actionsProperty.get(this) as ArrayList<*>
+            val actions = actionsProperty.get(this) as? ArrayList<*> ?: return emptyList()
 
-            return actions.map { action ->
+            return actions.mapNotNull { action ->
                 val memberProperties = action::class.memberProperties
 
-                val methodNameProperty = memberProperties.first { it.name == "methodName" }
+                val methodNameProperty = memberProperties
+                    .firstOrNull { it.name == "methodName" }
+                    ?: return@mapNotNull null
                 methodNameProperty.isAccessible = true
-                val methodName = methodNameProperty.getter.call(action) as String
+                val methodName = methodNameProperty.getter.call(action) as? String
+                    ?: return@mapNotNull null
 
-                val valueProperty = memberProperties.first { it.name == "value" }
+                val valueProperty = memberProperties
+                    .firstOrNull { it.name == "value" }
+                    ?: return@mapNotNull null
                 valueProperty.isAccessible = true
                 val value = valueProperty.getter.call(action)
 
