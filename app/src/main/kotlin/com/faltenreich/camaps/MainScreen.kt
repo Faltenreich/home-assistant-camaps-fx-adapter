@@ -1,5 +1,6 @@
 package com.faltenreich.camaps
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.faltenreich.camaps.camaps.CamApsFxState
@@ -28,18 +30,10 @@ fun MainScreen(modifier: Modifier = Modifier) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Row(modifier = Modifier.fillMaxWidth()) {
-            Text(
-                text = "CamAPS FX",
-                modifier = Modifier.weight(1f),
-            )
-            when (camApsFxState) {
-                is CamApsFxState.None -> Text("No event")
-                is CamApsFxState.Value -> Text(camApsFxState.bloodSugar.mgDl.toString())
-                is CamApsFxState.Error -> Text("ERROR: ${camApsFxState.message}")
-            }
-        }
-        Row(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             Text(
                 text = "Home Assistant",
                 modifier = Modifier.weight(1f),
@@ -48,6 +42,29 @@ fun MainScreen(modifier: Modifier = Modifier) {
                 is HomeAssistantState.Disconnected -> Text("Disconnected")
                 is HomeAssistantState.ConnectedDevice -> Text("Device connected")
                 is HomeAssistantState.ConnectedSensor -> Text("Sensor connected")
+            }
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = "CamAPS FX",
+                modifier = Modifier.weight(1f),
+            )
+            when (camApsFxState) {
+                is CamApsFxState.None -> Text("-")
+                is CamApsFxState.Value -> {
+                    Text(camApsFxState.bloodSugar.mgDl.toString())
+                    camApsFxState.bloodSugar.trend?.let { trend ->
+                        Image(
+                            imageVector = trend.imageVector,
+                            contentDescription = null,
+                            colorFilter = ColorFilter.tint(trend.color),
+                        )
+                    }
+                }
+                is CamApsFxState.Error -> Text("ERROR: ${camApsFxState.message}")
             }
         }
     }
