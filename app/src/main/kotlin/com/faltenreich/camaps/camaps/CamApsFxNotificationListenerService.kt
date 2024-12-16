@@ -61,7 +61,6 @@ class CamApsFxNotificationListenerService : NotificationListenerService() {
 
     override fun onNotificationPosted(statusBarNotification: StatusBarNotification?) {
         val state = statusBarNotification?.let(notificationMapper::invoke) ?: return
-        homeAssistantService.update(state)
         bloodSugarEventAdapter.setCamApsState(state)
     }
 }

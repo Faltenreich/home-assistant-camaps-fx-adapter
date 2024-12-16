@@ -3,6 +3,7 @@ package com.faltenreich.camaps.homeassistant
 import android.os.Build
 import android.util.Log
 import com.faltenreich.camaps.BuildConfig
+import com.faltenreich.camaps.MainStateObserver
 import com.faltenreich.camaps.camaps.CamApsFxState
 import com.faltenreich.camaps.homeassistant.device.HomeAssistantRegisterDeviceRequestBody
 import com.faltenreich.camaps.homeassistant.sensor.HomeAssistantRegisterSensorRequestBody
@@ -10,11 +11,15 @@ import com.faltenreich.camaps.homeassistant.sensor.HomeAssistantUpdateSensorRequ
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 class HomeAssistantService {
 
     private val homeAssistantClient = HomeAssistantClient.local()
+    private val bloodSugarEventAdapter = MainStateObserver
 
     private var webhookId: String? = null
 
@@ -24,6 +29,15 @@ class HomeAssistantService {
     fun start() = scope.launch {
         registerDevice()
         registerSensor()
+
+        bloodSugarEventAdapter.state
+            .map { it.camApsFxState }
+            .distinctUntilChanged()
+            .collectLatest(::update)
+    }
+
+    fun stop() {
+        job.cancel()
     }
 
     private suspend fun registerDevice() {
@@ -43,6 +57,7 @@ class HomeAssistantService {
         try {
             val response = homeAssistantClient.registerDevice(requestBody)
             webhookId = response.webhookId
+            bloodSugarEventAdapter.setHomeAssistantState(HomeAssistantState.ConnectedDevice)
             Log.d(TAG, "Registered device: $response")
         } catch (exception: Exception) {
             Log.e(TAG, "Registering device failed: $exception")
@@ -65,13 +80,14 @@ class HomeAssistantService {
                 requestBody = requestBody,
                 webhookId = webhookId,
             )
+            bloodSugarEventAdapter.setHomeAssistantState(HomeAssistantState.ConnectedSensor)
             Log.d(TAG, "Registered sensor")
         } catch (exception: Exception) {
             Log.e(TAG, "Registering sensor failed: $exception")
         }
     }
 
-    fun update(state: CamApsFxState) = scope.launch {
+    private fun update(state: CamApsFxState) = scope.launch {
         val webhookId = webhookId ?: run {
             Log.d(TAG, "Skipping update of sensor due to missing webhook")
             return@launch
@@ -96,10 +112,6 @@ class HomeAssistantService {
             return@launch
         }
         Log.d(TAG, "Updated sensor")
-    }
-
-    fun stop() {
-        job.cancel()
     }
 
     companion object {
