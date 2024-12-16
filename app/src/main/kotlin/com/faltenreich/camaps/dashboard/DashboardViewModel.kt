@@ -20,8 +20,8 @@ class DashboardViewModel : ViewModel() {
         scope = viewModelScope,
         started = SharingStarted.Lazily,
         initialValue = DashboardState(
-            camApsFxState = camApsFxState.value,
-            homeAssistantState = homeAssistantState.value,
+            camApsFx = camApsFxState.value,
+            homeAssistant = homeAssistantState.value,
         )
     )
 }
