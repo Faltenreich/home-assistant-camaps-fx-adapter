@@ -1,5 +1,6 @@
 package com.faltenreich.camaps.dashboard.camaps
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.MaterialTheme
@@ -7,6 +8,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import com.faltenreich.camaps.camaps.BloodSugar
@@ -18,7 +20,13 @@ fun CamApsFxDashboard(
     modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier,
+        modifier = modifier.background(
+            when (state) {
+                is CamApsFxState.None,
+                is CamApsFxState.Value-> Color.Transparent
+                is CamApsFxState.Error -> Color.Red
+            }
+        ),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
