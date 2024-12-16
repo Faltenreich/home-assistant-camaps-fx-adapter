@@ -1,4 +1,4 @@
-package com.faltenreich.camaps
+package com.faltenreich.camaps.dashboard
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,11 +12,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.faltenreich.camaps.StateHolder
+import com.faltenreich.camaps.camaps.BloodSugar
 import com.faltenreich.camaps.camaps.CamApsFxState
 import com.faltenreich.camaps.homeassistant.HomeAssistantState
 
 @Composable
-fun MainScreen(modifier: Modifier = Modifier) {
+fun Dashboard(modifier: Modifier = Modifier) {
     val camApsFxState = StateHolder.camApsFxState.collectAsStateWithLifecycle()
     val homeAssistantState = StateHolder.homeAssistantState.collectAsStateWithLifecycle()
 

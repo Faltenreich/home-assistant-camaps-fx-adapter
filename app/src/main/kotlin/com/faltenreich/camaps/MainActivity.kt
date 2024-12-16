@@ -8,6 +8,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.faltenreich.camaps.camaps.CamApsFxNotificationListenerService
+import com.faltenreich.camaps.dashboard.Dashboard
 
 class MainActivity : ComponentActivity() {
 
@@ -16,7 +17,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         if (isNotificationListenerPermissionGranted()) {
             setContent {
-                MainScreen()
+                Dashboard()
             }
         } else {
             redirectToSettings()
