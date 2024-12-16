@@ -5,7 +5,6 @@ import com.faltenreich.camaps.homeassistant.device.HomeAssistantRegisterDeviceRe
 import com.faltenreich.camaps.homeassistant.device.HomeAssistantRegisterDeviceResponse
 import com.faltenreich.camaps.homeassistant.sensor.HomeAssistantRegisterSensorRequestBody
 import com.faltenreich.camaps.homeassistant.sensor.HomeAssistantUpdateSensorRequestBody
-import com.faltenreich.camaps.shared.NetworkClient
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.auth.Auth

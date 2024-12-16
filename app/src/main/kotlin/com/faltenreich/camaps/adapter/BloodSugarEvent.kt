@@ -1,4 +1,4 @@
-package com.faltenreich.camaps
+package com.faltenreich.camaps.adapter
 
 data class BloodSugarEvent(
     val mgDl: Float,

@@ -1,4 +1,4 @@
-package com.faltenreich.camaps.shared
+package com.faltenreich.camaps.homeassistant
 
 import android.util.Log
 import io.ktor.client.HttpClient

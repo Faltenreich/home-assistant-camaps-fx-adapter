@@ -3,7 +3,7 @@ package com.faltenreich.camaps.camaps
 import android.service.notification.StatusBarNotification
 import android.util.Log
 import android.widget.RemoteViews
-import com.faltenreich.camaps.BloodSugarEvent
+import com.faltenreich.camaps.adapter.BloodSugarEvent
 import java.util.ArrayList
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.isAccessible

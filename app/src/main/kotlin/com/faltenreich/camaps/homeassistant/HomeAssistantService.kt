@@ -2,8 +2,8 @@ package com.faltenreich.camaps.homeassistant
 
 import android.os.Build
 import android.util.Log
-import com.faltenreich.camaps.BloodSugarEvent
 import com.faltenreich.camaps.BuildConfig
+import com.faltenreich.camaps.adapter.BloodSugarEvent
 import com.faltenreich.camaps.homeassistant.device.HomeAssistantRegisterDeviceRequestBody
 import com.faltenreich.camaps.homeassistant.sensor.HomeAssistantRegisterSensorRequestBody
 import com.faltenreich.camaps.homeassistant.sensor.HomeAssistantUpdateSensorRequestBody
