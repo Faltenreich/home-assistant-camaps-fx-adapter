@@ -3,6 +3,7 @@ package com.faltenreich.camaps.camaps
 import android.service.notification.StatusBarNotification
 import android.util.Log
 import android.widget.RemoteViews
+import com.faltenreich.camaps.BloodSugar
 import java.util.ArrayList
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.isAccessible
@@ -30,12 +31,12 @@ class CamApsFxNotificationMapper {
             .filter { it.methodName == "setImage" }
             .mapNotNull { it.value as? Int }
             .lastOrNull()
-        val trend = CamApsFxState.Value.BloodSugar.Trend.entries.firstOrNull {
-            it.imageResourceId == trendImageResourceId
+        val trend = BloodSugar.Trend.entries.firstOrNull {
+            it.camApsImageResourceId == trendImageResourceId
         }
 
         return CamApsFxState.Value(
-            bloodSugar = CamApsFxState.Value.BloodSugar(
+            bloodSugar = BloodSugar(
                 mgDl = mgDl,
                 trend = trend,
             ),
