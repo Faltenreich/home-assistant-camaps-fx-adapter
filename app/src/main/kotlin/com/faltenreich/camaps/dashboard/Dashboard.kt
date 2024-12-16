@@ -12,15 +12,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.faltenreich.camaps.StateHolder
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.faltenreich.camaps.camaps.BloodSugar
 import com.faltenreich.camaps.camaps.CamApsFxState
 import com.faltenreich.camaps.homeassistant.HomeAssistantState
 
 @Composable
-fun Dashboard(modifier: Modifier = Modifier) {
-    val camApsFxState = StateHolder.camApsFxState.collectAsStateWithLifecycle()
-    val homeAssistantState = StateHolder.homeAssistantState.collectAsStateWithLifecycle()
+fun Dashboard(
+    modifier: Modifier = Modifier,
+    viewModel: DashboardViewModel = viewModel(),
+) {
+    val state = viewModel.state.collectAsStateWithLifecycle()
 
     Column(
         modifier = modifier
@@ -37,7 +39,7 @@ fun Dashboard(modifier: Modifier = Modifier) {
                 text = "Home Assistant",
                 modifier = Modifier.weight(1f),
             )
-            when (homeAssistantState.value) {
+            when (state.value.homeAssistantState) {
                 is HomeAssistantState.Disconnected -> Text("Disconnected")
                 is HomeAssistantState.ConnectedDevice -> Text("Device connected")
                 is HomeAssistantState.ConnectedSensor -> Text("Sensor connected")
@@ -51,7 +53,7 @@ fun Dashboard(modifier: Modifier = Modifier) {
                 text = "CamAPS FX",
                 modifier = Modifier.weight(1f),
             )
-            when (val state = camApsFxState.value) {
+            when (val state = state.value.camApsFxState) {
                 is CamApsFxState.None -> Text("-")
                 is CamApsFxState.Value -> {
                     Text(state.bloodSugar.mgDl.toString())
