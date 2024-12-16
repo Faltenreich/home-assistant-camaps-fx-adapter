@@ -3,7 +3,7 @@ package com.faltenreich.camaps.homeassistant
 import android.os.Build
 import android.util.Log
 import com.faltenreich.camaps.BuildConfig
-import com.faltenreich.camaps.MainStateObserver
+import com.faltenreich.camaps.StateHolder
 import com.faltenreich.camaps.camaps.CamApsFxState
 import com.faltenreich.camaps.homeassistant.device.HomeAssistantRegisterDeviceRequestBody
 import com.faltenreich.camaps.homeassistant.sensor.HomeAssistantRegisterSensorRequestBody
@@ -12,14 +12,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class HomeAssistantService {
 
     private val homeAssistantClient = HomeAssistantClient.local()
-    private val bloodSugarEventAdapter = MainStateObserver
+    private val bloodSugarEventAdapter = StateHolder
 
     private var webhookId: String? = null
 
@@ -30,10 +29,7 @@ class HomeAssistantService {
         registerDevice()
         registerSensor()
 
-        bloodSugarEventAdapter.state
-            .map { it.camApsFxState }
-            .distinctUntilChanged()
-            .collectLatest(::update)
+        bloodSugarEventAdapter.camApsFxState.collectLatest(::update)
     }
 
     fun stop() {
@@ -57,7 +53,7 @@ class HomeAssistantService {
         try {
             val response = homeAssistantClient.registerDevice(requestBody)
             webhookId = response.webhookId
-            bloodSugarEventAdapter.setHomeAssistantState(HomeAssistantState.ConnectedDevice)
+            bloodSugarEventAdapter.homeAssistantState.update { HomeAssistantState.ConnectedDevice }
             Log.d(TAG, "Registered device: $response")
         } catch (exception: Exception) {
             Log.e(TAG, "Registering device failed: $exception")
@@ -76,11 +72,8 @@ class HomeAssistantService {
         )
         Log.d(TAG, "Registering sensor: $requestBody")
         try {
-            homeAssistantClient.registerSensor(
-                requestBody = requestBody,
-                webhookId = webhookId,
-            )
-            bloodSugarEventAdapter.setHomeAssistantState(HomeAssistantState.ConnectedSensor)
+            homeAssistantClient.registerSensor(requestBody, webhookId)
+            bloodSugarEventAdapter.homeAssistantState.update { HomeAssistantState.ConnectedSensor }
             Log.d(TAG, "Registered sensor")
         } catch (exception: Exception) {
             Log.e(TAG, "Registering sensor failed: $exception")

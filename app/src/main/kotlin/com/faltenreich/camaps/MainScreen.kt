@@ -19,9 +19,8 @@ import com.faltenreich.camaps.homeassistant.HomeAssistantState
 
 @Composable
 fun MainScreen(modifier: Modifier = Modifier) {
-    val state = MainStateObserver.state.collectAsStateWithLifecycle().value
-    val camApsFxState = state.camApsFxState
-    val homeAssistantState = state.homeAssistantState
+    val camApsFxState = StateHolder.camApsFxState.collectAsStateWithLifecycle()
+    val homeAssistantState = StateHolder.homeAssistantState.collectAsStateWithLifecycle()
 
     Column(
         modifier = modifier
@@ -38,7 +37,7 @@ fun MainScreen(modifier: Modifier = Modifier) {
                 text = "Home Assistant",
                 modifier = Modifier.weight(1f),
             )
-            when (homeAssistantState) {
+            when (homeAssistantState.value) {
                 is HomeAssistantState.Disconnected -> Text("Disconnected")
                 is HomeAssistantState.ConnectedDevice -> Text("Device connected")
                 is HomeAssistantState.ConnectedSensor -> Text("Sensor connected")
@@ -52,11 +51,11 @@ fun MainScreen(modifier: Modifier = Modifier) {
                 text = "CamAPS FX",
                 modifier = Modifier.weight(1f),
             )
-            when (camApsFxState) {
+            when (val state = camApsFxState.value) {
                 is CamApsFxState.None -> Text("-")
                 is CamApsFxState.Value -> {
-                    Text(camApsFxState.bloodSugar.mgDl.toString())
-                    camApsFxState.bloodSugar.trend?.let { trend ->
+                    Text(state.bloodSugar.mgDl.toString())
+                    state.bloodSugar.trend?.let { trend ->
                         Image(
                             imageVector = trend.imageVector,
                             contentDescription = null,
@@ -64,7 +63,7 @@ fun MainScreen(modifier: Modifier = Modifier) {
                         )
                     }
                 }
-                is CamApsFxState.Error -> Text("ERROR: ${camApsFxState.message}")
+                is CamApsFxState.Error -> Text("ERROR: ${state.message}")
             }
         }
     }
