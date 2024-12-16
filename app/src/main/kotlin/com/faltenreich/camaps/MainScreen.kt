@@ -7,15 +7,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.faltenreich.camaps.adapter.BloodSugarEventAdapter
+import com.faltenreich.camaps.camaps.CamApsFxState
+import com.faltenreich.camaps.camaps.CamApsFxStateObserver
 
 @Composable
 fun MainScreen(modifier: Modifier = Modifier) {
-    val event = BloodSugarEventAdapter.events.collectAsStateWithLifecycle()
+    val state = CamApsFxStateObserver.state.collectAsStateWithLifecycle().value
+
     Box(
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,
     ) {
-        Text(event.value?.mgDl?.toString() ?: "No event")
+        when (state) {
+            is CamApsFxState.None -> Text("No event")
+            is CamApsFxState.Value -> Text(state.bloodSugar.mgDl.toString())
+            is CamApsFxState.Error -> Text("ERROR: ${state.message}")
+        }
     }
 }

@@ -5,14 +5,13 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
-import com.faltenreich.camaps.adapter.BloodSugarEventAdapter
 import com.faltenreich.camaps.homeassistant.HomeAssistantService
 
 class CamApsFxNotificationListenerService : NotificationListenerService() {
 
     private val notificationMapper = CamApsFxNotificationMapper()
     private val homeAssistantService = HomeAssistantService()
-    private val bloodSugarEventAdapter = BloodSugarEventAdapter
+    private val bloodSugarEventAdapter = CamApsFxStateObserver
 
     private var componentName: ComponentName? = null
 
@@ -60,8 +59,8 @@ class CamApsFxNotificationListenerService : NotificationListenerService() {
     }
 
     override fun onNotificationPosted(statusBarNotification: StatusBarNotification?) {
-        val event = statusBarNotification?.let(notificationMapper::invoke) ?: return
-        homeAssistantService.update(event)
-        bloodSugarEventAdapter.postEvent(event)
+        val state = statusBarNotification?.let(notificationMapper::invoke) ?: return
+        homeAssistantService.update(state)
+        bloodSugarEventAdapter.setState(state)
     }
 }

@@ -3,7 +3,7 @@ package com.faltenreich.camaps.homeassistant
 import android.os.Build
 import android.util.Log
 import com.faltenreich.camaps.BuildConfig
-import com.faltenreich.camaps.adapter.BloodSugarEvent
+import com.faltenreich.camaps.camaps.CamApsFxState
 import com.faltenreich.camaps.homeassistant.device.HomeAssistantRegisterDeviceRequestBody
 import com.faltenreich.camaps.homeassistant.sensor.HomeAssistantRegisterSensorRequestBody
 import com.faltenreich.camaps.homeassistant.sensor.HomeAssistantUpdateSensorRequestBody
@@ -71,14 +71,18 @@ class HomeAssistantService {
         }
     }
 
-    fun update(event: BloodSugarEvent) = scope.launch {
+    fun update(state: CamApsFxState) = scope.launch {
         val webhookId = webhookId ?: run {
             Log.d(TAG, "Skipping update of sensor due to missing webhook")
             return@launch
         }
+
+        // TODO: Handle other states
+        (state as? CamApsFxState.Value) ?: return@launch
+
         val requestBody = HomeAssistantUpdateSensorRequestBody(
             data = HomeAssistantUpdateSensorRequestBody.Data(
-                state = event.mgDl,
+                state = state.bloodSugar.mgDl,
             ),
         )
         Log.d(TAG, "Updating sensor: $requestBody")
