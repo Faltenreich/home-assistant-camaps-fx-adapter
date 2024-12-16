@@ -1,6 +1,5 @@
 package com.faltenreich.camaps
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,7 +10,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.faltenreich.camaps.camaps.CamApsFxState
@@ -55,13 +53,18 @@ fun MainScreen(modifier: Modifier = Modifier) {
                 is CamApsFxState.None -> Text("-")
                 is CamApsFxState.Value -> {
                     Text(state.bloodSugar.mgDl.toString())
-                    state.bloodSugar.trend?.let { trend ->
-                        Image(
-                            imageVector = trend.imageVector,
-                            contentDescription = null,
-                            colorFilter = ColorFilter.tint(trend.color),
-                        )
-                    }
+                    Text(
+                        when (state.bloodSugar.trend) {
+                            BloodSugar.Trend.RISING_FAST -> "+++"
+                            BloodSugar.Trend.RISING -> "++"
+                            BloodSugar.Trend.RISING_SLOW -> "+"
+                            BloodSugar.Trend.STEADY -> ""
+                            BloodSugar.Trend.DROPPING_SLOW -> "-"
+                            BloodSugar.Trend.DROPPING -> "--"
+                            BloodSugar.Trend.DROPPING_FAST -> "---"
+                            null -> ""
+                        }
+                    )
                 }
                 is CamApsFxState.Error -> Text("ERROR: ${state.message}")
             }
