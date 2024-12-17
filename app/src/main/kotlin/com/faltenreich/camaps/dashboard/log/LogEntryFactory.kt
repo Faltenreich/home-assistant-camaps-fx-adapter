@@ -24,12 +24,12 @@ class LogEntryFactory {
             is CamApsFxState.Value -> LogEntry(
                 dateTime = dateTime,
                 source = source,
-                message = "Notification received: ${bloodSugar.mgDl} mg/dL",
+                message = "received notification: ${bloodSugar.mgDl} mg/dL",
             )
             is CamApsFxState.Error -> LogEntry(
                 dateTime = dateTime,
                 source = source,
-                message = "Error received: $message",
+                message = "received error: $message",
             )
         }
     }
@@ -44,17 +44,17 @@ class LogEntryFactory {
             is HomeAssistantState.Disconnected -> LogEntry(
                 dateTime = dateTime,
                 source = source,
-                message = "Device disconnected",
+                message = "disconnected device",
             )
             is HomeAssistantState.ConnectedDevice -> LogEntry(
                 dateTime = dateTime,
                 source = source,
-                message = "Device connected",
+                message = "connected device",
             )
             is HomeAssistantState.ConnectedSensor -> LogEntry(
                 dateTime = dateTime,
                 source = source,
-                message = "Sensor connected",
+                message = "connected sensor",
             )
         }
     }
