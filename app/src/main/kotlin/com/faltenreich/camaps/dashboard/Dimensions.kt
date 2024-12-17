@@ -9,5 +9,6 @@ object Dimensions {
 
         val P_4: Dp = 4.dp
         val P_8: Dp = 8.dp
+        val P_16: Dp = 16.dp
     }
 }

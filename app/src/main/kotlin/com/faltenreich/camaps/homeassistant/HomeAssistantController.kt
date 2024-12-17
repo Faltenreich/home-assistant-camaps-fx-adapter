@@ -8,11 +8,7 @@ import com.faltenreich.camaps.camaps.CamApsFxState
 import com.faltenreich.camaps.homeassistant.device.HomeAssistantRegisterDeviceRequestBody
 import com.faltenreich.camaps.homeassistant.sensor.HomeAssistantRegisterSensorRequestBody
 import com.faltenreich.camaps.homeassistant.sensor.HomeAssistantUpdateSensorRequestBody
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 
 class HomeAssistantController {
 
@@ -21,20 +17,13 @@ class HomeAssistantController {
 
     private var webhookId: String? = null
 
-    private val job = SupervisorJob()
-    private val scope = CoroutineScope(Dispatchers.IO + job)
-
-    fun start() = scope.launch {
+    suspend fun start() {
         registerDevice()
         registerSensor()
 
         mainStateProvider.state.collectLatest { state ->
             update(state.camApsFx)
         }
-    }
-
-    fun stop() {
-        job.cancel()
     }
 
     private suspend fun registerDevice() {
@@ -81,14 +70,14 @@ class HomeAssistantController {
         }
     }
 
-    private fun update(state: CamApsFxState) = scope.launch {
+    private suspend fun update(state: CamApsFxState) {
         val webhookId = webhookId ?: run {
             Log.d(TAG, "Skipping update of sensor due to missing webhook")
-            return@launch
+            return
         }
 
         // TODO: Handle other states
-        (state as? CamApsFxState.Value) ?: return@launch
+        (state as? CamApsFxState.Value) ?: return
 
         val requestBody = HomeAssistantUpdateSensorRequestBody(
             data = HomeAssistantUpdateSensorRequestBody.Data(
@@ -103,7 +92,7 @@ class HomeAssistantController {
             )
         } catch (exception: Exception) {
             Log.e(TAG, "Updating sensor failed: $exception")
-            return@launch
+            return
         }
         Log.d(TAG, "Updated sensor")
     }

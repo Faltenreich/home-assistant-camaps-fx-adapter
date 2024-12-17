@@ -31,7 +31,11 @@ fun Dashboard(
             entries = state.log,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(paddingValues),
+                .padding(paddingValues)
+                .padding(
+                    horizontal = Dimensions.Padding.P_16,
+                    vertical = Dimensions.Padding.P_8,
+                ),
         )
     }
 }

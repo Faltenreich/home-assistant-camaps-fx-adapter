@@ -7,6 +7,10 @@ import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import com.faltenreich.camaps.camaps.CamApsFxController
 import com.faltenreich.camaps.homeassistant.HomeAssistantController
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 
 class MainService : NotificationListenerService() {
 
@@ -15,14 +19,19 @@ class MainService : NotificationListenerService() {
 
     private var componentName: ComponentName? = null
 
+    private val job = SupervisorJob()
+    private val scope = CoroutineScope(Dispatchers.IO + job)
+
     override fun onCreate() {
         super.onCreate()
-        homeAssistantController.start()
+        scope.launch {
+            homeAssistantController.start()
+        }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        homeAssistantController.stop()
+        job.cancel()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
