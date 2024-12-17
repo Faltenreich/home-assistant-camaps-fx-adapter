@@ -13,8 +13,8 @@ import kotlinx.coroutines.flow.collectLatest
 
 class HomeAssistantController {
 
-    private val homeAssistantClient = HomeAssistantClient.Companion.local()
     private val mainStateProvider = MainStateProvider
+    private val homeAssistantClient = HomeAssistantClient.Companion.local()
 
     private var webhookId: String? = null
 

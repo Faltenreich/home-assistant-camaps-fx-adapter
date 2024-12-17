@@ -7,8 +7,8 @@ import com.faltenreich.camaps.camaps.notification.CamApsFxNotificationMapper
 
 class CamApsFxController : NotificationListenerService() {
 
-    private val notificationMapper = CamApsFxNotificationMapper()
     private val mainStateProvider = MainStateProvider
+    private val notificationMapper = CamApsFxNotificationMapper()
 
     fun handleNotification(statusBarNotification: StatusBarNotification?) {
         val state = statusBarNotification?.let(notificationMapper::invoke) ?: return
