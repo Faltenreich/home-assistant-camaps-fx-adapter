@@ -23,23 +23,21 @@ class CamApsFxNotificationMapper {
             .mapNotNull { (it.value as? String)?.toFloatOrNull() }
             .firstOrNull()
 
-        return mgDl?.let {
+        return if (mgDl != null) {
             val trendImageResourceId = actions
                 .filter { it.methodName == "setImageResource" }
                 .mapNotNull { it.value as? Int }
                 .lastOrNull()
-            val trend = CamApsFxState.BloodSugar.Trend.entries.firstOrNull {
-                it.camApsImageResourceId == trendImageResourceId
-            }
-            CamApsFxState.BloodSugar(
-                mgDl = mgDl,
-                trend = trend,
+            val trend = CamApsFxState.BloodSugar.Trend.entries
+                .firstOrNull { it.imageResourceId == trendImageResourceId }
+            CamApsFxState.BloodSugar(mgDl, trend)
+        } else {
+            CamApsFxState.Unknown(
+                message = actions
+                    .map { action -> "${action.methodName}: ${action.value}" }
+                    .joinToString(),
             )
-        } ?: CamApsFxState.Unknown(
-            message = actions
-                .map { action -> "${action.methodName}: ${action.value}" }
-                .joinToString(),
-        )
+        }
     }
 
     private val RemoteViews.actions: List<RemoteViewAction>
