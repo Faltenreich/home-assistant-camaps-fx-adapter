@@ -15,7 +15,7 @@ class NetworkClient(@PublishedApi internal val httpClient: HttpClient) {
     suspend inline fun <reified Response> get(url: Url): Response {
         Log.d(TAG, "Requesting: GET $url")
         val response = httpClient.get(url)
-        Log.d(TAG, "Responding: GET $response")
+        Log.d(TAG, "Responded: GET $response")
         return response.body()
     }
 
@@ -25,7 +25,7 @@ class NetworkClient(@PublishedApi internal val httpClient: HttpClient) {
             contentType(ContentType.Application.Json)
             setBody(requestBody)
         }
-        Log.d(TAG, "Responding: POST $response")
+        Log.d(TAG, "Responded: POST $url ${response.status}")
         return response.body()
     }
 
