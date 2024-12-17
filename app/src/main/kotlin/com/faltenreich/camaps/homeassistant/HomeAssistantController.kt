@@ -78,11 +78,11 @@ class HomeAssistantController {
         }
 
         // TODO: Handle other states
-        (state as? CamApsFxState.Value) ?: return
+        (state as? CamApsFxState.BloodSugar) ?: return
 
         val requestBody = HomeAssistantUpdateSensorRequestBody(
             data = HomeAssistantUpdateSensorRequestBody.Data(
-                state = state.bloodSugar.mgDl,
+                state = state.mgDl,
             ),
         )
         Log.d(TAG, "Updating sensor: $requestBody")

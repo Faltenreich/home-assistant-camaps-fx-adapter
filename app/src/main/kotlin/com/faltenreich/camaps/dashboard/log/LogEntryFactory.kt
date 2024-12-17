@@ -20,16 +20,16 @@ object LogEntryFactory {
             color = Color.Green,
         )
         return when (this) {
-            is CamApsFxState.None -> null
-            is CamApsFxState.Value -> LogEntry(
+            is CamApsFxState.Blank -> null
+            is CamApsFxState.BloodSugar -> LogEntry(
                 dateTime = dateTime,
                 source = source,
-                message = "received notification: ${bloodSugar.mgDl} mg/dL",
+                message = "sent blood sugar: $mgDl mg/dL",
             )
-            is CamApsFxState.Error -> LogEntry(
+            is CamApsFxState.Unknown -> LogEntry(
                 dateTime = dateTime,
                 source = source,
-                message = "received error: $message",
+                message = "sent unknown data: $message",
             )
         }
     }

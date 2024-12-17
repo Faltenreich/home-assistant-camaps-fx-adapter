@@ -28,15 +28,13 @@ class CamApsFxNotificationMapper {
             .filter { it.methodName == "setImageResource" }
             .mapNotNull { it.value as? Int }
             .lastOrNull()
-        val trend = BloodSugar.Trend.entries.firstOrNull {
+        val trend = CamApsFxState.BloodSugar.Trend.entries.firstOrNull {
             it.camApsImageResourceId == trendImageResourceId
         }
 
-        return CamApsFxState.Value(
-            bloodSugar = BloodSugar(
-                mgDl = mgDl,
-                trend = trend,
-            ),
+        return CamApsFxState.BloodSugar(
+            mgDl = mgDl,
+            trend = trend,
         )
     }
 
