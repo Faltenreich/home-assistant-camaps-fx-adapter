@@ -35,6 +35,9 @@ fun Dashboard(
             modifier = Modifier.fillMaxWidth().weight(1f),
         )
         HorizontalDivider()
-        LogList(entries = state.log)
+        LogList(
+            entries = state.log,
+            modifier = Modifier.fillMaxWidth().weight(1f),
+        )
     }
 }

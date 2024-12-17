@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.unit.dp
+import com.faltenreich.camaps.Dimensions
 
 @Composable
 fun DashboardComponent(
@@ -15,6 +15,6 @@ fun DashboardComponent(
     Image(
         painter = painter,
         contentDescription = null,
-        modifier = modifier.size(80.dp),
+        modifier = modifier.size(Dimensions.Size.ICON),
     )
 }

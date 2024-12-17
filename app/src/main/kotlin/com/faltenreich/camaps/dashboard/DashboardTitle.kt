@@ -10,7 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.unit.dp
+import com.faltenreich.camaps.Dimensions
 
 @Composable
 fun DashboardTitle(
@@ -26,7 +26,7 @@ fun DashboardTitle(
         Image(
             painter = painter,
             contentDescription = null,
-            modifier = Modifier.size(60.dp),
+            modifier = Modifier.size(Dimensions.Size.ICON),
         )
         Text(
             text = text,

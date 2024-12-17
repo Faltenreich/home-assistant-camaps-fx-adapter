@@ -6,13 +6,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import com.faltenreich.camaps.Dimensions
 
 @Composable
 fun DashboardArrow(modifier: Modifier = Modifier) {
     Image(
         imageVector = Icons.AutoMirrored.Filled.ArrowForward,
         contentDescription = null,
-        modifier = modifier.size(40.dp),
+        modifier = modifier.size(Dimensions.Size.ARROW),
     )
 }
