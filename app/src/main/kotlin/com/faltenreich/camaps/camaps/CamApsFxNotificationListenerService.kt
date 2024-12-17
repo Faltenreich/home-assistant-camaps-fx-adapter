@@ -12,7 +12,7 @@ class CamApsFxNotificationListenerService : NotificationListenerService() {
 
     private val notificationMapper = CamApsFxNotificationMapper()
     private val homeAssistantService = HomeAssistantService()
-    private val bloodSugarEventAdapter = MainStateHolder
+    private val mainStateHolder = MainStateHolder
 
     private var componentName: ComponentName? = null
 
@@ -61,6 +61,6 @@ class CamApsFxNotificationListenerService : NotificationListenerService() {
 
     override fun onNotificationPosted(statusBarNotification: StatusBarNotification?) {
         val state = statusBarNotification?.let(notificationMapper::invoke) ?: return
-        bloodSugarEventAdapter.setCamApsFxState(state)
+        mainStateHolder.setCamApsFxState(state)
     }
 }
