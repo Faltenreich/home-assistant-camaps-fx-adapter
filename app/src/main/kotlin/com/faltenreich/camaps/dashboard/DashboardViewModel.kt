@@ -1,9 +1,11 @@
 package com.faltenreich.camaps.dashboard
 
 import androidx.lifecycle.ViewModel
-import com.faltenreich.camaps.MainStateHolder
+import com.faltenreich.camaps.MainStateProvider
 
 class DashboardViewModel : ViewModel() {
 
-    val state = MainStateHolder.state
+    private val mainStateProvider = MainStateProvider
+
+    val state = mainStateProvider.state
 }
