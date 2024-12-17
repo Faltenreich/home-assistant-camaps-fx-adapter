@@ -3,6 +3,7 @@ package com.faltenreich.camaps.camaps
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import com.faltenreich.camaps.MainStateProvider
+import com.faltenreich.camaps.camaps.notification.CamApsFxNotificationMapper
 
 class CamApsFxController : NotificationListenerService() {
 

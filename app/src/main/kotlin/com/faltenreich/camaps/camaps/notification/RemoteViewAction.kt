@@ -1,4 +1,4 @@
-package com.faltenreich.camaps.camaps
+package com.faltenreich.camaps.camaps.notification
 
 data class RemoteViewAction(
     val methodName: String,

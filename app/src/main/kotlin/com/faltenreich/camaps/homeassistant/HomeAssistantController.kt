@@ -6,13 +6,14 @@ import com.faltenreich.camaps.BuildConfig
 import com.faltenreich.camaps.MainStateProvider
 import com.faltenreich.camaps.camaps.CamApsFxState
 import com.faltenreich.camaps.homeassistant.device.HomeAssistantRegisterDeviceRequestBody
+import com.faltenreich.camaps.homeassistant.network.HomeAssistantClient
 import com.faltenreich.camaps.homeassistant.sensor.HomeAssistantRegisterSensorRequestBody
 import com.faltenreich.camaps.homeassistant.sensor.HomeAssistantUpdateSensorRequestBody
 import kotlinx.coroutines.flow.collectLatest
 
 class HomeAssistantController {
 
-    private val homeAssistantClient = HomeAssistantClient.local()
+    private val homeAssistantClient = HomeAssistantClient.Companion.local()
     private val mainStateProvider = MainStateProvider
 
     private var webhookId: String? = null

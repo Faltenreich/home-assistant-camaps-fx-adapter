@@ -1,4 +1,4 @@
-package com.faltenreich.camaps.homeassistant
+package com.faltenreich.camaps.homeassistant.network
 
 import com.faltenreich.camaps.BuildConfig
 import com.faltenreich.camaps.homeassistant.device.HomeAssistantRegisterDeviceRequestBody

@@ -1,7 +1,8 @@
-package com.faltenreich.camaps.camaps
+package com.faltenreich.camaps.camaps.notification
 
 import android.service.notification.StatusBarNotification
 import android.widget.RemoteViews
+import com.faltenreich.camaps.camaps.CamApsFxState
 import java.util.ArrayList
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.isAccessible
