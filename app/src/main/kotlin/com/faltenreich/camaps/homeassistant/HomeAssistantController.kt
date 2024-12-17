@@ -14,7 +14,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-class HomeAssistantService {
+class HomeAssistantController {
 
     private val homeAssistantClient = HomeAssistantClient.local()
     private val mainStateHolder = MainStateHolder
@@ -110,6 +110,6 @@ class HomeAssistantService {
 
     companion object {
 
-        private val TAG = HomeAssistantService::class.java.simpleName
+        private val TAG = HomeAssistantController::class.java.simpleName
     }
 }
