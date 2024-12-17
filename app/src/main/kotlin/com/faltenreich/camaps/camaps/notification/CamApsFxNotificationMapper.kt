@@ -22,19 +22,23 @@ class CamApsFxNotificationMapper {
             .filter { it.methodName == "setText" }
             .mapNotNull { (it.value as? String)?.toFloatOrNull() }
             .firstOrNull()
-            ?: return null
 
-        val trendImageResourceId = actions
-            .filter { it.methodName == "setImageResource" }
-            .mapNotNull { it.value as? Int }
-            .lastOrNull()
-        val trend = CamApsFxState.BloodSugar.Trend.entries.firstOrNull {
-            it.camApsImageResourceId == trendImageResourceId
-        }
-
-        return CamApsFxState.BloodSugar(
-            mgDl = mgDl,
-            trend = trend,
+        return mgDl?.let {
+            val trendImageResourceId = actions
+                .filter { it.methodName == "setImageResource" }
+                .mapNotNull { it.value as? Int }
+                .lastOrNull()
+            val trend = CamApsFxState.BloodSugar.Trend.entries.firstOrNull {
+                it.camApsImageResourceId == trendImageResourceId
+            }
+            CamApsFxState.BloodSugar(
+                mgDl = mgDl,
+                trend = trend,
+            )
+        } ?: CamApsFxState.Unknown(
+            message = actions
+                .map { action -> "${action.methodName}: ${action.value}" }
+                .joinToString(),
         )
     }
 
