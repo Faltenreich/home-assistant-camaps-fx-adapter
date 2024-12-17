@@ -3,16 +3,19 @@ package com.faltenreich.camaps.dashboard.camaps
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
+import com.faltenreich.camaps.R
 import com.faltenreich.camaps.camaps.BloodSugar
 import com.faltenreich.camaps.camaps.CamApsFxState
+import com.faltenreich.camaps.dashboard.DashboardTitle
 
 @Composable
 fun CamApsFxDashboard(
@@ -30,9 +33,9 @@ fun CamApsFxDashboard(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text(
-            text = "CamAPS FX",
-            style = MaterialTheme.typography.titleLarge,
+        DashboardTitle(
+            text = stringResource(R.string.cam_aps_fx),
+            painter = painterResource(R.drawable.ic_camaps_fx),
         )
         when (state) {
             is CamApsFxState.None -> Text("-")
