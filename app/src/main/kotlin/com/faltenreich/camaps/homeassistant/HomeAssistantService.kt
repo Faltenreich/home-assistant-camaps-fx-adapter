@@ -12,7 +12,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class HomeAssistantService {
@@ -53,7 +52,7 @@ class HomeAssistantService {
         try {
             val response = homeAssistantClient.registerDevice(requestBody)
             webhookId = response.webhookId
-            bloodSugarEventAdapter.homeAssistantState.update { HomeAssistantState.ConnectedDevice }
+            bloodSugarEventAdapter.setHomeAssistantState(HomeAssistantState.ConnectedDevice)
             Log.d(TAG, "Registered device: $response")
         } catch (exception: Exception) {
             Log.e(TAG, "Registering device failed: $exception")
@@ -73,7 +72,7 @@ class HomeAssistantService {
         Log.d(TAG, "Registering sensor: $requestBody")
         try {
             homeAssistantClient.registerSensor(requestBody, webhookId)
-            bloodSugarEventAdapter.homeAssistantState.update { HomeAssistantState.ConnectedSensor }
+            bloodSugarEventAdapter.setHomeAssistantState(HomeAssistantState.ConnectedSensor)
             Log.d(TAG, "Registered sensor")
         } catch (exception: Exception) {
             Log.e(TAG, "Registering sensor failed: $exception")

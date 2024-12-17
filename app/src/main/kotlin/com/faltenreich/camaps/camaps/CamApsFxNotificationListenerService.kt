@@ -7,7 +7,6 @@ import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import com.faltenreich.camaps.StateHolder
 import com.faltenreich.camaps.homeassistant.HomeAssistantService
-import kotlinx.coroutines.flow.update
 
 class CamApsFxNotificationListenerService : NotificationListenerService() {
 
@@ -62,6 +61,6 @@ class CamApsFxNotificationListenerService : NotificationListenerService() {
 
     override fun onNotificationPosted(statusBarNotification: StatusBarNotification?) {
         val state = statusBarNotification?.let(notificationMapper::invoke) ?: return
-        bloodSugarEventAdapter.camApsFxState.update { state }
+        bloodSugarEventAdapter.setCamApsFxState(state)
     }
 }

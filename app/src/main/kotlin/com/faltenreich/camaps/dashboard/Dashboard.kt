@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -11,6 +12,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.faltenreich.camaps.dashboard.camaps.CamApsFxDashboard
 import com.faltenreich.camaps.dashboard.homeassistant.HomeAssistantDashboard
+import com.faltenreich.camaps.dashboard.log.LogList
 
 @Composable
 fun Dashboard(
@@ -32,5 +34,7 @@ fun Dashboard(
             state = state.camApsFx,
             modifier = Modifier.fillMaxWidth().weight(1f),
         )
+        HorizontalDivider()
+        LogList(entries = state.log)
     }
 }

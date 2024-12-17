@@ -11,10 +11,12 @@ class DashboardViewModel : ViewModel() {
 
     private val camApsFxState = StateHolder.camApsFxState
     private val homeAssistantState = StateHolder.homeAssistantState
+    private val log = StateHolder.log
 
     val state = combine(
         camApsFxState,
         homeAssistantState,
+        log,
         ::DashboardState,
     ).stateIn(
         scope = viewModelScope,
@@ -22,6 +24,7 @@ class DashboardViewModel : ViewModel() {
         initialValue = DashboardState(
             camApsFx = camApsFxState.value,
             homeAssistant = homeAssistantState.value,
+            log = log.value,
         )
     )
 }
