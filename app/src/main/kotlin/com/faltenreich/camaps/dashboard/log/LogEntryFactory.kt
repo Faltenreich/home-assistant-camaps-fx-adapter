@@ -7,7 +7,7 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
-class LogEntryFactory {
+object LogEntryFactory {
 
     private fun createDateTime(): String {
         return LocalDateTime.now().format(DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM))

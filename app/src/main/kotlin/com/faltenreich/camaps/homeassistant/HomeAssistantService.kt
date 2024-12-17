@@ -3,7 +3,7 @@ package com.faltenreich.camaps.homeassistant
 import android.os.Build
 import android.util.Log
 import com.faltenreich.camaps.BuildConfig
-import com.faltenreich.camaps.StateHolder
+import com.faltenreich.camaps.MainStateHolder
 import com.faltenreich.camaps.camaps.CamApsFxState
 import com.faltenreich.camaps.homeassistant.device.HomeAssistantRegisterDeviceRequestBody
 import com.faltenreich.camaps.homeassistant.sensor.HomeAssistantRegisterSensorRequestBody
@@ -17,7 +17,7 @@ import kotlinx.coroutines.launch
 class HomeAssistantService {
 
     private val homeAssistantClient = HomeAssistantClient.local()
-    private val bloodSugarEventAdapter = StateHolder
+    private val mainStateHolder = MainStateHolder
 
     private var webhookId: String? = null
 
@@ -28,7 +28,9 @@ class HomeAssistantService {
         registerDevice()
         registerSensor()
 
-        bloodSugarEventAdapter.camApsFxState.collectLatest(::update)
+        mainStateHolder.state.collectLatest { state ->
+            update(state.camApsFx)
+        }
     }
 
     fun stop() {
@@ -52,7 +54,7 @@ class HomeAssistantService {
         try {
             val response = homeAssistantClient.registerDevice(requestBody)
             webhookId = response.webhookId
-            bloodSugarEventAdapter.setHomeAssistantState(HomeAssistantState.ConnectedDevice)
+            mainStateHolder.setHomeAssistantState(HomeAssistantState.ConnectedDevice)
             Log.d(TAG, "Registered device: $response")
         } catch (exception: Exception) {
             Log.e(TAG, "Registering device failed: $exception")
@@ -72,7 +74,7 @@ class HomeAssistantService {
         Log.d(TAG, "Registering sensor: $requestBody")
         try {
             homeAssistantClient.registerSensor(requestBody, webhookId)
-            bloodSugarEventAdapter.setHomeAssistantState(HomeAssistantState.ConnectedSensor)
+            mainStateHolder.setHomeAssistantState(HomeAssistantState.ConnectedSensor)
             Log.d(TAG, "Registered sensor")
         } catch (exception: Exception) {
             Log.e(TAG, "Registering sensor failed: $exception")

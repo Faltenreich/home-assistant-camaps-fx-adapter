@@ -5,14 +5,14 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
-import com.faltenreich.camaps.StateHolder
+import com.faltenreich.camaps.MainStateHolder
 import com.faltenreich.camaps.homeassistant.HomeAssistantService
 
 class CamApsFxNotificationListenerService : NotificationListenerService() {
 
     private val notificationMapper = CamApsFxNotificationMapper()
     private val homeAssistantService = HomeAssistantService()
-    private val bloodSugarEventAdapter = StateHolder
+    private val bloodSugarEventAdapter = MainStateHolder
 
     private var componentName: ComponentName? = null
 
