@@ -40,20 +40,19 @@ class HomeAssistantController {
             osVersion = Build.VERSION.SDK_INT.toString(),
             supportsEncryption = false,
         )
-        Log.d(TAG, "Registering device: $requestBody")
         try {
             val response = homeAssistantClient.registerDevice(requestBody)
             webhookId = response.webhookId
             mainStateProvider.setHomeAssistantState(HomeAssistantState.ConnectedDevice)
-            Log.d(TAG, "Registered device: $response")
+            Log.d(TAG, "Device registered: $response")
         } catch (exception: Exception) {
-            Log.e(TAG, "Registering device failed: $exception")
+            Log.e(TAG, "Device could not be registered: $exception")
         }
     }
 
     private suspend fun registerSensor() {
         val webhookId = webhookId ?: run {
-            Log.d(TAG, "Skipping registration of sensor due to missing webhook")
+            Log.d(TAG, "Sensor could not be registered due to to missing webhook")
             return
         }
         val requestBody = HomeAssistantRegisterSensorRequestBody(
@@ -61,19 +60,18 @@ class HomeAssistantController {
                 state = 120f,
             ),
         )
-        Log.d(TAG, "Registering sensor: $requestBody")
         try {
             homeAssistantClient.registerSensor(requestBody, webhookId)
             mainStateProvider.setHomeAssistantState(HomeAssistantState.ConnectedSensor)
-            Log.d(TAG, "Registered sensor")
+            Log.d(TAG, "Sensor registered")
         } catch (exception: Exception) {
-            Log.e(TAG, "Registering sensor failed: $exception")
+            Log.e(TAG, "Sensor could not be registered: $exception")
         }
     }
 
     private suspend fun update(state: CamApsFxState) {
         val webhookId = webhookId ?: run {
-            Log.d(TAG, "Skipping update of sensor due to missing webhook")
+            Log.d(TAG, "Sensor could not be updated due to to missing webhook")
             return
         }
 
@@ -85,17 +83,15 @@ class HomeAssistantController {
                 state = state.mgDl,
             ),
         )
-        Log.d(TAG, "Updating sensor: $requestBody")
         try {
             homeAssistantClient.updateSensor(
                 requestBody = requestBody,
                 webhookId = webhookId,
             )
+            Log.d(TAG, "Sensor updated")
         } catch (exception: Exception) {
-            Log.e(TAG, "Updating sensor failed: $exception")
-            return
+            Log.e(TAG, "Sensor could not be updated: $exception")
         }
-        Log.d(TAG, "Updated sensor")
     }
 
     companion object {

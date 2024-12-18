@@ -17,8 +17,10 @@ import kotlinx.coroutines.flow.update
 
 class DashboardViewModel : ViewModel() {
 
+    private val mainStateProvider = MainStateProvider
+
     private val hasPermissions = MutableStateFlow<Boolean>(false)
-    private val mainState = MainStateProvider.state
+    private val mainState = mainStateProvider.state
 
     val state = combine(
         hasPermissions,
@@ -52,6 +54,6 @@ class DashboardViewModel : ViewModel() {
     }
 
     fun toggleService() {
-
+        mainStateProvider.toggleService()
     }
 }
