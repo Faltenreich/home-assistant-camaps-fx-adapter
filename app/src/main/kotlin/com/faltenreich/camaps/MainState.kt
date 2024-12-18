@@ -5,6 +5,7 @@ import com.faltenreich.camaps.dashboard.log.LogEntry
 import com.faltenreich.camaps.homeassistant.HomeAssistantState
 
 data class MainState(
+    val service: MainServiceState,
     val camApsFx: CamApsFxState,
     val homeAssistant: HomeAssistantState,
     val log: List<LogEntry>,

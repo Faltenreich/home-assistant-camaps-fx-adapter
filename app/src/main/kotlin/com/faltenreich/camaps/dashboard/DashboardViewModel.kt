@@ -12,20 +12,22 @@ import com.faltenreich.camaps.MainStateProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 
 class DashboardViewModel : ViewModel() {
 
     private val hasPermissions = MutableStateFlow<Boolean>(false)
-    private val log = MainStateProvider.state.map { it.log }
+    private val mainState = MainStateProvider.state
 
     val state = combine(
         hasPermissions,
-        log,
-    ) { hasPermissions, log ->
-        if (hasPermissions) DashboardState.Content(log)
+        mainState,
+    ) { hasPermissions, mainState ->
+        if (hasPermissions) DashboardState.Content(
+            service = mainState.service,
+            log = mainState.log,
+        )
         else DashboardState.MissingPermissions
     }.stateIn(
         scope = viewModelScope,
@@ -47,5 +49,9 @@ class DashboardViewModel : ViewModel() {
     fun openNotificationSettings(activity: Activity) {
         val intent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
         activity.startActivityForResult(intent, 1001)
+    }
+
+    fun toggleService() {
+
     }
 }

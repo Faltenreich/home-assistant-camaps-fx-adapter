@@ -11,6 +11,7 @@ object MainStateProvider {
 
     private val _state = MutableStateFlow<MainState>(
         MainState(
+            service = MainServiceState.Disconnected,
             camApsFx = CamApsFxState.Blank,
             homeAssistant = HomeAssistantState.Disconnected,
             log = emptyList(),
