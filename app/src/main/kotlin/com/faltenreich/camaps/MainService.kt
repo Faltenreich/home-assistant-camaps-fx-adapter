@@ -26,6 +26,7 @@ class MainService : NotificationListenerService() {
         scope.launch {
             mainStateProvider.event.collectLatest { event ->
                 when (event) {
+                    // FIXME: Breaks state of service which can then not be started anymore
                     is MainEvent.ToggleService -> when (mainStateProvider.state.value.service) {
                         is MainServiceState.Disconnected -> {
                             val service = this@MainService
