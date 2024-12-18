@@ -1,10 +1,12 @@
 package com.faltenreich.camaps.dashboard
 
-import com.faltenreich.camaps.MainState
+import com.faltenreich.camaps.dashboard.log.LogEntry
 
 sealed interface DashboardState {
 
-    data object MissingNotificationListenerPermission : DashboardState
+    data object MissingPermissions : DashboardState
 
-    data class Content(val mainState: MainState) : DashboardState
+    data class Content(
+        val log: List<LogEntry>,
+    ) : DashboardState
 }

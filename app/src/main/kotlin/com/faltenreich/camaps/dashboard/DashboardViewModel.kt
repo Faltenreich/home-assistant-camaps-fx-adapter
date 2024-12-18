@@ -12,33 +12,34 @@ import com.faltenreich.camaps.MainStateProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 
 class DashboardViewModel : ViewModel() {
 
-    private val isNotificationListenerPermissionGranted = MutableStateFlow<Boolean>(false)
-    private val mainState = MainStateProvider.state
+    private val hasPermissions = MutableStateFlow<Boolean>(false)
+    private val log = MainStateProvider.state.map { it.log }
 
     val state = combine(
-        isNotificationListenerPermissionGranted,
-        mainState,
-    ) { isNotificationListenerPermissionGranted, mainState ->
-        if (isNotificationListenerPermissionGranted) DashboardState.Content(mainState = mainState)
-        else DashboardState.MissingNotificationListenerPermission
+        hasPermissions,
+        log,
+    ) { hasPermissions, log ->
+        if (hasPermissions) DashboardState.Content(log)
+        else DashboardState.MissingPermissions
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.Lazily,
-        initialValue = DashboardState.MissingNotificationListenerPermission,
+        initialValue = DashboardState.MissingPermissions,
     )
 
-    fun checkNotificationListenerPermission(context: Context) {
+    fun checkPermissions(context: Context) {
         val componentName = ComponentName(context, MainService::class.java)
         val enabledListeners = Settings.Secure.getString(
             context.contentResolver,
             "enabled_notification_listeners",
         )
-        isNotificationListenerPermissionGranted.update {
+        hasPermissions.update {
             enabledListeners?.contains(componentName.flattenToString()) == true
         }
     }

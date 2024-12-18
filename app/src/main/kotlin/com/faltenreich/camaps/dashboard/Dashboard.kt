@@ -33,7 +33,7 @@ fun Dashboard(
 
     // TODO: Check onResume
     LaunchedEffect(Unit) {
-        viewModel.checkNotificationListenerPermission(context)
+        viewModel.checkPermissions(context)
     }
 
     Scaffold(
@@ -41,7 +41,7 @@ fun Dashboard(
         topBar = { TopAppBar(title = { Text(stringResource(R.string.app_name)) }) },
     ) { paddingValues ->
         when (state) {
-            is DashboardState.MissingNotificationListenerPermission -> Box(
+            is DashboardState.MissingPermissions -> Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center,
             ) {
@@ -50,7 +50,7 @@ fun Dashboard(
                 }
             }
             is DashboardState.Content -> LogList(
-                entries = state.mainState.log,
+                entries = state.log,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(paddingValues)
