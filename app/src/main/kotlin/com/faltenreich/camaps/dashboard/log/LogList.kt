@@ -15,7 +15,9 @@ fun LogList(
     val listState = rememberLazyListState()
 
     LaunchedEffect(entries) {
-        listState.scrollToItem(entries.lastIndex)
+        if (entries.isNotEmpty()) {
+            listState.scrollToItem(entries.lastIndex)
+        }
     }
 
     LazyColumn(
