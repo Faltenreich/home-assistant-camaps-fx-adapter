@@ -11,7 +11,7 @@ sealed interface CamApsFxState {
 
         enum class Trend(val imageResourceId: Int) {
             RISING_FAST(-1), // TODO
-            RISING(-1), // TODO
+            RISING(2131230960),
             RISING_SLOW(2131230954),
             STEADY(2131230951),
             DROPPING_SLOW(2131230942),
