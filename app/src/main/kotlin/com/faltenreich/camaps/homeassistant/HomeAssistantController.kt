@@ -4,12 +4,10 @@ import android.os.Build
 import android.util.Log
 import com.faltenreich.camaps.BuildConfig
 import com.faltenreich.camaps.MainStateProvider
-import com.faltenreich.camaps.camaps.CamApsFxState
 import com.faltenreich.camaps.homeassistant.device.HomeAssistantRegisterDeviceRequestBody
 import com.faltenreich.camaps.homeassistant.network.HomeAssistantClient
 import com.faltenreich.camaps.homeassistant.sensor.HomeAssistantRegisterSensorRequestBody
 import com.faltenreich.camaps.homeassistant.sensor.HomeAssistantUpdateSensorRequestBody
-import kotlinx.coroutines.flow.collectLatest
 
 class HomeAssistantController {
 
@@ -21,10 +19,6 @@ class HomeAssistantController {
     suspend fun start() {
         registerDevice()
         registerSensor()
-
-        mainStateProvider.state.collectLatest { state ->
-            update(state.camApsFx)
-        }
     }
 
     private suspend fun registerDevice() {
@@ -78,7 +72,7 @@ class HomeAssistantController {
         }
     }
 
-    private suspend fun update(state: CamApsFxState) {
+    suspend fun update(data: HomeAssistantData) {
         val webhookId = webhookId ?: run {
             Log.d(TAG, "Sensor could not be updated due to to missing webhook")
             mainStateProvider.setHomeAssistantState(
@@ -88,11 +82,11 @@ class HomeAssistantController {
         }
 
         // TODO: Handle other states
-        (state as? CamApsFxState.BloodSugar) ?: return
+        (data as? HomeAssistantData.BloodSugar) ?: return
 
         val requestBody = HomeAssistantUpdateSensorRequestBody(
             data = HomeAssistantUpdateSensorRequestBody.Data(
-                state = state.mgDl,
+                state = data.mgDl,
             ),
         )
         try {
@@ -101,6 +95,7 @@ class HomeAssistantController {
                 webhookId = webhookId,
             )
             Log.d(TAG, "Sensor updated")
+            mainStateProvider.setHomeAssistantState(HomeAssistantState.UpdatedSensor(data))
         } catch (exception: Exception) {
             Log.e(TAG, "Sensor could not be updated: $exception")
             mainStateProvider.setHomeAssistantState(

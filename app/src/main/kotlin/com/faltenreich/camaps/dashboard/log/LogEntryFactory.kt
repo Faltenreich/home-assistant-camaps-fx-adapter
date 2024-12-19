@@ -67,6 +67,11 @@ object LogEntryFactory {
                 source = source,
                 message = "connected sensor",
             )
+            is HomeAssistantState.UpdatedSensor -> LogEntry(
+                dateTime = dateTime,
+                source = source,
+                message = "sent data: $data"
+            )
             is HomeAssistantState.Error -> LogEntry(
                 dateTime = dateTime,
                 source = source,

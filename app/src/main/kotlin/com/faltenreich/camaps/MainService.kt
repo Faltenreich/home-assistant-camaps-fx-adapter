@@ -5,11 +5,15 @@ import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Log
 import com.faltenreich.camaps.camaps.CamApsFxController
+import com.faltenreich.camaps.camaps.CamApsFxState
 import com.faltenreich.camaps.homeassistant.HomeAssistantController
+import com.faltenreich.camaps.homeassistant.HomeAssistantData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 /**
@@ -42,6 +46,21 @@ class MainService : NotificationListenerService() {
                     }
                 }
             }
+        }
+        scope.launch {
+            mainStateProvider.state
+                .map { it.camApsFx }
+                .distinctUntilChanged()
+                .collectLatest { state ->
+                    when (state) {
+                        is CamApsFxState.Blank -> Unit
+                        is CamApsFxState.BloodSugar -> {
+                            val data = HomeAssistantData.BloodSugar(mgDl = state.mgDl)
+                            homeAssistantController.update(data)
+                        }
+                        is CamApsFxState.Error -> Unit // TODO
+                    }
+                }
         }
     }
 

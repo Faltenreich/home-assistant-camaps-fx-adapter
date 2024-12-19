@@ -8,5 +8,7 @@ sealed interface HomeAssistantState {
 
     data object ConnectedSensor : HomeAssistantState
 
+    data class UpdatedSensor(val data: HomeAssistantData) : HomeAssistantState
+
     data class Error(val message: String) : HomeAssistantState
 }
