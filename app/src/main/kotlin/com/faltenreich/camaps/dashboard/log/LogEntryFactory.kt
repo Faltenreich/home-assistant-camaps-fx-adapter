@@ -1,6 +1,5 @@
 package com.faltenreich.camaps.dashboard.log
 
-import androidx.compose.ui.graphics.Color
 import com.faltenreich.camaps.MainServiceState
 import com.faltenreich.camaps.camaps.CamApsFxState
 import com.faltenreich.camaps.homeassistant.HomeAssistantState
@@ -16,10 +15,7 @@ object LogEntryFactory {
 
     fun create(serviceState: MainServiceState): LogEntry = with(serviceState) {
         val dateTime = createDateTime()
-        val source = LogEntry.Source(
-            name = "Service",
-            color = Color.Gray,
-        )
+        val source = "Service"
         when (this) {
             is MainServiceState.Disconnected -> LogEntry(
                 dateTime = dateTime,
@@ -36,10 +32,7 @@ object LogEntryFactory {
 
     fun create(camApsFxState: CamApsFxState): LogEntry? = with(camApsFxState) {
         val dateTime = createDateTime()
-        val source = LogEntry.Source(
-            name = "CamAPS FX",
-            color = Color.Green,
-        )
+        val source = "CamAPS FX"
         when (this) {
             is CamApsFxState.Blank -> null
             is CamApsFxState.BloodSugar -> LogEntry(
@@ -57,10 +50,7 @@ object LogEntryFactory {
 
     fun create(homeAssistantState: HomeAssistantState): LogEntry = with(homeAssistantState) {
         val dateTime = createDateTime()
-        val source = LogEntry.Source(
-            name = "Home Assistant",
-            color = Color.Blue,
-        )
+        val source = "Home Assistant"
         when (this) {
             is HomeAssistantState.Disconnected -> LogEntry(
                 dateTime = dateTime,
