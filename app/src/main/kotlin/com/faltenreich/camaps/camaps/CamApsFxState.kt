@@ -20,7 +20,5 @@ sealed interface CamApsFxState {
         }
     }
 
-    data class Unknown(val message: String) : CamApsFxState
-
     data class Error(val message: String) : CamApsFxState
 }

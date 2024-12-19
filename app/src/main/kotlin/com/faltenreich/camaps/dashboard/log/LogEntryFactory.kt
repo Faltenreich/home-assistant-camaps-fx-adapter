@@ -45,17 +45,12 @@ object LogEntryFactory {
             is CamApsFxState.BloodSugar -> LogEntry(
                 dateTime = dateTime,
                 source = source,
-                message = "sent blood sugar: $mgDl mg/dL",
-            )
-            is CamApsFxState.Unknown -> LogEntry(
-                dateTime = dateTime,
-                source = source,
-                message = "sent unknown data: $message",
+                message = "sent data: $mgDl mg/dL",
             )
             is CamApsFxState.Error -> LogEntry(
                 dateTime = dateTime,
                 source = source,
-                message = "received error: $message"
+                message = "sent something: $message",
             )
         }
     }

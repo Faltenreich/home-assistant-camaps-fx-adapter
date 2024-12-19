@@ -16,10 +16,10 @@ class CamApsFxNotificationMapper {
             ?: return null
         @Suppress("DEPRECATION")
         val contentView = camApsFxNotification.contentView ?: run {
-            return CamApsFxState.Error("Missing contentView in notification")
+            return CamApsFxState.Error("Missing contentView")
         }
         val actions = contentView.actions.takeIf(List<*>::isNotEmpty) ?: run {
-            return CamApsFxState.Error("Missing actions in contentView")
+            return CamApsFxState.Error("Missing actions")
         }
 
         val mgDl = actions
@@ -36,10 +36,11 @@ class CamApsFxNotificationMapper {
                 .firstOrNull { it.imageResourceId == trendImageResourceId }
             CamApsFxState.BloodSugar(mgDl, trend)
         } else {
-            CamApsFxState.Unknown(
-                message = actions
-                    .map { action -> "${action.methodName}: ${action.value}" }
-                    .joinToString(),
+            val actionsJoined = actions
+                .map { action -> "${action.methodName}: ${action.value}" }
+                .joinToString()
+            CamApsFxState.Error(
+                message = "Unknown actions: $actionsJoined",
             )
         }
     }
