@@ -15,8 +15,12 @@ class CamApsFxNotificationMapper {
             ?.notification
             ?: return null
         @Suppress("DEPRECATION")
-        val contentView = camApsFxNotification.contentView ?: return null
-        val actions = contentView.actions.takeIf(List<*>::isNotEmpty) ?: return null
+        val contentView = camApsFxNotification.contentView ?: run {
+            return CamApsFxState.Error("Missing contentView in notification")
+        }
+        val actions = contentView.actions.takeIf(List<*>::isNotEmpty) ?: run {
+            return CamApsFxState.Error("Missing actions in contentView")
+        }
 
         val mgDl = actions
             .filter { it.methodName == "setText" }

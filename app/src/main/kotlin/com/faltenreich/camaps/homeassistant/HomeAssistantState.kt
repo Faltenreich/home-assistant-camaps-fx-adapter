@@ -7,4 +7,6 @@ sealed interface HomeAssistantState {
     data object ConnectedDevice : HomeAssistantState
 
     data object ConnectedSensor : HomeAssistantState
+
+    data class Error(val message: String) : HomeAssistantState
 }

@@ -47,12 +47,18 @@ class HomeAssistantController {
             Log.d(TAG, "Device registered: $response")
         } catch (exception: Exception) {
             Log.e(TAG, "Device could not be registered: $exception")
+            mainStateProvider.setHomeAssistantState(
+                HomeAssistantState.Error("Failed to register device due to $exception")
+            )
         }
     }
 
     private suspend fun registerSensor() {
         val webhookId = webhookId ?: run {
             Log.d(TAG, "Sensor could not be registered due to to missing webhook")
+            mainStateProvider.setHomeAssistantState(
+                HomeAssistantState.Error("Failed to register sensor due to missing webhook")
+            )
             return
         }
         val requestBody = HomeAssistantRegisterSensorRequestBody(
@@ -66,12 +72,18 @@ class HomeAssistantController {
             Log.d(TAG, "Sensor registered")
         } catch (exception: Exception) {
             Log.e(TAG, "Sensor could not be registered: $exception")
+            mainStateProvider.setHomeAssistantState(
+                HomeAssistantState.Error("Failed to register sensor due to $exception")
+            )
         }
     }
 
     private suspend fun update(state: CamApsFxState) {
         val webhookId = webhookId ?: run {
             Log.d(TAG, "Sensor could not be updated due to to missing webhook")
+            mainStateProvider.setHomeAssistantState(
+                HomeAssistantState.Error("Failed to update sensor due to missing webhook")
+            )
             return
         }
 
@@ -91,6 +103,9 @@ class HomeAssistantController {
             Log.d(TAG, "Sensor updated")
         } catch (exception: Exception) {
             Log.e(TAG, "Sensor could not be updated: $exception")
+            mainStateProvider.setHomeAssistantState(
+                HomeAssistantState.Error("Failed to update sensor due to $exception")
+            )
         }
     }
 

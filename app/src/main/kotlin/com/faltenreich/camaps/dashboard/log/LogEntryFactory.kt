@@ -52,6 +52,11 @@ object LogEntryFactory {
                 source = source,
                 message = "sent unknown data: $message",
             )
+            is CamApsFxState.Error -> LogEntry(
+                dateTime = dateTime,
+                source = source,
+                message = "received error: $message"
+            )
         }
     }
 
@@ -76,6 +81,11 @@ object LogEntryFactory {
                 dateTime = dateTime,
                 source = source,
                 message = "connected sensor",
+            )
+            is HomeAssistantState.Error -> LogEntry(
+                dateTime = dateTime,
+                source = source,
+                message = "received error: $message"
             )
         }
     }
