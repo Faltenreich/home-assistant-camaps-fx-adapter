@@ -1,6 +1,8 @@
 package com.faltenreich.camaps
 
 import android.content.ComponentName
+import android.content.Intent
+import android.os.IBinder
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Log
@@ -32,10 +34,11 @@ class MainService : NotificationListenerService() {
 
     override fun onCreate() {
         super.onCreate()
+        Log.d(TAG, "Service created")
         scope.launch {
+            // FIXME: Breaks after first event
             mainStateProvider.event.collectLatest { event ->
                 when (event) {
-                    // FIXME: Breaks state of service which can then not be started anymore
                     is MainEvent.ToggleService -> when (mainStateProvider.state.value.service) {
                         is MainServiceState.Disconnected -> {
                             val service = this@MainService
@@ -64,6 +67,16 @@ class MainService : NotificationListenerService() {
         }
     }
 
+    override fun onBind(intent: Intent?): IBinder? {
+        Log.d(TAG, "Service bound")
+        return super.onBind(intent)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.d(TAG, "Service destroyed")
+    }
+
     override fun onListenerConnected() {
         super.onListenerConnected()
         Log.d(TAG, "Service connected")
@@ -81,6 +94,7 @@ class MainService : NotificationListenerService() {
     }
 
     override fun onNotificationPosted(statusBarNotification: StatusBarNotification?) {
+        Log.d(TAG, "Notification posted")
         camApsFxController.handleNotification(statusBarNotification)
     }
 

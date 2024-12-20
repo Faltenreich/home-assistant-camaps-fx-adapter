@@ -5,6 +5,7 @@ package com.faltenreich.camaps.dashboard
 import android.app.Activity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -66,18 +67,26 @@ fun Dashboard(
                             ),
                     )
                     HorizontalDivider()
-                    TextButton(
-                        onClick = { viewModel.toggleService() },
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Text(
-                            stringResource(
-                                when (state.service) {
-                                    is MainServiceState.Disconnected -> R.string.service_start
-                                    is MainServiceState.Connected -> R.string.service_stop
-                                }
+                    Row {
+                        TextButton(
+                            onClick = { viewModel.openNotificationSettings(context as Activity) },
+                            modifier = Modifier.weight(1f),
+                        ) {
+                            Text(stringResource(R.string.settings_open))
+                        }
+                        TextButton(
+                            onClick = { viewModel.toggleService() },
+                            modifier = Modifier.weight(1f),
+                        ) {
+                            Text(
+                                stringResource(
+                                    when (state.service) {
+                                        is MainServiceState.Disconnected -> R.string.service_start
+                                        is MainServiceState.Connected -> R.string.service_stop
+                                    }
+                                )
                             )
-                        )
+                        }
                     }
                 }
             }
