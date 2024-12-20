@@ -34,6 +34,7 @@ class MainService : NotificationListenerService() {
         super.onCreate()
         Log.d(TAG, "Service created")
         scope.launch {
+            // FIXME Stops working after onDestroy
             mainStateProvider.event.collectLatest { event ->
                 when (event) {
                     is MainEvent.ToggleService -> when (mainStateProvider.state.value.service) {
@@ -43,6 +44,7 @@ class MainService : NotificationListenerService() {
                             requestRebind(componentName)
                         }
                         // FIXME: Disallowed call from unknown notification listener
+                        // TODO: Replace un-/binding of service with manual pausing of work
                         is MainServiceState.Connected -> requestUnbind()
                     }
                 }
