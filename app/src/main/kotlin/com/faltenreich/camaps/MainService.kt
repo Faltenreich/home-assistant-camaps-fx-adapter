@@ -12,7 +12,6 @@ import com.faltenreich.camaps.homeassistant.HomeAssistantController
 import com.faltenreich.camaps.homeassistant.HomeAssistantData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -29,14 +28,12 @@ class MainService : NotificationListenerService() {
     private val camApsFxController = CamApsFxController()
     private val homeAssistantController = HomeAssistantController()
 
-    private val job = SupervisorJob()
-    private val scope = CoroutineScope(Dispatchers.IO + job)
+    private val scope = CoroutineScope(Dispatchers.IO)
 
     override fun onCreate() {
         super.onCreate()
         Log.d(TAG, "Service created")
         scope.launch {
-            // FIXME: Breaks after first event
             mainStateProvider.event.collectLatest { event ->
                 when (event) {
                     is MainEvent.ToggleService -> when (mainStateProvider.state.value.service) {
@@ -45,6 +42,7 @@ class MainService : NotificationListenerService() {
                             val componentName = ComponentName(service, service::class.java)
                             requestRebind(componentName)
                         }
+                        // FIXME: Disallowed call from unknown notification listener
                         is MainServiceState.Connected -> requestUnbind()
                     }
                 }
@@ -90,7 +88,6 @@ class MainService : NotificationListenerService() {
         super.onListenerDisconnected()
         Log.d(TAG, "Service disconnected")
         mainStateProvider.setServiceState(MainServiceState.Disconnected)
-        job.cancel()
     }
 
     override fun onNotificationPosted(statusBarNotification: StatusBarNotification?) {
