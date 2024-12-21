@@ -8,6 +8,7 @@ import android.provider.Settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.faltenreich.camaps.MainService
+import com.faltenreich.camaps.MainServiceState
 import com.faltenreich.camaps.MainStateProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -53,7 +54,15 @@ class DashboardViewModel : ViewModel() {
         activity.startActivityForResult(intent, 1001)
     }
 
+    // TODO: Find a reliable way to stop and restart service
     fun toggleService() {
-        mainStateProvider.toggleService()
+        when (mainState.value.service) {
+            is MainServiceState.Disconnected -> {
+                // TODO: requestRebind(componentName)
+            }
+            is MainServiceState.Connected -> {
+                // TODO: requestUnbind()
+            }
+        }
     }
 }

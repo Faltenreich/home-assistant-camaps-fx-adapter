@@ -1,6 +1,5 @@
 package com.faltenreich.camaps
 
-import android.content.ComponentName
 import android.content.Intent
 import android.os.IBinder
 import android.service.notification.NotificationListenerService
@@ -33,21 +32,6 @@ class MainService : NotificationListenerService() {
     override fun onCreate() {
         super.onCreate()
         Log.d(TAG, "Service created")
-        scope.launch {
-            // FIXME: Un-/rebind service from Activity because scope will be killed with service
-            mainStateProvider.event.collectLatest { event ->
-                when (event) {
-                    is MainEvent.ToggleService -> when (mainStateProvider.state.value.service) {
-                        is MainServiceState.Disconnected -> {
-                            val service = this@MainService
-                            val componentName = ComponentName(service, service::class.java)
-                            requestRebind(componentName)
-                        }
-                        is MainServiceState.Connected -> requestUnbind()
-                    }
-                }
-            }
-        }
         scope.launch {
             mainStateProvider.state
                 .map { it.camApsFx }
