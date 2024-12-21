@@ -17,7 +17,7 @@ fun LogListItem(
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(Dimensions.Padding.P_4),
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = Alignment.Top,
     ) {
         Text(dateTime)
         Text(source, fontWeight = FontWeight.Bold)
