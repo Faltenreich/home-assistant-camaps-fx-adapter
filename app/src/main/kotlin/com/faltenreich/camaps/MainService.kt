@@ -39,6 +39,8 @@ class MainService : NotificationListenerService() {
                 .collectLatest { state ->
                     when (state) {
                         is CamApsFxState.Blank -> Unit
+                        is CamApsFxState.Off -> Unit // TODO
+                        is CamApsFxState.Starting -> Unit // TODO
                         is CamApsFxState.BloodSugar -> {
                             val data = HomeAssistantData.BloodSugar(mgDl = state.mgDl)
                             homeAssistantController.update(data)

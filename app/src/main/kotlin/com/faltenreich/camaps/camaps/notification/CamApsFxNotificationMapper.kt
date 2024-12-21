@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.faltenreich.camaps.camaps.notification
 
 import android.service.notification.StatusBarNotification
@@ -14,34 +16,38 @@ class CamApsFxNotificationMapper {
             .takeIf { it.packageName == CAM_APS_FX_PACKAGE_NAME }
             ?.notification
             ?: return null
-        @Suppress("DEPRECATION")
         val contentView = camApsFxNotification.contentView ?: run {
             return CamApsFxState.Error("Missing contentView")
         }
         val actions = contentView.actions.takeIf(List<*>::isNotEmpty) ?: run {
             return CamApsFxState.Error("Missing actions")
         }
+        val setTextActions = actions.filter { it.methodName == "setText" }
 
-        val mgDl = actions
-            .filter { it.methodName == "setText" }
-            .mapNotNull { (it.value as? String)?.toFloatOrNull() }
-            .firstOrNull()
+        val mgDl = setTextActions.mapNotNull { (it.value as? String)?.toFloatOrNull() }.firstOrNull()
+        val isOff = setTextActions.any { (it.value as? String) == "Aus" }
+        val isStarting = setTextActions.any { (it.value as? String) == "Starten" }
 
-        return if (mgDl != null) {
-            val trendImageResourceId = actions
-                .filter { it.methodName == "setImageResource" }
-                .mapNotNull { it.value as? Int }
-                .lastOrNull()
-            val trend = CamApsFxState.BloodSugar.Trend.entries
-                .firstOrNull { it.imageResourceId == trendImageResourceId }
-            CamApsFxState.BloodSugar(mgDl, trend)
-        } else {
-            val actionsJoined = actions
-                .map { action -> "${action.methodName}: ${action.value}" }
-                .joinToString()
-            CamApsFxState.Error(
-                message = "Unknown actions: $actionsJoined",
-            )
+        return when {
+            mgDl != null -> {
+                val trendImageResourceId = actions
+                    .filter { it.methodName == "setImageResource" }
+                    .mapNotNull { it.value as? Int }
+                    .lastOrNull()
+                val trend = CamApsFxState.BloodSugar.Trend.entries
+                    .firstOrNull { it.imageResourceId == trendImageResourceId }
+                CamApsFxState.BloodSugar(mgDl, trend)
+            }
+            isStarting -> CamApsFxState.Starting
+            isOff -> CamApsFxState.Off
+            else -> {
+                val actionsJoined = actions
+                    .map { action -> "${action.methodName}: ${action.value}" }
+                    .joinToString()
+                CamApsFxState.Error(
+                    message = "Unknown actions: $actionsJoined",
+                )
+            }
         }
     }
 
