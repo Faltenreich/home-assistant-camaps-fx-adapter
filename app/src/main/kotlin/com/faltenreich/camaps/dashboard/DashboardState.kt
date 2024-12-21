@@ -8,7 +8,7 @@ sealed interface DashboardState {
     data object MissingPermissions : DashboardState
 
     data class Content(
-        val service: MainServiceState,
+        val serviceState: MainServiceState,
         val log: List<LogEntry>,
     ) : DashboardState
 }

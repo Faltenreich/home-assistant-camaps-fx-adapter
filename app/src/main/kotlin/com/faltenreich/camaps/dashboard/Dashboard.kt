@@ -80,7 +80,7 @@ fun Dashboard(
                         ) {
                             Text(
                                 stringResource(
-                                    when (state.service) {
+                                    when (state.serviceState) {
                                         is MainServiceState.Disconnected -> R.string.service_start
                                         is MainServiceState.Connected -> R.string.service_stop
                                     }

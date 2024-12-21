@@ -28,7 +28,7 @@ class DashboardViewModel : ViewModel() {
         mainState,
     ) { hasPermissions, mainState ->
         if (hasPermissions) DashboardState.Content(
-            service = mainState.service,
+            serviceState = mainState.serviceState,
             log = mainState.log,
         )
         else DashboardState.MissingPermissions
@@ -56,7 +56,7 @@ class DashboardViewModel : ViewModel() {
 
     // TODO: Find a reliable way to stop and restart service
     fun toggleService() {
-        when (mainState.value.service) {
+        when (mainState.value.serviceState) {
             is MainServiceState.Disconnected -> {
                 // TODO: requestRebind(componentName)
             }

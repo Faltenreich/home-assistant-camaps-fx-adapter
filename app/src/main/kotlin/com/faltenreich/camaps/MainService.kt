@@ -34,7 +34,7 @@ class MainService : NotificationListenerService() {
         Log.d(TAG, "Service created")
         scope.launch {
             mainStateProvider.state
-                .map { it.camApsFx }
+                .map { it.camApsFxState }
                 .distinctUntilChanged()
                 .collectLatest { state ->
                     when (state) {
