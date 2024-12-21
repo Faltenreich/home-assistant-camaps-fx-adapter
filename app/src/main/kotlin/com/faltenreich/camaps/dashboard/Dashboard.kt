@@ -12,10 +12,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,7 +45,15 @@ fun Dashboard(
 
     Scaffold(
         modifier = modifier,
-        topBar = { TopAppBar(title = { Text(stringResource(R.string.app_name)) }) },
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(R.string.app_name)) },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                ),
+            )
+        },
     ) { paddingValues ->
         when (state) {
             is DashboardState.MissingPermissions -> Box(
@@ -60,11 +70,7 @@ fun Dashboard(
                         entries = state.log,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .weight(1f)
-                            .padding(
-                                horizontal = Dimensions.Padding.P_16,
-                                vertical = Dimensions.Padding.P_8,
-                            ),
+                            .weight(1f),
                     )
                     HorizontalDivider()
                     Row {
