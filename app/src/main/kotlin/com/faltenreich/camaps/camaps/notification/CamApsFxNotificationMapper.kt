@@ -16,13 +16,13 @@ class CamApsFxNotificationMapper {
             .takeIf { it.packageName == CAM_APS_FX_PACKAGE_NAME }
             ?.notification
             ?: return null
-        val contentView = camApsFxNotification.contentView ?: run {
+        val remoteViews = camApsFxNotification.contentView ?: run {
             return CamApsFxState.Error("Missing contentView")
         }
-        val actions = contentView.actions.takeIf(List<*>::isNotEmpty) ?: run {
+        val remoteViewActions = getRemoteViewActions(remoteViews).takeIf(List<*>::isNotEmpty) ?: run {
             return CamApsFxState.Error("Missing actions")
         }
-        val setTextActions = actions.filter { it.methodName == "setText" }
+        val setTextActions = remoteViewActions.filter { it.methodName == "setText" }
 
         val mgDl = setTextActions.mapNotNull { (it.value as? String)?.toFloatOrNull() }.firstOrNull()
         val isOff = setTextActions.any { (it.value as? String) == "Aus" }
@@ -30,7 +30,7 @@ class CamApsFxNotificationMapper {
 
         return when {
             mgDl != null -> {
-                val trendImageResourceId = actions
+                val trendImageResourceId = remoteViewActions
                     .filter { it.methodName == "setImageResource" }
                     .mapNotNull { it.value as? Int }
                     .lastOrNull()
@@ -41,7 +41,7 @@ class CamApsFxNotificationMapper {
             isStarting -> CamApsFxState.Starting
             isOff -> CamApsFxState.Off
             else -> {
-                val actionsJoined = actions
+                val actionsJoined = remoteViewActions
                     .map { action -> "${action.methodName}: ${action.value}" }
                     .joinToString()
                 CamApsFxState.Error(
@@ -51,33 +51,30 @@ class CamApsFxNotificationMapper {
         }
     }
 
-    private val RemoteViews.actions: List<RemoteViewAction>
-        get() {
-            val actionsProperty = RemoteViews::class.memberProperties
-                .firstOrNull { it.name == "mActions" }
-                ?: return emptyList()
-            actionsProperty.isAccessible = true
-            val actions = actionsProperty.get(this) as? ArrayList<*> ?: return emptyList()
+    private fun getRemoteViewActions(from: RemoteViews): List<RemoteViewAction> {
+        val actionsProperty = RemoteViews::class.memberProperties
+            .firstOrNull { it.name == "mActions" }
+            ?: return emptyList()
+        actionsProperty.isAccessible = true
+        val actions = actionsProperty.get(from) as? ArrayList<*> ?: return emptyList()
+        return actions.mapNotNull(::getRemoteViewAction)
+    }
 
-            return actions.mapNotNull { action ->
-                val memberProperties = action::class.memberProperties
+    private fun getRemoteViewAction(from: Any): RemoteViewAction? {
+        val memberProperties = from::class.memberProperties
 
-                val methodNameProperty = memberProperties
-                    .firstOrNull { it.name == "mMethodName" }
-                    ?: return@mapNotNull null
-                methodNameProperty.isAccessible = true
-                val methodName = methodNameProperty.getter.call(action) as? String
-                    ?: return@mapNotNull null
+        val methodNameProperty = memberProperties
+            .firstOrNull { it.name == "mMethodName" }
+            ?: return null
+        methodNameProperty.isAccessible = true
+        val methodName = methodNameProperty.getter.call(from) as? String ?: return null
 
-                val valueProperty = memberProperties
-                    .firstOrNull { it.name == "mValue" }
-                    ?: return@mapNotNull null
-                valueProperty.isAccessible = true
-                val value = valueProperty.getter.call(action)
+        val valueProperty = memberProperties.firstOrNull { it.name == "mValue" } ?: return null
+        valueProperty.isAccessible = true
+        val value = valueProperty.getter.call(from)
 
-                RemoteViewAction(methodName, value)
-            }
-        }
+        return RemoteViewAction(methodName, value)
+    }
 
     companion object {
 
