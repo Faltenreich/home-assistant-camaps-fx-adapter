@@ -4,7 +4,7 @@
 
 This app reads blood sugar values from CamAPS FX by observing its notifications and sends them to the HomeAssistant API.
 This project serves as showcase for a blog post on
-[writingbits.de](https://writingbits.de/2025/01/06/reading-android-notifications-with-custom-remote-views.html).
+[writingbits.de](https://writingbits.de/2025/01/06/reading-android-notifications-with-custom-views-using-reflection.html).
 
 ### Third-party licenses
 
