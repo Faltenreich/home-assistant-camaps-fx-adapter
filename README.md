@@ -7,6 +7,12 @@ This app reads blood sugar values from CamAPS FX by observing its notifications 
 This project is purely for scientific purposes and illustrates practices that are explained in a blog post on 
 [writingbits.de](https://writingbits.de/2025/01/01/reading-android-notifications-with-custom-remote-views.html).
 
+### Setup
+
+1. Create [long-lived access token](https://developers.home-assistant.io/docs/auth_api/#long-lived-access-token) for Home Assistant
+2. Store token as `homeAssistantToken` in Gradle properties, e.g. in `local.properties`
+3. Compile and run project, local Home Assistant instance will be used (http://homeassistant.local:8123)
+
 ### Third-party licenses
 
 This software uses following technologies with great appreciation:
