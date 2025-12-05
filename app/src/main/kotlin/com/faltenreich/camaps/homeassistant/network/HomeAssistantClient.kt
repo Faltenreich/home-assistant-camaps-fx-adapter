@@ -3,6 +3,7 @@ package com.faltenreich.camaps.homeassistant.network
 import com.faltenreich.camaps.homeassistant.device.HomeAssistantRegisterDeviceRequestBody
 import com.faltenreich.camaps.homeassistant.device.HomeAssistantRegisterDeviceResponse
 import com.faltenreich.camaps.homeassistant.sensor.HomeAssistantRegisterSensorRequestBody
+import com.faltenreich.camaps.homeassistant.sensor.HomeAssistantRegisterSensorResponse
 import com.faltenreich.camaps.homeassistant.sensor.HomeAssistantUpdateSensorRequestBody
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
@@ -37,7 +38,7 @@ class HomeAssistantClient(
     override suspend fun registerSensor(
         requestBody: HomeAssistantRegisterSensorRequestBody,
         webhookId: String,
-    ) {
+    ): HomeAssistantRegisterSensorResponse {
         return networkClient.post(
             url = Url("$host/api/webhook/$webhookId"),
             requestBody = requestBody,
@@ -71,6 +72,7 @@ class HomeAssistantClient(
                                     encodeDefaults = true
                                     prettyPrint = true
                                     isLenient = true
+                                    ignoreUnknownKeys = true
                                 }
                             )
                         }

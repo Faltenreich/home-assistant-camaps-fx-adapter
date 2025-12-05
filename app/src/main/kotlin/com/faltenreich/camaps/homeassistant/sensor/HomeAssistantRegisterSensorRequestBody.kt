@@ -14,11 +14,11 @@ data class HomeAssistantRegisterSensorRequestBody(
     @Serializable
     data class Data(
         @SerialName("device_class")
-        val deviceClass: String = "glucose",
+        val deviceClass: String = "blood_glucose_concentration",
         @SerialName("icon")
         val icon: String = "mdi:water-alert",
         @SerialName("name")
-        val name: String = "Blood Sugar",
+        val name: String,
         @SerialName("state")
         val state: Float,
         @SerialName("type")

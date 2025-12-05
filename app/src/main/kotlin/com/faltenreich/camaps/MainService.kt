@@ -15,7 +15,7 @@ import com.faltenreich.camaps.homeassistant.HomeAssistantController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -37,7 +37,7 @@ class MainService : NotificationListenerService() {
             mainStateProvider.state
                 .map { it.camApsFxState }
                 .distinctUntilChanged()
-                .collectLatest { state ->
+                .collect { state ->
                     when (state) {
                         is CamApsFxState.Blank -> Unit
                         is CamApsFxState.Off -> Unit // TODO
@@ -51,7 +51,7 @@ class MainService : NotificationListenerService() {
         }
 
         scope.launch {
-            ReinitializationManager.onSuccess.collectLatest {
+            ReinitializationManager.onSuccess.collect {
                 Log.d(TAG, "Re-initializing Home Assistant connection")
                 mainStateProvider.addLog("Re-initializing Home Assistant connection")
                 homeAssistantController.start()
@@ -95,15 +95,12 @@ class MainService : NotificationListenerService() {
 
         scope.launch {
             mainStateProvider.setServiceState(MainServiceState.Connected)
-            var success = false
-            while (!success) {
-                try {
-                    homeAssistantController.start()
-                    success = true
-                } catch (e: Exception) {
-                    mainStateProvider.addLog("Failed to connect to Home Assistant. Retrying in 10 minutes.")
-                    delay(600_000) // 10 minutes
-                }
+            try {
+                homeAssistantController.start()
+            } catch (e: Exception) {
+                mainStateProvider.addLog("Failed to connect to Home Assistant. Retrying in 10 minutes.")
+                delay(600_000) // 10 minutes
+                homeAssistantController.start()
             }
         }
     }

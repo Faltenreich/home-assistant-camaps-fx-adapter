@@ -8,13 +8,13 @@ data class HomeAssistantUpdateSensorRequestBody(
     @SerialName("type")
     val type: String = "update_sensor_states",
     @SerialName("data")
-    val data: Data,
+    val data: List<Data>,
 ) {
 
     @Serializable
     data class Data(
         @SerialName("icon")
-        val icon: String = "mdi:water_drop",
+        val icon: String = "mdi:water-alert",
         @SerialName("state")
         val state: Float,
         @SerialName("type")

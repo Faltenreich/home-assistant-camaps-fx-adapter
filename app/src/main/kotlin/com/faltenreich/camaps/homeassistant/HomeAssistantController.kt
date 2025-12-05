@@ -12,6 +12,7 @@ import com.faltenreich.camaps.homeassistant.network.HomeAssistantClient
 import com.faltenreich.camaps.homeassistant.sensor.HomeAssistantRegisterSensorRequestBody
 import com.faltenreich.camaps.homeassistant.sensor.HomeAssistantUpdateSensorRequestBody
 import com.faltenreich.camaps.settings.SettingsRepository
+import io.ktor.client.plugins.ResponseException
 
 class HomeAssistantController(context: Context) {
 
@@ -33,7 +34,7 @@ class HomeAssistantController(context: Context) {
         val uri = settingsRepository.getHomeAssistantUri()
         val token = settingsRepository.getHomeAssistantToken()
         homeAssistantClient = HomeAssistantClient.getInstance(uri, token)
-        
+
         registerDevice()
     }
 
@@ -44,7 +45,7 @@ class HomeAssistantController(context: Context) {
             appId = BuildConfig.APPLICATION_ID,
             appName = "CamAPS FX Adapter",
             appVersion = BuildConfig.VERSION_NAME,
-            deviceName = "${Build.MANUFACTURER} ${Build.MODEL}",
+            deviceName = "CamAPS FX Adapter",
             manufacturer = Build.MANUFACTURER,
             model = Build.MODEL,
             osName = "Android",
@@ -59,34 +60,43 @@ class HomeAssistantController(context: Context) {
     }
 
     private suspend fun registerSensors() {
+        mainStateProvider.addLog("Registering sensors")
         listOf("mmol/L", "mg/dL").forEach { unit ->
             registerSensor(unit)
         }
     }
 
     private suspend fun registerSensor(unit: String) {
-        mainStateProvider.addLog("Registering sensor for $unit")
         val webhookId = webhookId ?: run {
             mainStateProvider.setHomeAssistantState(
                 HomeAssistantState.Error("Failed to register sensor for $unit due to missing webhook")
             )
             return
         }
+
         val requestBody = HomeAssistantRegisterSensorRequestBody(
             data = HomeAssistantRegisterSensorRequestBody.Data(
                 uniqueId = getSensorUniqueId(unit),
+                name = "Blood Sugar ($unit)",
                 state = 0f, // Initial state, will be updated shortly
                 unitOfMeasurement = unit,
-            ),
+            )
         )
+
         try {
-            homeAssistantClient.registerSensor(requestBody, webhookId)
-            mainStateProvider.setHomeAssistantState(HomeAssistantState.ConnectedSensor("Registered sensor with ID: ${getSensorUniqueId(unit)}"))
-            Log.d(TAG, "Sensor for $unit registered")
+            val response = homeAssistantClient.registerSensor(requestBody, webhookId)
+            mainStateProvider.setHomeAssistantState(HomeAssistantState.ConnectedSensor("Registered sensor for $unit. Response: $response"))
+            Log.d(TAG, "Sensor for $unit registered. Response: $response")
+        } catch (e: ResponseException) {
+            val statusCode = e.response.status.value
+            Log.e(TAG, "Sensor for $unit could not be registered. Status: $statusCode", e)
+            mainStateProvider.setHomeAssistantState(
+                HomeAssistantState.Error("Failed to register sensor for $unit. Status: $statusCode")
+            )
         } catch (exception: Exception) {
             Log.e(TAG, "Sensor for $unit could not be registered: $exception")
             mainStateProvider.setHomeAssistantState(
-                HomeAssistantState.Error("Failed to register sensor for $unit due to $exception")
+                HomeAssistantState.Error("Failed to register sensor for $unit: ${exception.message}")
             )
         }
     }
@@ -95,12 +105,15 @@ class HomeAssistantController(context: Context) {
         val webhookId = webhookId ?: return
 
         val requestBody = HomeAssistantUpdateSensorRequestBody(
-            data = HomeAssistantUpdateSensorRequestBody.Data(
-                uniqueId = getSensorUniqueId(data.unitOfMeasurement),
-                state = data.value,
-                attributes = mapOf("trend" to data.trend?.name)
-            ),
+            data = listOf(
+                HomeAssistantUpdateSensorRequestBody.Data(
+                    uniqueId = getSensorUniqueId(data.unitOfMeasurement),
+                    state = data.value,
+                    attributes = mapOf("trend" to data.trend?.name)
+                )
+            )
         )
+
         try {
             homeAssistantClient.updateSensor(
                 requestBody = requestBody,

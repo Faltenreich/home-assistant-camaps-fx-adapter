@@ -3,6 +3,7 @@ package com.faltenreich.camaps.homeassistant.network
 import com.faltenreich.camaps.homeassistant.device.HomeAssistantRegisterDeviceRequestBody
 import com.faltenreich.camaps.homeassistant.device.HomeAssistantRegisterDeviceResponse
 import com.faltenreich.camaps.homeassistant.sensor.HomeAssistantRegisterSensorRequestBody
+import com.faltenreich.camaps.homeassistant.sensor.HomeAssistantRegisterSensorResponse
 import com.faltenreich.camaps.homeassistant.sensor.HomeAssistantUpdateSensorRequestBody
 
 interface HomeAssistantApi {
@@ -16,7 +17,7 @@ interface HomeAssistantApi {
     suspend fun registerSensor(
         requestBody: HomeAssistantRegisterSensorRequestBody,
         webhookId: String,
-    )
+    ): HomeAssistantRegisterSensorResponse
 
     suspend fun updateSensor(
         requestBody: HomeAssistantUpdateSensorRequestBody,
