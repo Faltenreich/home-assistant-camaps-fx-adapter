@@ -22,6 +22,7 @@ class HomeAssistantController(context: Context) {
     private lateinit var homeAssistantClient: HomeAssistantApi
     private val deviceId: String = Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
     private var webhookId: String? = null
+    private val registeredSensorUniqueIds = mutableSetOf<String>()
 
     private fun getSensorUniqueId(unit: String): String {
         val suffix = unit.replace("/", "_")
@@ -58,17 +59,9 @@ class HomeAssistantController(context: Context) {
         webhookId = response.webhookId
         mainStateProvider.setHomeAssistantState(HomeAssistantState.ConnectedDevice("Connected with ID: $deviceId"))
         Log.d(TAG, "Device registered: $response")
-        registerSensors()
     }
 
-    private suspend fun registerSensors() {
-        mainStateProvider.addLog("Registering sensors")
-        listOf("mmol/L", "mg/dL").forEach { unit ->
-            registerSensor(unit)
-        }
-    }
-
-    private suspend fun registerSensor(unit: String) {
+    private suspend fun registerSensor(unit: String, state: Float) {
         val webhookId = webhookId ?: run {
             mainStateProvider.setHomeAssistantState(
                 HomeAssistantState.Error("Failed to register sensor for $unit due to missing webhook")
@@ -76,17 +69,19 @@ class HomeAssistantController(context: Context) {
             return
         }
 
+        val uniqueId = getSensorUniqueId(unit)
         val requestBody = HomeAssistantRegisterSensorRequestBody(
             data = HomeAssistantRegisterSensorRequestBody.Data(
-                uniqueId = getSensorUniqueId(unit),
+                uniqueId = uniqueId,
                 name = "Blood Sugar ($unit)",
-                state = 0f, // Initial state, will be updated shortly
+                state = state,
                 unitOfMeasurement = unit,
             )
         )
 
         try {
             val response = homeAssistantClient.registerSensor(requestBody, webhookId)
+            registeredSensorUniqueIds.add(uniqueId)
             mainStateProvider.setHomeAssistantState(HomeAssistantState.ConnectedSensor("Registered sensor for $unit."))
             Log.d(TAG, "Sensor for $unit registered. Response: $response")
         } catch (e: ResponseException) {
@@ -105,29 +100,34 @@ class HomeAssistantController(context: Context) {
 
     suspend fun update(data: CamApsFxState.BloodSugar) {
         val webhookId = webhookId ?: return
+        val sensorUniqueId = getSensorUniqueId(data.unitOfMeasurement)
 
-        val requestBody = HomeAssistantUpdateSensorRequestBody(
-            data = listOf(
-                HomeAssistantUpdateSensorRequestBody.Data(
-                    uniqueId = getSensorUniqueId(data.unitOfMeasurement),
-                    state = data.value,
-                    attributes = mapOf("trend" to data.trend?.name)
+        if (sensorUniqueId in registeredSensorUniqueIds) {
+            val requestBody = HomeAssistantUpdateSensorRequestBody(
+                data = listOf(
+                    HomeAssistantUpdateSensorRequestBody.Data(
+                        uniqueId = sensorUniqueId,
+                        state = data.value,
+                        attributes = mapOf("trend" to data.trend?.name)
+                    )
                 )
             )
-        )
 
-        try {
-            homeAssistantClient.updateSensor(
-                requestBody = requestBody,
-                webhookId = webhookId,
-            )
-            Log.d(TAG, "Sensor updated")
-            mainStateProvider.setHomeAssistantState(HomeAssistantState.UpdatedSensor(HomeAssistantData.BloodSugar(data.value, data.unitOfMeasurement)))
-        } catch (exception: Exception) {
-            Log.e(TAG, "Sensor could not be updated: $exception")
-            mainStateProvider.setHomeAssistantState(
-                HomeAssistantState.Error("Failed to update sensor: $exception")
-            )
+            try {
+                homeAssistantClient.updateSensor(
+                    requestBody = requestBody,
+                    webhookId = webhookId,
+                )
+                Log.d(TAG, "Sensor updated")
+                mainStateProvider.setHomeAssistantState(HomeAssistantState.UpdatedSensor(HomeAssistantData.BloodSugar(data.value, data.unitOfMeasurement)))
+            } catch (exception: Exception) {
+                Log.e(TAG, "Sensor could not be updated: $exception")
+                mainStateProvider.setHomeAssistantState(
+                    HomeAssistantState.Error("Failed to update sensor: $exception")
+                )
+            }
+        } else {
+            registerSensor(data.unitOfMeasurement, data.value)
         }
     }
 
