@@ -36,6 +36,7 @@ class HomeAssistantController(context: Context) {
         val token = settingsRepository.getHomeAssistantToken()
         homeAssistantClient = HomeAssistantClient.getInstance(uri, token)
         webhookId = settingsRepository.getHomeAssistantWebhookId().takeIf { it.isNotBlank() }
+        registeredSensorUniqueIds.addAll(settingsRepository.getRegisteredSensorUniqueIds())
 
         if (webhookId == null) {
             registerDevice()
@@ -106,6 +107,8 @@ class HomeAssistantController(context: Context) {
             val response = homeAssistantClient.registerDevice(requestBody)
             webhookId = response.webhookId
             response.webhookId?.let { settingsRepository.saveHomeAssistantWebhookId(it) }
+            registeredSensorUniqueIds.clear()
+            settingsRepository.clearRegisteredSensorUniqueIds()
             mainStateProvider.setHomeAssistantState(HomeAssistantState.ConnectedDevice("Connected with ID: $deviceId"))
             Log.d(TAG, "Device registered: $response")
         } catch (exception: Exception) {
@@ -137,7 +140,8 @@ class HomeAssistantController(context: Context) {
         try {
             val response = homeAssistantClient.registerSensor(requestBody, webhookId)
             registeredSensorUniqueIds.add(uniqueId)
-            mainStateProvider.setHomeAssistantState(HomeAssistantState.ConnectedSensor("Registered sensor for $unit."))
+            settingsRepository.saveRegisteredSensorUniqueIds(registeredSensorUniqueIds)
+            mainStateProvider.setHomeAssistantState(HomeAssistantState.ConnectedSensor("Registered sensor: $state $unit."))
             Log.d(TAG, "Sensor for $unit registered. Response: $response")
         } catch (e: ResponseException) {
             val statusCode = e.response.status.value
