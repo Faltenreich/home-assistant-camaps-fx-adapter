@@ -24,8 +24,8 @@ class HomeAssistantController(context: Context) {
     private var webhookId: String? = null
 
     private fun getSensorUniqueId(unit: String): String {
-        val suffix = if (unit.startsWith("mmol")) "mmol" else "mg"
-        return "${deviceId}_blood_sugar_$suffix"
+        val suffix = unit.replace("/", "_")
+        return "${deviceId}_blood_sugar_$suffix".lowercase()
     }
 
     suspend fun start() {
