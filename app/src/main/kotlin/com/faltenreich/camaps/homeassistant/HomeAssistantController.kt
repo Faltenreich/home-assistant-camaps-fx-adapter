@@ -102,11 +102,18 @@ class HomeAssistantController(context: Context) {
             appData = emptyMap(),
             identifiers = listOf("device_$deviceId"),
         )
-        val response = homeAssistantClient.registerDevice(requestBody)
-        webhookId = response.webhookId
-        response.webhookId?.let { settingsRepository.saveHomeAssistantWebhookId(it) }
-        mainStateProvider.setHomeAssistantState(HomeAssistantState.ConnectedDevice("Connected with ID: $deviceId"))
-        Log.d(TAG, "Device registered: $response")
+        try {
+            val response = homeAssistantClient.registerDevice(requestBody)
+            webhookId = response.webhookId
+            response.webhookId?.let { settingsRepository.saveHomeAssistantWebhookId(it) }
+            mainStateProvider.setHomeAssistantState(HomeAssistantState.ConnectedDevice("Connected with ID: $deviceId"))
+            Log.d(TAG, "Device registered: $response")
+        } catch (exception: Exception) {
+            Log.e(TAG, "Device could not be registered: $exception")
+            mainStateProvider.setHomeAssistantState(
+                HomeAssistantState.Error("Failed to register device: ${exception.message}")
+            )
+        }
     }
 
     private suspend fun registerSensor(unit: String, state: Float) {
