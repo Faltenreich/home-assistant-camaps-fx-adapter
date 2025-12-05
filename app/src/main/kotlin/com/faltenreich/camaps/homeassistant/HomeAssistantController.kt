@@ -47,7 +47,7 @@ class HomeAssistantController(context: Context) {
 
     private suspend fun validateWebhook() {
         val webhookId = webhookId ?: return
-        mainStateProvider.addLog("Validating existing webhook.")
+        mainStateProvider.addLog("Validating existing webhook")
         Log.d(TAG, "Validating webhook ID: $webhookId")
 
         val requestBody = HomeAssistantUpdateSensorRequestBody(data = emptyList())
@@ -60,9 +60,9 @@ class HomeAssistantController(context: Context) {
             mainStateProvider.setHomeAssistantState(HomeAssistantState.ConnectedDevice("Connected with ID: $deviceId"))
             Log.d(TAG, "Webhook is valid.")
             if (registeredSensorUniqueIds.isEmpty()) {
-                mainStateProvider.addLog("Waiting for reading to register sensor.")
+                mainStateProvider.addLog("Waiting for reading to register sensor..")
             } else {
-                mainStateProvider.addLog("Sensor already registered.")
+                mainStateProvider.addLog("Sensor already registered")
             }
         } catch (e: ResponseException) {
             val statusCode = e.response.status.value
