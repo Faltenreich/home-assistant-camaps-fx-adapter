@@ -7,6 +7,7 @@ import android.service.notification.StatusBarNotification
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import com.faltenreich.camaps.camaps.CamApsFxState
 
@@ -30,14 +31,19 @@ class CamApsFxNotificationMapper {
             findTextViews(view, textViews)
             Log.d(TAG, "Found text in notification: ${textViews.joinToString()}")
 
+            val imageViews = mutableListOf<Int>()
+            findImageViews(view, imageViews)
+            Log.d(TAG, "Found image resource IDs in notification: ${imageViews.joinToString()}")
+
             val value = textViews.mapNotNull { it.replace(',', '.').toFloatOrNull() }.firstOrNull()
             val unit = textViews.firstOrNull { it.equals("mmol/L", ignoreCase = true) || it.equals("mg/dL", ignoreCase = true) }
+            val trend = CamApsFxState.BloodSugar.Trend.entries.firstOrNull { trend -> imageViews.any { it == trend.imageResourceId } }
             val isOff = textViews.any { it.equals("Off", ignoreCase = true) || it.equals("Aus", ignoreCase = true) }
             val isStarting = textViews.any { it.equals("Starting", ignoreCase = true) || it.equals("Starten", ignoreCase = true) }
 
             return when {
                 value != null && unit != null -> {
-                    CamApsFxState.BloodSugar(value, unit, null)
+                    CamApsFxState.BloodSugar(value, unit, trend)
                 }
                 isStarting -> CamApsFxState.Starting
                 isOff -> CamApsFxState.Off
@@ -63,6 +69,26 @@ class CamApsFxNotificationMapper {
             val text = view.text?.toString()
             if (!text.isNullOrBlank()) {
                 textViews.add(text)
+            }
+        }
+    }
+
+    private fun findImageViews(view: View, imageViews: MutableList<Int>) {
+        if (view is ViewGroup) {
+            for (i in 0 until view.childCount) {
+                findImageViews(view.getChildAt(i), imageViews)
+            }
+        } else if (view is ImageView) {
+            // This is a bit of a hack, but it's the most reliable way to get the resource ID
+            val resourceId = try {
+                val field = view::class.java.getDeclaredField("mResource")
+                field.isAccessible = true
+                field.getInt(view)
+            } catch (e: Exception) {
+                -1
+            }
+            if (resourceId != -1) {
+                imageViews.add(resourceId)
             }
         }
     }

@@ -12,7 +12,6 @@ import androidx.core.app.NotificationCompat
 import com.faltenreich.camaps.camaps.CamApsFxController
 import com.faltenreich.camaps.camaps.CamApsFxState
 import com.faltenreich.camaps.homeassistant.HomeAssistantController
-import com.faltenreich.camaps.homeassistant.HomeAssistantData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -44,8 +43,7 @@ class MainService : NotificationListenerService() {
                         is CamApsFxState.Off -> Unit // TODO
                         is CamApsFxState.Starting -> Unit // TODO
                         is CamApsFxState.BloodSugar -> {
-                            val data = HomeAssistantData.BloodSugar(state.value, state.unitOfMeasurement)
-                            homeAssistantController.update(data)
+                            homeAssistantController.update(state)
                         }
                         is CamApsFxState.Error -> Unit // TODO
                     }

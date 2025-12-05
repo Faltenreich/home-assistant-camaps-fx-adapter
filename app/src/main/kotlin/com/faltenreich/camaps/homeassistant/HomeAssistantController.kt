@@ -5,6 +5,7 @@ import android.os.Build
 import android.util.Log
 import com.faltenreich.camaps.BuildConfig
 import com.faltenreich.camaps.MainStateProvider
+import com.faltenreich.camaps.camaps.CamApsFxState
 import com.faltenreich.camaps.homeassistant.device.HomeAssistantRegisterDeviceRequestBody
 import com.faltenreich.camaps.homeassistant.network.HomeAssistantApi
 import com.faltenreich.camaps.homeassistant.network.HomeAssistantClient
@@ -90,13 +91,14 @@ class HomeAssistantController(context: Context) {
         }
     }
 
-    suspend fun update(data: HomeAssistantData.BloodSugar) {
+    suspend fun update(data: CamApsFxState.BloodSugar) {
         val webhookId = webhookId ?: return
 
         val requestBody = HomeAssistantUpdateSensorRequestBody(
             data = HomeAssistantUpdateSensorRequestBody.Data(
                 uniqueId = getSensorUniqueId(data.unitOfMeasurement),
                 state = data.value,
+                attributes = mapOf("trend" to data.trend?.name)
             ),
         )
         try {
@@ -105,7 +107,7 @@ class HomeAssistantController(context: Context) {
                 webhookId = webhookId,
             )
             Log.d(TAG, "Sensor updated")
-            mainStateProvider.setHomeAssistantState(HomeAssistantState.UpdatedSensor(data))
+            mainStateProvider.setHomeAssistantState(HomeAssistantState.UpdatedSensor(HomeAssistantData.BloodSugar(data.value, data.unitOfMeasurement)))
         } catch (exception: Exception) {
             Log.e(TAG, "Sensor could not be updated: $exception")
             mainStateProvider.setHomeAssistantState(
