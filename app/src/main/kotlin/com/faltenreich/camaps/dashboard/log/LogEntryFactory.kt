@@ -48,7 +48,7 @@ object LogEntryFactory {
             is CamApsFxState.BloodSugar -> LogEntry(
                 dateTime = dateTime,
                 source = source,
-                message = "sent data: $mmolL mmol/L",
+                message = "sent data: ${value} ${unitOfMeasurement}",
             )
             is CamApsFxState.Error -> LogEntry(
                 dateTime = dateTime,

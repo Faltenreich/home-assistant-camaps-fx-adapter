@@ -44,10 +44,9 @@ class MainService : NotificationListenerService() {
                         is CamApsFxState.Off -> Unit // TODO
                         is CamApsFxState.Starting -> Unit // TODO
                         is CamApsFxState.BloodSugar -> {
-                            val data = HomeAssistantData.BloodSugar(mmolL = state.mmolL)
+                            val data = HomeAssistantData.BloodSugar(state.value, state.unitOfMeasurement)
                             homeAssistantController.update(data)
                         }
-
                         is CamApsFxState.Error -> Unit // TODO
                     }
                 }
@@ -114,7 +113,7 @@ class MainService : NotificationListenerService() {
     override fun onListenerDisconnected() {
         super.onListenerDisconnected()
         Log.d(TAG, "onListenerDisconnected: Service disconnected")
-        mainStateProvider.addLog("Service disconnected")
+        mainStateProvider.addLog("Service disconnected. If this was unexpected, try toggling the notification permission.")
         mainStateProvider.setServiceState(MainServiceState.Disconnected)
     }
 

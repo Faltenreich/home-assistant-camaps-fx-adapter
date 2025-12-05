@@ -30,21 +30,20 @@ class CamApsFxNotificationMapper {
             findTextViews(view, textViews)
             Log.d(TAG, "Found text in notification: ${textViews.joinToString()}")
 
-            val mmolL = textViews.mapNotNull { it.replace(',', '.').toFloatOrNull() }.firstOrNull()
-            val isOff = textViews.any { it.equals("Aus", ignoreCase = true) }
-            val isStarting = textViews.any { it.equals("Starten", ignoreCase = true) }
+            val value = textViews.mapNotNull { it.replace(',', '.').toFloatOrNull() }.firstOrNull()
+            val unit = textViews.firstOrNull { it.equals("mmol/L", ignoreCase = true) || it.equals("mg/dL", ignoreCase = true) }
+            val isOff = textViews.any { it.equals("Off", ignoreCase = true) || it.equals("Aus", ignoreCase = true) }
+            val isStarting = textViews.any { it.equals("Starting", ignoreCase = true) || it.equals("Starten", ignoreCase = true) }
 
             return when {
-                mmolL != null -> {
-                    // Trend information might require visual analysis or is located in a different view.
-                    // For now, we are focusing on the blood sugar value.
-                    CamApsFxState.BloodSugar(mmolL, null)
+                value != null && unit != null -> {
+                    CamApsFxState.BloodSugar(value, unit, null)
                 }
                 isStarting -> CamApsFxState.Starting
                 isOff -> CamApsFxState.Off
                 else -> {
                     CamApsFxState.Error(
-                        message = "Unknown text in notification: ${textViews.joinToString()}",
+                        message = "Could not determine state from notification: ${textViews.joinToString()}",
                     )
                 }
             }

@@ -19,8 +19,12 @@ class HomeAssistantController(context: Context) {
     private lateinit var homeAssistantClient: HomeAssistantApi
 
     private val deviceId = "${Build.MANUFACTURER}_${Build.MODEL}".replace(" ", "_")
-    private val sensorUniqueId = "${deviceId}_blood_sugar"
     private var webhookId: String? = null
+
+    private fun getSensorUniqueId(unit: String): String {
+        val suffix = if (unit.startsWith("mmol")) "mmol" else "mg"
+        return "${deviceId}_blood_sugar_$suffix"
+    }
 
     suspend fun start() {
         Log.d(TAG, "start: Kicking off Home Assistant registration")
@@ -50,52 +54,49 @@ class HomeAssistantController(context: Context) {
         webhookId = response.webhookId
         mainStateProvider.setHomeAssistantState(HomeAssistantState.ConnectedDevice("Connected with ID: $deviceId"))
         Log.d(TAG, "Device registered: $response")
-        registerSensor()
+        registerSensors()
     }
 
-    private suspend fun registerSensor() {
-        mainStateProvider.addLog("Registering sensor with Home Assistant")
+    private suspend fun registerSensors() {
+        listOf("mmol/L", "mg/dL").forEach { unit ->
+            registerSensor(unit)
+        }
+    }
+
+    private suspend fun registerSensor(unit: String) {
+        mainStateProvider.addLog("Registering sensor for $unit")
         val webhookId = webhookId ?: run {
-            Log.d(TAG, "Sensor could not be registered due to to missing webhook")
             mainStateProvider.setHomeAssistantState(
-                HomeAssistantState.Error("Failed to register sensor due to missing webhook")
+                HomeAssistantState.Error("Failed to register sensor for $unit due to missing webhook")
             )
             return
         }
         val requestBody = HomeAssistantRegisterSensorRequestBody(
             data = HomeAssistantRegisterSensorRequestBody.Data(
-                uniqueId = sensorUniqueId,
+                uniqueId = getSensorUniqueId(unit),
                 state = 0f, // Initial state, will be updated shortly
+                unitOfMeasurement = unit,
             ),
         )
         try {
             homeAssistantClient.registerSensor(requestBody, webhookId)
-            mainStateProvider.setHomeAssistantState(HomeAssistantState.ConnectedSensor("Registered sensor with ID: $sensorUniqueId"))
-            Log.d(TAG, "Sensor registered")
+            mainStateProvider.setHomeAssistantState(HomeAssistantState.ConnectedSensor("Registered sensor with ID: ${getSensorUniqueId(unit)}"))
+            Log.d(TAG, "Sensor for $unit registered")
         } catch (exception: Exception) {
-            Log.e(TAG, "Sensor could not be registered: $exception")
+            Log.e(TAG, "Sensor for $unit could not be registered: $exception")
             mainStateProvider.setHomeAssistantState(
-                HomeAssistantState.Error("Failed to register sensor due to $exception")
+                HomeAssistantState.Error("Failed to register sensor for $unit due to $exception")
             )
         }
     }
 
-    suspend fun update(data: HomeAssistantData) {
-        val webhookId = webhookId ?: run {
-            Log.d(TAG, "Sensor could not be updated due to to missing webhook")
-            mainStateProvider.setHomeAssistantState(
-                HomeAssistantState.Error("Failed to update sensor due to missing webhook")
-            )
-            return
-        }
-
-        // TODO: Handle other states
-        (data as? HomeAssistantData.BloodSugar) ?: return
+    suspend fun update(data: HomeAssistantData.BloodSugar) {
+        val webhookId = webhookId ?: return
 
         val requestBody = HomeAssistantUpdateSensorRequestBody(
             data = HomeAssistantUpdateSensorRequestBody.Data(
-                uniqueId = sensorUniqueId,
-                state = data.mmolL,
+                uniqueId = getSensorUniqueId(data.unitOfMeasurement),
+                state = data.value,
             ),
         )
         try {
