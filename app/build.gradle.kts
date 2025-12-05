@@ -21,7 +21,6 @@ android {
 
     buildTypes {
         getByName("debug") {
-            buildConfigField("String", "HOME_ASSISTANT_TOKEN", gradleLocalProperties(rootDir, providers).getProperty("homeAssistantToken"))
         }
         release {
             isMinifyEnabled = false

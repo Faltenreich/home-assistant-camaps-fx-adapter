@@ -9,8 +9,9 @@ This project serves as showcase for a blog post on
 ### Setup
 
 1. Create [long-lived access token](https://developers.home-assistant.io/docs/auth_api/#long-lived-access-token) for Home Assistant
-2. Store token as `homeAssistantToken` in Gradle properties, e.g. in `local.properties`
-3. Compile and run project, local Home Assistant instance will be used: http://homeassistant.local:8123
+2. Compile and run project, local Home Assistant instance will be used: http://homeassistant.local:8123
+3. Configure settings in app for home assistant uri and long lived access token.
+4. Allow notification access permissions
 
 ### Third-party licenses
 
