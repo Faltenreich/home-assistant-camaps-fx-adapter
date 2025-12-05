@@ -23,6 +23,8 @@ class HomeAssistantController(context: Context) {
     private var webhookId: String? = null
 
     suspend fun start() {
+        Log.d(TAG, "start: Kicking off Home Assistant registration")
+        mainStateProvider.addLog("Kicking off Home Assistant registration")
         val uri = settingsRepository.getHomeAssistantUri()
         val token = settingsRepository.getHomeAssistantToken()
         homeAssistantClient = HomeAssistantClient.getInstance(uri, token)

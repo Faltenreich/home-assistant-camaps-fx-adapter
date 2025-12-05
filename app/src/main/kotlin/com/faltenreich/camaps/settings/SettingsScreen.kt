@@ -37,6 +37,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -50,9 +52,14 @@ fun SettingsScreen(
     val token by viewModel.token.collectAsState()
     val connectionState by viewModel.connectionState.collectAsState()
     val unitType by viewModel.unitType.collectAsState()
+    val hasPermission by viewModel.hasPermission.collectAsState()
 
     var expanded by remember { mutableStateOf(false) }
     val unitTypes = listOf("mmol/L", "mg/dL")
+
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        viewModel.checkPermission(context)
+    }
 
     Scaffold(
         topBar = {
@@ -144,11 +151,18 @@ fun SettingsScreen(
                 }
             }
             Spacer(modifier = Modifier.height(32.dp))
-            Button(
-                onClick = { viewModel.openNotificationSettings(context as Activity) },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Permissions")
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Button(
+                    onClick = { viewModel.openNotificationSettings(context as Activity) },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text("Permissions")
+                }
+                if (hasPermission) {
+                    Icon(Icons.Default.Check, contentDescription = "Success", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(start = 8.dp))
+                } else {
+                    Icon(Icons.Default.Close, contentDescription = "Failure", tint = MaterialTheme.colorScheme.error, modifier = Modifier.padding(start = 8.dp))
+                }
             }
             Spacer(modifier = Modifier.height(16.dp))
             Button(

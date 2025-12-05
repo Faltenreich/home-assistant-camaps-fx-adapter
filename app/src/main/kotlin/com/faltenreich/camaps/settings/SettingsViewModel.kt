@@ -2,7 +2,10 @@ package com.faltenreich.camaps.settings
 
 import android.app.Activity
 import android.app.Application
+import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
@@ -31,6 +34,9 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     private val _connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Idle)
     val connectionState = _connectionState.asStateFlow()
 
+    private val _hasPermission = MutableStateFlow(false)
+    val hasPermission = _hasPermission.asStateFlow()
+
     fun onUriChanged(uri: String) {
         _uri.value = uri
         settingsRepository.saveHomeAssistantUri(uri)
@@ -46,6 +52,12 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     fun onUnitTypeChanged(unitType: String) {
         _unitType.value = unitType
         settingsRepository.saveUnitType(unitType)
+    }
+
+    fun checkPermission(context: Context) {
+        val componentName = ComponentName(context, "com.faltenreich.camaps.MainService")
+        val enabledListeners = Settings.Secure.getString(context.contentResolver, "enabled_notification_listeners")
+        _hasPermission.value = enabledListeners?.contains(componentName.flattenToString()) == true
     }
 
     fun testConnection() {
