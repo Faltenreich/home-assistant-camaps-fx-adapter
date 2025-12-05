@@ -133,6 +133,13 @@ fun SettingsScreen(
             ) {
                 Text("Restart Service")
             }
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(
+                onClick = viewModel::reset,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Re-register device")
+            }
         }
     }
 }

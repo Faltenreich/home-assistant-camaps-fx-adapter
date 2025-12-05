@@ -98,6 +98,17 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
+    fun reset() {
+        Log.d(TAG, "Resetting Home Assistant registration")
+        val context = getApplication<Application>().applicationContext
+        settingsRepository.saveHomeAssistantWebhookId("")
+        settingsRepository.clearRegisteredSensorUniqueIds()
+        Toast.makeText(context, "Home Assistant registration has been reset", Toast.LENGTH_SHORT).show()
+        viewModelScope.launch {
+            ReinitializationManager.reinitialize()
+        }
+    }
+
     companion object {
         private val TAG = SettingsViewModel::class.java.simpleName
     }

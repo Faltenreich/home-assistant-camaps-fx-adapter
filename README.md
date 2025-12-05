@@ -6,6 +6,11 @@ This app reads blood sugar values from CamAPS FX by observing its notifications 
 This project serves as showcase for a blog post on
 [writingbits.de](https://writingbits.de/2025/01/06/reading-android-notifications-with-custom-views-using-reflection.html).
 
+
+### Build
+
+APK: `gradlew.bat assembleDebug`
+
 ### Setup
 
 1. Create [long-lived access token](https://developers.home-assistant.io/docs/auth_api/#long-lived-access-token) for Home Assistant
@@ -43,3 +48,7 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
+
+### TODO:
+
+Create dummy entity attached to device to validate webhook/device registration
