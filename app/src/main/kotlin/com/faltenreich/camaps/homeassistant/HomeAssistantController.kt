@@ -59,6 +59,11 @@ class HomeAssistantController(context: Context) {
             )
             mainStateProvider.setHomeAssistantState(HomeAssistantState.ConnectedDevice("Connected with ID: $deviceId"))
             Log.d(TAG, "Webhook is valid.")
+            if (registeredSensorUniqueIds.isEmpty()) {
+                mainStateProvider.addLog("Waiting for reading to register sensor.")
+            } else {
+                mainStateProvider.addLog("Sensor already registered.")
+            }
         } catch (e: ResponseException) {
             val statusCode = e.response.status.value
             Log.w(TAG, "Webhook validation failed with status: $statusCode", e)
