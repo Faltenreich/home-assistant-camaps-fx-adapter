@@ -40,6 +40,7 @@ class HomeAssistantController(context: Context) {
 
     private suspend fun registerDevice() {
         mainStateProvider.addLog("Registering device with Home Assistant")
+        Log.d(TAG, "Device ID: $deviceId")
         val requestBody = HomeAssistantRegisterDeviceRequestBody(
             deviceId = deviceId,
             appId = BuildConfig.APPLICATION_ID,
@@ -51,6 +52,7 @@ class HomeAssistantController(context: Context) {
             osName = "Android",
             osVersion = Build.VERSION.SDK_INT.toString(),
             supportsEncryption = false,
+            identifiers = listOf("device_$deviceId"),
         )
         val response = homeAssistantClient.registerDevice(requestBody)
         webhookId = response.webhookId
