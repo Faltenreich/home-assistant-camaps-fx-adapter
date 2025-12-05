@@ -2,6 +2,7 @@ package com.faltenreich.camaps.homeassistant
 
 import android.content.Context
 import android.os.Build
+import android.provider.Settings
 import android.util.Log
 import com.faltenreich.camaps.BuildConfig
 import com.faltenreich.camaps.MainStateProvider
@@ -19,7 +20,7 @@ class HomeAssistantController(context: Context) {
     private val mainStateProvider = MainStateProvider
     private val settingsRepository = SettingsRepository(context)
     private lateinit var homeAssistantClient: HomeAssistantApi
-    private val deviceId = "${Build.MANUFACTURER}_${Build.MODEL}".replace(" ", "_")
+    private val deviceId: String = Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
     private var webhookId: String? = null
 
     private fun getSensorUniqueId(unit: String): String {
