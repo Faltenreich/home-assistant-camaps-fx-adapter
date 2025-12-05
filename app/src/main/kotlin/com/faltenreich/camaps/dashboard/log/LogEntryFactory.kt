@@ -13,6 +13,14 @@ object LogEntryFactory {
         return LocalDateTime.now().format(DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM))
     }
 
+    fun create(message: String): LogEntry {
+        return LogEntry(
+            dateTime = createDateTime(),
+            source = "System",
+            message = message,
+        )
+    }
+
     fun create(serviceState: MainServiceState): LogEntry = with(serviceState) {
         val dateTime = createDateTime()
         val source = "Service"
