@@ -35,8 +35,54 @@ class HomeAssistantController(context: Context) {
         val uri = settingsRepository.getHomeAssistantUri()
         val token = settingsRepository.getHomeAssistantToken()
         homeAssistantClient = HomeAssistantClient.getInstance(uri, token)
+        webhookId = settingsRepository.getHomeAssistantWebhookId().takeIf { it.isNotBlank() }
 
-        registerDevice()
+        if (webhookId == null) {
+            registerDevice()
+        } else {
+            validateWebhook()
+        }
+    }
+
+    private suspend fun validateWebhook() {
+        val webhookId = webhookId ?: return
+        mainStateProvider.addLog("Validating existing webhook.")
+        Log.d(TAG, "Validating webhook ID: $webhookId")
+
+        val requestBody = HomeAssistantUpdateSensorRequestBody(data = emptyList())
+
+        try {
+            homeAssistantClient.updateSensor(
+                requestBody = requestBody,
+                webhookId = webhookId,
+            )
+            mainStateProvider.setHomeAssistantState(HomeAssistantState.ConnectedDevice("Connected with ID: $deviceId"))
+            Log.d(TAG, "Webhook is valid.")
+        } catch (e: ResponseException) {
+            val statusCode = e.response.status.value
+            Log.w(TAG, "Webhook validation failed with status: $statusCode", e)
+            when (statusCode) {
+                404, 410 -> {
+                    mainStateProvider.addLog("Webhook is invalid, re-registering device.")
+                    registerDevice()
+                }
+                401, 403 -> {
+                    mainStateProvider.setHomeAssistantState(
+                        HomeAssistantState.Error("Authentication error. Please check your Home Assistant token.")
+                    )
+                }
+                else -> {
+                    mainStateProvider.setHomeAssistantState(
+                        HomeAssistantState.Error("Failed to validate webhook. Status: $statusCode")
+                    )
+                }
+            }
+        } catch (exception: Exception) {
+            Log.e(TAG, "Webhook validation failed", exception)
+            mainStateProvider.setHomeAssistantState(
+                HomeAssistantState.Error("Failed to validate webhook: ${exception.message}")
+            )
+        }
     }
 
     private suspend fun registerDevice() {
@@ -53,10 +99,12 @@ class HomeAssistantController(context: Context) {
             osName = "Android",
             osVersion = Build.VERSION.SDK_INT.toString(),
             supportsEncryption = false,
+            appData = emptyMap(),
             identifiers = listOf("device_$deviceId"),
         )
         val response = homeAssistantClient.registerDevice(requestBody)
         webhookId = response.webhookId
+        response.webhookId?.let { settingsRepository.saveHomeAssistantWebhookId(it) }
         mainStateProvider.setHomeAssistantState(HomeAssistantState.ConnectedDevice("Connected with ID: $deviceId"))
         Log.d(TAG, "Device registered: $response")
     }
