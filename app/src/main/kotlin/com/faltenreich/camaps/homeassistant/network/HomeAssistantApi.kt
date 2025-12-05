@@ -7,9 +7,19 @@ import com.faltenreich.camaps.homeassistant.sensor.HomeAssistantUpdateSensorRequ
 
 interface HomeAssistantApi {
 
-    suspend fun registerDevice(requestBody: HomeAssistantRegisterDeviceRequestBody): HomeAssistantRegisterDeviceResponse
+    suspend fun testConnection()
 
-    suspend fun registerSensor(requestBody: HomeAssistantRegisterSensorRequestBody, webhookId: String)
+    suspend fun registerDevice(
+        requestBody: HomeAssistantRegisterDeviceRequestBody
+    ): HomeAssistantRegisterDeviceResponse
 
-    suspend fun updateSensor(requestBody: HomeAssistantUpdateSensorRequestBody, webhookId: String)
+    suspend fun registerSensor(
+        requestBody: HomeAssistantRegisterSensorRequestBody,
+        webhookId: String,
+    )
+
+    suspend fun updateSensor(
+        requestBody: HomeAssistantUpdateSensorRequestBody,
+        webhookId: String,
+    )
 }

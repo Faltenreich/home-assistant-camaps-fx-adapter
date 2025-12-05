@@ -1,0 +1,3 @@
+# Copy this file to local.properties and replace the placeholder with your real token.
+# local.properties stays untracked so personal secrets remain local.
+homeAssistantToken=REPLACE_WITH_LONG_LIVED_TOKEN

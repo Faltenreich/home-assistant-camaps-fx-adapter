@@ -2,82 +2,75 @@
 
 package com.faltenreich.camaps.camaps.notification
 
+import android.content.Context
 import android.service.notification.StatusBarNotification
-import android.widget.RemoteViews
+import android.util.Log
+import android.view.View
+import android.view.ViewGroup
+import android.widget.TextView
 import com.faltenreich.camaps.camaps.CamApsFxState
-import java.util.ArrayList
-import kotlin.reflect.full.memberProperties
-import kotlin.reflect.jvm.isAccessible
 
 class CamApsFxNotificationMapper {
 
-    operator fun invoke(statusBarNotification: StatusBarNotification): CamApsFxState? {
+    operator fun invoke(context: Context, statusBarNotification: StatusBarNotification): CamApsFxState? {
         val camApsFxNotification = statusBarNotification
-            .takeIf { it.packageName == CAM_APS_FX_PACKAGE_NAME }
+            .takeIf { it.packageName.startsWith(CAM_APS_FX_PACKAGE_NAME_PREFIX) }
             ?.notification
             ?: return null
-        val remoteViews = camApsFxNotification.contentView ?: run {
-            return CamApsFxState.Error("Missing contentView")
-        }
-        val remoteViewActions = getRemoteViewActions(remoteViews).takeIf(List<*>::isNotEmpty) ?: run {
-            return CamApsFxState.Error("Missing actions")
-        }
-        val setTextActions = remoteViewActions.filter { it.methodName == "setText" }
 
-        val mgDl = setTextActions.mapNotNull { (it.value as? String)?.toFloatOrNull() }.firstOrNull()
-        val isOff = setTextActions.any { (it.value as? String) == "Aus" }
-        val isStarting = setTextActions.any { (it.value as? String) == "Starten" }
+        // Prioritize bigContentView as it often contains more details than the collapsed view
+        val remoteViews = camApsFxNotification.bigContentView ?: camApsFxNotification.contentView ?: run {
+            return CamApsFxState.Error("Missing both bigContentView and contentView")
+        }
 
-        return when {
-            mgDl != null -> {
-                val trendImageResourceId = remoteViewActions
-                    .filter { it.methodName == "setImageResource" }
-                    .mapNotNull { it.value as? Int }
-                    .lastOrNull()
-                val trend = CamApsFxState.BloodSugar.Trend.entries
-                    .firstOrNull { it.imageResourceId == trendImageResourceId }
-                CamApsFxState.BloodSugar(mgDl, trend)
+        try {
+            val remotePackageContext = context.createPackageContext(statusBarNotification.packageName, Context.CONTEXT_IGNORE_SECURITY)
+            val view = remoteViews.apply(remotePackageContext, null)
+            val textViews = mutableListOf<String>()
+            findTextViews(view, textViews)
+            Log.d(TAG, "Found text in notification: ${textViews.joinToString()}")
+
+            val mmolL = textViews.mapNotNull { it.replace(',', '.').toFloatOrNull() }.firstOrNull()
+            val isOff = textViews.any { it.equals("Aus", ignoreCase = true) }
+            val isStarting = textViews.any { it.equals("Starten", ignoreCase = true) }
+
+            return when {
+                mmolL != null -> {
+                    // Trend information might require visual analysis or is located in a different view.
+                    // For now, we are focusing on the blood sugar value.
+                    CamApsFxState.BloodSugar(mmolL, null)
+                }
+                isStarting -> CamApsFxState.Starting
+                isOff -> CamApsFxState.Off
+                else -> {
+                    CamApsFxState.Error(
+                        message = "Unknown text in notification: ${textViews.joinToString()}",
+                    )
+                }
             }
-            isStarting -> CamApsFxState.Starting
-            isOff -> CamApsFxState.Off
-            else -> {
-                val actionsJoined = remoteViewActions
-                    .map { action -> "${action.methodName}: ${action.value}" }
-                    .joinToString()
-                CamApsFxState.Error(
-                    message = "Unknown actions: $actionsJoined",
-                )
-            }
+
+        } catch (e: Exception) {
+            Log.e(TAG, "Error inflating remote views", e)
+            return CamApsFxState.Error("Failed to inflate RemoteViews: ${e.message}")
         }
     }
 
-    private fun getRemoteViewActions(from: RemoteViews): List<RemoteViewAction> {
-        val actionsProperty = RemoteViews::class.memberProperties
-            .firstOrNull { it.name == "mActions" }
-            ?: return emptyList()
-        actionsProperty.isAccessible = true
-        val actions = actionsProperty.get(from) as? ArrayList<*> ?: return emptyList()
-        return actions.mapNotNull(::getRemoteViewAction)
-    }
-
-    private fun getRemoteViewAction(from: Any): RemoteViewAction? {
-        val memberProperties = from::class.memberProperties
-
-        val methodNameProperty = memberProperties
-            .firstOrNull { it.name == "mMethodName" }
-            ?: return null
-        methodNameProperty.isAccessible = true
-        val methodName = methodNameProperty.getter.call(from) as? String ?: return null
-
-        val valueProperty = memberProperties.firstOrNull { it.name == "mValue" } ?: return null
-        valueProperty.isAccessible = true
-        val value = valueProperty.getter.call(from)
-
-        return RemoteViewAction(methodName, value)
+    private fun findTextViews(view: View, textViews: MutableList<String>) {
+        if (view is ViewGroup) {
+            for (i in 0 until view.childCount) {
+                findTextViews(view.getChildAt(i), textViews)
+            }
+        } else if (view is TextView) {
+            val text = view.text?.toString()
+            if (!text.isNullOrBlank()) {
+                textViews.add(text)
+            }
+        }
     }
 
     companion object {
 
-        private const val CAM_APS_FX_PACKAGE_NAME = "com.camdiab.fx_alert.mgdl"
+        private val TAG = CamApsFxNotificationMapper::class.java.simpleName
+        private const val CAM_APS_FX_PACKAGE_NAME_PREFIX = "com.camdiab.fx_alert"
     }
 }

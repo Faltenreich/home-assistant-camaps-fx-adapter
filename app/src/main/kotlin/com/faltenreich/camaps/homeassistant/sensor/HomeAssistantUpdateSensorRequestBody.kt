@@ -20,6 +20,6 @@ data class HomeAssistantUpdateSensorRequestBody(
         @SerialName("type")
         val type: String = "sensor",
         @SerialName("unique_id")
-        val uniqueId: String = "blood_sugar",
+        val uniqueId: String = "blood_sugar_mmol",
     )
 }

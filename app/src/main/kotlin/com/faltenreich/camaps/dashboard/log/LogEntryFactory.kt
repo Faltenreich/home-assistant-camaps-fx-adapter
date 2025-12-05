@@ -48,12 +48,12 @@ object LogEntryFactory {
             is CamApsFxState.BloodSugar -> LogEntry(
                 dateTime = dateTime,
                 source = source,
-                message = "sent data: $mgDl mg/dL",
+                message = "sent data: $mmolL mmol/L",
             )
             is CamApsFxState.Error -> LogEntry(
                 dateTime = dateTime,
                 source = source,
-                message = "sent something: $message",
+                message = "received unhandled notification: $message",
             )
         }
     }
@@ -62,6 +62,11 @@ object LogEntryFactory {
         val dateTime = createDateTime()
         val source = "Home Assistant"
         when (this) {
+            is HomeAssistantState.Idle -> LogEntry(
+                dateTime = dateTime,
+                source = source,
+                message = "is idle",
+            )
             is HomeAssistantState.Disconnected -> LogEntry(
                 dateTime = dateTime,
                 source = source,
@@ -70,12 +75,12 @@ object LogEntryFactory {
             is HomeAssistantState.ConnectedDevice -> LogEntry(
                 dateTime = dateTime,
                 source = source,
-                message = "connected device",
+                message = message,
             )
             is HomeAssistantState.ConnectedSensor -> LogEntry(
                 dateTime = dateTime,
                 source = source,
-                message = "connected sensor",
+                message = message,
             )
             is HomeAssistantState.UpdatedSensor -> LogEntry(
                 dateTime = dateTime,

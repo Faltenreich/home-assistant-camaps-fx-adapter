@@ -1,7 +1,40 @@
 package com.faltenreich.camaps.dashboard.log
 
+import com.faltenreich.camaps.homeassistant.HomeAssistantState
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+
 data class LogEntry(
     val dateTime: String,
     val source: String,
     val message: String,
-)
+) {
+    companion object {
+        private val simpleDateFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
+
+        fun from(homeAssistantState: HomeAssistantState): LogEntry {
+            val message = when (homeAssistantState) {
+                is HomeAssistantState.ConnectedDevice -> homeAssistantState.message
+                is HomeAssistantState.ConnectedSensor -> homeAssistantState.message
+                is HomeAssistantState.Disconnected -> "Disconnected from Home Assistant"
+                is HomeAssistantState.Error -> homeAssistantState.message
+                is HomeAssistantState.Idle -> "Home Assistant is idle"
+                is HomeAssistantState.UpdatedSensor -> "Sensor updated: ${homeAssistantState.data}"
+            }
+            return LogEntry(
+                dateTime = simpleDateFormat.format(Date()),
+                source = "Home Assistant",
+                message = message,
+            )
+        }
+
+        fun system(message: String): LogEntry {
+            return LogEntry(
+                dateTime = simpleDateFormat.format(Date()),
+                source = "System",
+                message = message,
+            )
+        }
+    }
+}

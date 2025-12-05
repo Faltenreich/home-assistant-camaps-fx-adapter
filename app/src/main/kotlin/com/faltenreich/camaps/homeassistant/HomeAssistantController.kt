@@ -1,29 +1,39 @@
 package com.faltenreich.camaps.homeassistant
 
+import android.content.Context
 import android.os.Build
 import android.util.Log
 import com.faltenreich.camaps.BuildConfig
 import com.faltenreich.camaps.MainStateProvider
 import com.faltenreich.camaps.homeassistant.device.HomeAssistantRegisterDeviceRequestBody
+import com.faltenreich.camaps.homeassistant.network.HomeAssistantApi
 import com.faltenreich.camaps.homeassistant.network.HomeAssistantClient
 import com.faltenreich.camaps.homeassistant.sensor.HomeAssistantRegisterSensorRequestBody
 import com.faltenreich.camaps.homeassistant.sensor.HomeAssistantUpdateSensorRequestBody
+import com.faltenreich.camaps.settings.SettingsRepository
 
-class HomeAssistantController {
+class HomeAssistantController(context: Context) {
 
     private val mainStateProvider = MainStateProvider
-    private val homeAssistantClient = HomeAssistantClient.Companion.local()
+    private val settingsRepository = SettingsRepository(context)
+    private lateinit var homeAssistantClient: HomeAssistantApi
 
+    private val deviceId = "${Build.MANUFACTURER}_${Build.MODEL}".replace(" ", "_")
+    private val sensorUniqueId = "${deviceId}_blood_sugar"
     private var webhookId: String? = null
 
     suspend fun start() {
+        val uri = settingsRepository.getHomeAssistantUri()
+        val token = settingsRepository.getHomeAssistantToken()
+        homeAssistantClient = HomeAssistantClient.getInstance(uri, token)
+        
         registerDevice()
-        registerSensor()
     }
 
     private suspend fun registerDevice() {
+        mainStateProvider.addLog("Registering device with Home Assistant")
         val requestBody = HomeAssistantRegisterDeviceRequestBody(
-            deviceId = "deviceId", // TODO: Find unique and consistent identifier?
+            deviceId = deviceId,
             appId = BuildConfig.APPLICATION_ID,
             appName = "CamAPS FX Adapter",
             appVersion = BuildConfig.VERSION_NAME,
@@ -34,20 +44,15 @@ class HomeAssistantController {
             osVersion = Build.VERSION.SDK_INT.toString(),
             supportsEncryption = false,
         )
-        try {
-            val response = homeAssistantClient.registerDevice(requestBody)
-            webhookId = response.webhookId
-            mainStateProvider.setHomeAssistantState(HomeAssistantState.ConnectedDevice)
-            Log.d(TAG, "Device registered: $response")
-        } catch (exception: Exception) {
-            Log.e(TAG, "Device could not be registered: $exception")
-            mainStateProvider.setHomeAssistantState(
-                HomeAssistantState.Error("Failed to register device due to $exception")
-            )
-        }
+        val response = homeAssistantClient.registerDevice(requestBody)
+        webhookId = response.webhookId
+        mainStateProvider.setHomeAssistantState(HomeAssistantState.ConnectedDevice("Connected with ID: $deviceId"))
+        Log.d(TAG, "Device registered: $response")
+        registerSensor()
     }
 
     private suspend fun registerSensor() {
+        mainStateProvider.addLog("Registering sensor with Home Assistant")
         val webhookId = webhookId ?: run {
             Log.d(TAG, "Sensor could not be registered due to to missing webhook")
             mainStateProvider.setHomeAssistantState(
@@ -57,12 +62,13 @@ class HomeAssistantController {
         }
         val requestBody = HomeAssistantRegisterSensorRequestBody(
             data = HomeAssistantRegisterSensorRequestBody.Data(
-                state = 120f,
+                uniqueId = sensorUniqueId,
+                state = 0f, // Initial state, will be updated shortly
             ),
         )
         try {
             homeAssistantClient.registerSensor(requestBody, webhookId)
-            mainStateProvider.setHomeAssistantState(HomeAssistantState.ConnectedSensor)
+            mainStateProvider.setHomeAssistantState(HomeAssistantState.ConnectedSensor("Registered sensor with ID: $sensorUniqueId"))
             Log.d(TAG, "Sensor registered")
         } catch (exception: Exception) {
             Log.e(TAG, "Sensor could not be registered: $exception")
@@ -86,7 +92,8 @@ class HomeAssistantController {
 
         val requestBody = HomeAssistantUpdateSensorRequestBody(
             data = HomeAssistantUpdateSensorRequestBody.Data(
-                state = data.mgDl,
+                uniqueId = sensorUniqueId,
+                state = data.mmolL,
             ),
         )
         try {

@@ -33,7 +33,7 @@ class DashboardViewModel : ViewModel() {
         else DashboardState.MissingPermissions
     }.stateIn(
         scope = viewModelScope,
-        started = SharingStarted.Lazily,
+        started = SharingStarted.Eagerly,
         initialValue = DashboardState.MissingPermissions,
     )
 

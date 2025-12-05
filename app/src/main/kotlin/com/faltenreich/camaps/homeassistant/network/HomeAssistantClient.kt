@@ -1,6 +1,5 @@
 package com.faltenreich.camaps.homeassistant.network
 
-import com.faltenreich.camaps.BuildConfig
 import com.faltenreich.camaps.homeassistant.device.HomeAssistantRegisterDeviceRequestBody
 import com.faltenreich.camaps.homeassistant.device.HomeAssistantRegisterDeviceResponse
 import com.faltenreich.camaps.homeassistant.sensor.HomeAssistantRegisterSensorRequestBody
@@ -11,15 +10,20 @@ import io.ktor.client.plugins.auth.Auth
 import io.ktor.client.plugins.auth.providers.BearerTokens
 import io.ktor.client.plugins.auth.providers.bearer
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.defaultRequest
 import io.ktor.http.Url
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
-import kotlin.String
 
 class HomeAssistantClient(
     private val host: String,
+    private val token: String,
     private val networkClient: NetworkClient,
 ) : HomeAssistantApi {
+
+    override suspend fun testConnection() {
+        networkClient.get<Unit>(url = Url("$host/api/"))
+    }
 
     override suspend fun registerDevice(
         requestBody: HomeAssistantRegisterDeviceRequestBody,
@@ -51,13 +55,16 @@ class HomeAssistantClient(
     }
 
     companion object {
-
-        fun local(): HomeAssistantApi {
+        fun getInstance(host: String, token: String): HomeAssistantApi {
             return HomeAssistantClient(
-                host = "http://homeassistant.local:8123",
+                host = host,
+                token = token,
                 networkClient = NetworkClient(
                     httpClient = HttpClient(OkHttp) {
                         expectSuccess = true
+                        defaultRequest {
+                            headers.append("User-Agent", "CamAPS-FX-Adapter")
+                        }
                         install(ContentNegotiation) {
                             json(
                                 Json {
@@ -71,7 +78,7 @@ class HomeAssistantClient(
                             bearer {
                                 loadTokens {
                                     BearerTokens(
-                                        accessToken = BuildConfig.HOME_ASSISTANT_TOKEN,
+                                        accessToken = token.trim(),
                                         refreshToken = null,
                                     )
                                 }

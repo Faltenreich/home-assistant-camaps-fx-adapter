@@ -3,12 +3,17 @@
 package com.faltenreich.camaps.dashboard
 
 import android.app.Activity
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -30,7 +35,9 @@ import com.faltenreich.camaps.dashboard.log.LogList
 fun Dashboard(
     modifier: Modifier = Modifier,
     viewModel: DashboardViewModel = viewModel(),
+    onSettingsClick: () -> Unit,
 ) {
+    Log.d("Dashboard", "Composing Dashboard")
     val context = LocalContext.current
     val state = viewModel.state.collectAsStateWithLifecycle().value
 
@@ -46,7 +53,16 @@ fun Dashboard(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                    actionIconContentColor = MaterialTheme.colorScheme.onPrimary
                 ),
+                actions = {
+                    IconButton(onClick = onSettingsClick) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = stringResource(R.string.settings_open)
+                        )
+                    }
+                }
             )
         },
     ) { paddingValues ->
@@ -55,7 +71,7 @@ fun Dashboard(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center,
             ) {
-                Button(onClick = { viewModel.openNotificationSettings(context as Activity)}) {
+                Button(onClick = { viewModel.openNotificationSettings(context as Activity) }) {
                     Text(stringResource(R.string.settings_open))
                 }
             }

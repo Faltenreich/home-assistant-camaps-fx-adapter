@@ -9,7 +9,7 @@ sealed interface CamApsFxState {
     data object Starting : CamApsFxState
 
     data class BloodSugar(
-        val mgDl: Float,
+        val mmolL: Float,
         val trend: Trend?,
     ) : CamApsFxState {
 
