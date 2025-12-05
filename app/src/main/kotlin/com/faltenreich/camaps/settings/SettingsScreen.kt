@@ -1,6 +1,7 @@
 package com.faltenreich.camaps.settings
 
 import android.app.Activity
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -14,10 +15,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -29,9 +27,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -51,11 +46,7 @@ fun SettingsScreen(
     val uri by viewModel.uri.collectAsState()
     val token by viewModel.token.collectAsState()
     val connectionState by viewModel.connectionState.collectAsState()
-    val unitType by viewModel.unitType.collectAsState()
     val hasPermission by viewModel.hasPermission.collectAsState()
-
-    var expanded by remember { mutableStateOf(false) }
-    val unitTypes = listOf("mmol/L", "mg/dL")
 
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
         viewModel.checkPermission(context)
@@ -120,48 +111,19 @@ fun SettingsScreen(
                     ConnectionState.Idle -> { /* Do nothing */ }
                 }
             }
-            Spacer(modifier = Modifier.height(16.dp))
-            ExposedDropdownMenuBox(
-                expanded = expanded,
-                onExpandedChange = { expanded = !expanded }
-            ) {
-                OutlinedTextField(
-                    value = unitType,
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text("Unit Type") },
-                    trailingIcon = {
-                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
-                    },
-                    modifier = Modifier.fillMaxWidth().menuAnchor()
-                )
-                ExposedDropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false }
-                ) {
-                    unitTypes.forEach { unitType ->
-                        DropdownMenuItem(
-                            text = { Text(unitType) },
-                            onClick = {
-                                viewModel.onUnitTypeChanged(unitType)
-                                expanded = false
-                            }
-                        )
-                    }
-                }
-            }
             Spacer(modifier = Modifier.height(32.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Button(
-                    onClick = { viewModel.openNotificationSettings(context as Activity) },
-                    modifier = Modifier.weight(1f)
-                ) {
+            Button(
+                onClick = { viewModel.openNotificationSettings(context as Activity) },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
                     Text("Permissions")
-                }
-                if (hasPermission) {
-                    Icon(Icons.Default.Check, contentDescription = "Success", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(start = 8.dp))
-                } else {
-                    Icon(Icons.Default.Close, contentDescription = "Failure", tint = MaterialTheme.colorScheme.error, modifier = Modifier.padding(start = 8.dp))
+                    Spacer(modifier = Modifier.size(8.dp))
+                    if (hasPermission) {
+                        Icon(Icons.Default.Check, contentDescription = "Success", tint = MaterialTheme.colorScheme.onPrimary)
+                    } else {
+                        Icon(Icons.Default.Close, contentDescription = "Failure", tint = MaterialTheme.colorScheme.onError)
+                    }
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
