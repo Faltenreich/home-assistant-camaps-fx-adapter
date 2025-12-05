@@ -1,5 +1,6 @@
 package com.faltenreich.camaps.dashboard.log
 
+import com.faltenreich.camaps.homeassistant.HomeAssistantData
 import com.faltenreich.camaps.homeassistant.HomeAssistantState
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -20,7 +21,14 @@ data class LogEntry(
                 is HomeAssistantState.Disconnected -> "Disconnected from Home Assistant"
                 is HomeAssistantState.Error -> homeAssistantState.message
                 is HomeAssistantState.Idle -> "Home Assistant is idle"
-                is HomeAssistantState.UpdatedSensor -> "Sensor updated: ${homeAssistantState.data}"
+                is HomeAssistantState.UpdatedSensor -> {
+                    val bloodSugar = homeAssistantState.data as? HomeAssistantData.BloodSugar
+                    if (bloodSugar != null) {
+                        "Sensor updated: ${bloodSugar.value} ${bloodSugar.unitOfMeasurement}"
+                    } else {
+                        "Sensor updated with unknown data"
+                    }
+                }
             }
             return LogEntry(
                 dateTime = simpleDateFormat.format(Date()),

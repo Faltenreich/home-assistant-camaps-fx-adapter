@@ -19,7 +19,6 @@ class HomeAssistantController(context: Context) {
     private val mainStateProvider = MainStateProvider
     private val settingsRepository = SettingsRepository(context)
     private lateinit var homeAssistantClient: HomeAssistantApi
-
     private val deviceId = "${Build.MANUFACTURER}_${Build.MODEL}".replace(" ", "_")
     private var webhookId: String? = null
 
@@ -29,8 +28,8 @@ class HomeAssistantController(context: Context) {
     }
 
     suspend fun start() {
-        Log.d(TAG, "start: Kicking off Home Assistant registration")
-        mainStateProvider.addLog("Kicking off Home Assistant registration")
+        Log.d(TAG, "start: Starting Home Assistant registration")
+        mainStateProvider.addLog("Starting Home Assistant registration")
         val uri = settingsRepository.getHomeAssistantUri()
         val token = settingsRepository.getHomeAssistantToken()
         homeAssistantClient = HomeAssistantClient.getInstance(uri, token)
@@ -85,7 +84,7 @@ class HomeAssistantController(context: Context) {
 
         try {
             val response = homeAssistantClient.registerSensor(requestBody, webhookId)
-            mainStateProvider.setHomeAssistantState(HomeAssistantState.ConnectedSensor("Registered sensor for $unit. Response: $response"))
+            mainStateProvider.setHomeAssistantState(HomeAssistantState.ConnectedSensor("Registered sensor for $unit."))
             Log.d(TAG, "Sensor for $unit registered. Response: $response")
         } catch (e: ResponseException) {
             val statusCode = e.response.status.value
@@ -96,7 +95,7 @@ class HomeAssistantController(context: Context) {
         } catch (exception: Exception) {
             Log.e(TAG, "Sensor for $unit could not be registered: $exception")
             mainStateProvider.setHomeAssistantState(
-                HomeAssistantState.Error("Failed to register sensor for $unit: ${exception.message}")
+                HomeAssistantState.Error("Failed to register sensor for $unit. Message: ${exception.message}")
             )
         }
     }
@@ -124,7 +123,7 @@ class HomeAssistantController(context: Context) {
         } catch (exception: Exception) {
             Log.e(TAG, "Sensor could not be updated: $exception")
             mainStateProvider.setHomeAssistantState(
-                HomeAssistantState.Error("Failed to update sensor due to $exception")
+                HomeAssistantState.Error("Failed to update sensor: $exception")
             )
         }
     }
