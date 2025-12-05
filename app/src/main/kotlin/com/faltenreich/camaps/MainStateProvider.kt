@@ -9,6 +9,8 @@ import kotlinx.coroutines.flow.update
 
 object MainStateProvider {
 
+    private const val MAX_LOG_ENTRIES = 200
+
     private val _state = MutableStateFlow(MainState())
     val state = _state.asStateFlow()
 
@@ -25,13 +27,13 @@ object MainStateProvider {
         _state.update {
             it.copy(
                 homeAssistantState = homeAssistantState,
-                log = it.log + logEntry,
+                log = (it.log + logEntry).takeLast(MAX_LOG_ENTRIES),
             )
         }
     }
 
     fun addLog(message: String) {
         val logEntry = LogEntry.system(message)
-        _state.update { it.copy(log = it.log + logEntry) }
+        _state.update { it.copy(log = (it.log + logEntry).takeLast(MAX_LOG_ENTRIES)) }
     }
 }
