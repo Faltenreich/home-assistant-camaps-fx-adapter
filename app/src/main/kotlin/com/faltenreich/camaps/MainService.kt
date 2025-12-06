@@ -62,12 +62,12 @@ class MainService : NotificationListenerService() {
         Log.d(TAG, "onListenerConnected: Service connected")
         mainStateProvider.addLog("Service connected")
 
-        createNotificationChannel(NOTIFICATION_CHANNEL_ID, getString(R.string.notification_channel_name), NotificationManager.IMPORTANCE_DEFAULT)
+        createNotificationChannel(NOTIFICATION_CHANNEL_ID, getString(R.string.notification_channel_name), NotificationManager.IMPORTANCE_LOW)
         createNotificationChannel(NOTIFICATION_TIMEOUT_CHANNEL_ID, getString(R.string.notification_timeout_channel_name), NotificationManager.IMPORTANCE_HIGH)
 
         val notification = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
             .setContentTitle(getString(R.string.app_name))
-            .setContentText("Service is running in the background")
+            .setContentText("Listening for CamAPS FX notifications")
             .setSmallIcon(R.mipmap.ic_launcher)
             .build()
 
