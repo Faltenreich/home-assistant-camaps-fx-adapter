@@ -4,4 +4,5 @@
     <string name="home_assistant">Home Assistant</string>
     <string name="settings_open">Open settings</string>
     <string name="notification_channel_name">Background Service</string>
+    <string name="notification_timeout_channel_name">Timeout Notification</string>
 </resources>

@@ -51,11 +51,20 @@ class SettingsRepository(context: Context) {
         sharedPreferences.edit().putString(KEY_UNIT_TYPE, unitType).apply()
     }
 
+    fun getNotificationTimeoutMinutes(): Int {
+        return sharedPreferences.getInt(KEY_NOTIFICATION_TIMEOUT_MINUTES, 0)
+    }
+
+    fun saveNotificationTimeoutMinutes(minutes: Int) {
+        sharedPreferences.edit().putInt(KEY_NOTIFICATION_TIMEOUT_MINUTES, minutes).apply()
+    }
+
     companion object {
         private const val KEY_HOME_ASSISTANT_URI = "home_assistant_uri"
         private const val KEY_HOME_ASSISTANT_TOKEN = "home_assistant_token"
         private const val KEY_HOME_ASSISTANT_WEBHOOK_ID = "home_assistant_webhook_id"
         private const val KEY_REGISTERED_SENSOR_UNIQUE_IDS = "registered_sensor_unique_ids"
         private const val KEY_UNIT_TYPE = "unit_type"
+        private const val KEY_NOTIFICATION_TIMEOUT_MINUTES = "notification_timeout_minutes"
     }
 }

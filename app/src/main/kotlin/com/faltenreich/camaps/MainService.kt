@@ -12,8 +12,10 @@ import androidx.core.app.NotificationCompat
 import com.faltenreich.camaps.camaps.CamApsFxController
 import com.faltenreich.camaps.camaps.CamApsFxState
 import com.faltenreich.camaps.homeassistant.HomeAssistantController
+import com.faltenreich.camaps.settings.SettingsRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -23,14 +25,17 @@ class MainService : NotificationListenerService() {
     private val mainStateProvider = MainStateProvider
     private val camApsFxController = CamApsFxController()
     private lateinit var homeAssistantController: HomeAssistantController
+    private lateinit var settingsRepository: SettingsRepository
 
     private val scope = CoroutineScope(Dispatchers.IO)
+    private var notificationTimeoutJob: Job? = null
 
     override fun onCreate() {
         super.onCreate()
         Log.d(TAG, "onCreate: Service creating")
         mainStateProvider.addLog("Service creating")
         homeAssistantController = HomeAssistantController(this)
+        settingsRepository = SettingsRepository(this)
         scope.launch {
             ReinitializationManager.onSuccess.collect {
                 Log.d(TAG, "Re-initializing Home Assistant connection")
@@ -57,14 +62,8 @@ class MainService : NotificationListenerService() {
         Log.d(TAG, "onListenerConnected: Service connected")
         mainStateProvider.addLog("Service connected")
 
-        val channel = NotificationChannel(
-            NOTIFICATION_CHANNEL_ID,
-            getString(R.string.notification_channel_name),
-            NotificationManager.IMPORTANCE_DEFAULT
-        )
-
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.createNotificationChannel(channel)
+        createNotificationChannel(NOTIFICATION_CHANNEL_ID, getString(R.string.notification_channel_name), NotificationManager.IMPORTANCE_DEFAULT)
+        createNotificationChannel(NOTIFICATION_TIMEOUT_CHANNEL_ID, getString(R.string.notification_timeout_channel_name), NotificationManager.IMPORTANCE_HIGH)
 
         val notification = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
             .setContentTitle(getString(R.string.app_name))
@@ -97,16 +96,44 @@ class MainService : NotificationListenerService() {
         Log.d(TAG, "onNotificationPosted: $statusBarNotification")
         val state = camApsFxController.handleNotification(this, statusBarNotification)
         if (state is CamApsFxState.BloodSugar) {
+            notificationTimeoutJob?.cancel()
             scope.launch {
                 homeAssistantController.update(state)
+
+                val timeoutMinutes = settingsRepository.getNotificationTimeoutMinutes()
+                if (timeoutMinutes > 0) {
+                    notificationTimeoutJob = scope.launch {
+                        delay(timeoutMinutes * 60 * 1000L)
+                        sendTimeoutNotification(timeoutMinutes)
+                    }
+                }
             }
         }
+    }
+
+    private fun createNotificationChannel(channelId: String, name: String, importance: Int) {
+        val channel = NotificationChannel(channelId, name, importance)
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(channel)
+    }
+
+    private fun sendTimeoutNotification(timeoutMinutes: Int) {
+        val notification = NotificationCompat.Builder(this, NOTIFICATION_TIMEOUT_CHANNEL_ID)
+            .setContentTitle("No New Readings")
+            .setContentText("No new readings received in the last $timeoutMinutes minutes.")
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .build()
+
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.notify(NOTIFICATION_TIMEOUT_ID, notification)
     }
 
     companion object {
 
         private val TAG = MainService::class.java.simpleName
         private const val NOTIFICATION_CHANNEL_ID = "com.faltenreich.camaps.background_service"
+        private const val NOTIFICATION_TIMEOUT_CHANNEL_ID = "com.faltenreich.camaps.timeout_notification"
         private const val NOTIFICATION_ID = 1
+        private const val NOTIFICATION_TIMEOUT_ID = 2
     }
 }

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
@@ -30,6 +31,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -45,6 +47,7 @@ fun SettingsScreen(
     val context = LocalContext.current
     val uri by viewModel.uri.collectAsState()
     val token by viewModel.token.collectAsState()
+    val notificationTimeoutMinutes by viewModel.notificationTimeoutMinutes.collectAsState()
     val connectionState by viewModel.connectionState.collectAsState()
     val hasPermission by viewModel.hasPermission.collectAsState()
 
@@ -111,6 +114,14 @@ fun SettingsScreen(
                     ConnectionState.Idle -> { /* Do nothing */ }
                 }
             }
+            Spacer(modifier = Modifier.height(16.dp))
+            OutlinedTextField(
+                value = notificationTimeoutMinutes.toString(),
+                onValueChange = viewModel::onNotificationTimeoutMinutesChanged,
+                label = { Text("Notify if no readings in x minutes") },
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+            )
             Spacer(modifier = Modifier.height(16.dp))
             Button(
                 onClick = { viewModel.openNotificationSettings(context as Activity) },

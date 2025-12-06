@@ -31,6 +31,9 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     private val _unitType = MutableStateFlow(settingsRepository.getUnitType())
     val unitType = _unitType.asStateFlow()
 
+    private val _notificationTimeoutMinutes = MutableStateFlow(settingsRepository.getNotificationTimeoutMinutes())
+    val notificationTimeoutMinutes = _notificationTimeoutMinutes.asStateFlow()
+
     private val _connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Idle)
     val connectionState = _connectionState.asStateFlow()
 
@@ -52,6 +55,12 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     fun onUnitTypeChanged(unitType: String) {
         _unitType.value = unitType
         settingsRepository.saveUnitType(unitType)
+    }
+
+    fun onNotificationTimeoutMinutesChanged(minutes: String) {
+        val newMinutes = minutes.toIntOrNull()?.coerceAtLeast(0) ?: 0
+        _notificationTimeoutMinutes.value = newMinutes
+        settingsRepository.saveNotificationTimeoutMinutes(newMinutes)
     }
 
     fun checkPermission(context: Context) {
