@@ -2,6 +2,7 @@ package com.faltenreich.camaps.homeassistant.network
 
 import com.faltenreich.camaps.homeassistant.device.HomeAssistantRegisterDeviceRequestBody
 import com.faltenreich.camaps.homeassistant.device.HomeAssistantRegisterDeviceResponse
+import com.faltenreich.camaps.homeassistant.sensor.HomeAssistantRegisterBinarySensorRequestBody
 import com.faltenreich.camaps.homeassistant.sensor.HomeAssistantRegisterSensorRequestBody
 import com.faltenreich.camaps.homeassistant.sensor.HomeAssistantRegisterSensorResponse
 import com.faltenreich.camaps.homeassistant.sensor.HomeAssistantUpdateSensorRequestBody
@@ -42,6 +43,22 @@ class HomeAssistantClient(
         return networkClient.post(
             url = Url("$host/api/webhook/$webhookId"),
             requestBody = requestBody,
+        )
+    }
+
+    override suspend fun registerBinarySensor(
+        requestBody: HomeAssistantRegisterBinarySensorRequestBody,
+        webhookId: String,
+    ): HomeAssistantRegisterSensorResponse {
+        return networkClient.post(
+            url = Url("$host/api/webhook/$webhookId"),
+            requestBody = requestBody,
+        )
+    }
+
+    override suspend fun getSensorState(sensorId: String) {
+        return networkClient.get(
+            url = Url("$host/api/states/$sensorId"),
         )
     }
 

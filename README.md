@@ -51,4 +51,11 @@ limitations under the License.
 
 ### TODO:
 
-Create dummy entity attached to device to validate webhook/device registration
+Create dummy entity attached to device to validate webhook/device registration:
+    "object_id": "DEVICEID_dummy_entity",
+Or remove the webhook validation as always returns 200 even if no longer valid
+
+Show trending arrow in logs:
+↟↑↗
+  →
+↡↓↘
