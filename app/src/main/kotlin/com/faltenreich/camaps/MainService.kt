@@ -2,9 +2,12 @@ package com.faltenreich.camaps
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.IBinder
+import android.provider.Settings
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Log
@@ -34,6 +37,14 @@ class MainService : NotificationListenerService() {
         super.onCreate()
         Log.d(TAG, "onCreate: Service creating")
         mainStateProvider.addLog("Service creating")
+
+        val componentName = ComponentName(this, MainService::class.java)
+        val enabledListeners = Settings.Secure.getString(contentResolver, "enabled_notification_listeners")
+        if (enabledListeners?.contains(componentName.flattenToString()) != true) {
+            mainStateProvider.addLog("Notification Listener permission not granted. Please enable it in settings.")
+            sendPermissionRequiredNotification()
+        }
+
         homeAssistantController = HomeAssistantController(this)
         settingsRepository = SettingsRepository(this)
         scope.launch {
@@ -61,6 +72,9 @@ class MainService : NotificationListenerService() {
         super.onListenerConnected()
         Log.d(TAG, "onListenerConnected: Service connected")
         mainStateProvider.addLog("Service connected")
+
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.cancel(PERMISSION_REQUIRED_NOTIFICATION_ID)
 
         createNotificationChannel(NOTIFICATION_CHANNEL_ID, getString(R.string.notification_channel_name), NotificationManager.IMPORTANCE_LOW)
         createNotificationChannel(NOTIFICATION_TIMEOUT_CHANNEL_ID, getString(R.string.notification_timeout_channel_name), NotificationManager.IMPORTANCE_HIGH)
@@ -132,12 +146,32 @@ class MainService : NotificationListenerService() {
         notificationManager.notify(NOTIFICATION_TIMEOUT_ID, notification)
     }
 
+    private fun sendPermissionRequiredNotification() {
+        createNotificationChannel(PERMISSION_REQUIRED_CHANNEL_ID, "Action Required", NotificationManager.IMPORTANCE_HIGH)
+
+        val intent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
+        val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+
+        val notification = NotificationCompat.Builder(this, PERMISSION_REQUIRED_CHANNEL_ID)
+            .setContentTitle(getString(R.string.app_name))
+            .setContentText("Permission Required: Notification access needed for app to function.")
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+            .build()
+
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.notify(PERMISSION_REQUIRED_NOTIFICATION_ID, notification)
+    }
+
     companion object {
 
         private val TAG = MainService::class.java.simpleName
         private const val NOTIFICATION_CHANNEL_ID = "com.faltenreich.camaps.background_service"
         private const val NOTIFICATION_TIMEOUT_CHANNEL_ID = "com.faltenreich.camaps.timeout_notification"
+        private const val PERMISSION_REQUIRED_CHANNEL_ID = "com.faltenreich.camaps.permission_required"
         private const val NOTIFICATION_ID = 1
         private const val NOTIFICATION_TIMEOUT_ID = 2
+        private const val PERMISSION_REQUIRED_NOTIFICATION_ID = 3
     }
 }
