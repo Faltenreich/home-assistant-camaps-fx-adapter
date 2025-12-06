@@ -5,18 +5,20 @@
 This app reads blood sugar values from CamAPS FX by observing its notifications and sends them to the HomeAssistant API.
 This project serves as showcase for a blog post on
 [writingbits.de](https://writingbits.de/2025/01/06/reading-android-notifications-with-custom-views-using-reflection.html).
-
+This app will run in the background and constantly send your readings to home assistant.
+Support for mmol/L and mg/dL.
 
 ### Build
 
-APK: `gradlew.bat assembleDebug`
+debug-app.apk: `gradlew.bat assembleDebug`
 
 ### Setup
 
-1. Create [long-lived access token](https://developers.home-assistant.io/docs/auth_api/#long-lived-access-token) for Home Assistant
-2. Compile and run project, local Home Assistant instance will be used: http://homeassistant.local:8123
-3. Configure settings in app for home assistant uri and long lived access token.
-4. Allow notification access permissions
+1. Compile and run project
+2. Configure settings in app for home assistant uri and long lived access token.
+    - Default Home Assistant instance will be used: http://homeassistant.local:8123, set this to your Home Assistant URI
+    - Create a [long-lived access token](https://developers.home-assistant.io/docs/auth_api/#long-lived-access-token) for Home Assistant
+3. Allow notification access permissions
 
 ### Third-party licenses
 
@@ -48,14 +50,3 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-
-### TODO:
-
-Create dummy entity attached to device to validate webhook/device registration:
-    "object_id": "DEVICEID_dummy_entity",
-Or remove the webhook validation as always returns 200 even if no longer valid
-
-Show trending arrow in logs:
-↟↑↗
-  →
-↡↓↘
