@@ -33,20 +33,32 @@ class CamApsFxNotificationMapper {
 
             val imageViews = mutableListOf<Int>()
             findImageViews(view, imageViews)
-            Log.d(TAG, "Found image resource IDs in notification: ${imageViews.joinToString()}")
+            val trendImageResourceIds =
+                CamApsFxState.BloodSugar.Trend.entries.map { it.imageResourceId }
+            val unknownImageResourceIds =
+                imageViews.filter { it !in CamApsFxState.BloodSugar.LOGO_IMAGE_RESOURCE_IDS && it !in trendImageResourceIds }
+            if (unknownImageResourceIds.isNotEmpty()) {
+                Log.d(
+                    TAG,
+                    "Found unknown image resource IDs in notification: ${unknownImageResourceIds.joinToString()}"
+                )
+            }
+            val trend = CamApsFxState.BloodSugar.Trend.entries
+                .firstOrNull { trend -> imageViews.any { it == trend.imageResourceId } }
+                ?: CamApsFxState.BloodSugar.Trend.UNKNOWN
 
             val value = textViews.mapNotNull { it.replace(',', '.').toFloatOrNull() }.firstOrNull()
             val unit = textViews.firstOrNull { it.equals("mmol/L", ignoreCase = true) || it.equals("mg/dL", ignoreCase = true) }
-            val trend = CamApsFxState.BloodSugar.Trend.entries.firstOrNull { trend -> imageViews.any { it == trend.imageResourceId } }
-            val isOff = textViews.any { it.equals("Off", ignoreCase = true) || it.equals("Aus", ignoreCase = true) }
-            val isStarting = textViews.any { it.equals("Starting", ignoreCase = true) || it.equals("Starten", ignoreCase = true) }
 
             return when {
                 value != null && unit != null -> {
-                    CamApsFxState.BloodSugar(value, unit, trend)
+                    Log.d(TAG, "Current reading: $value $unit")
+                    try {
+                        CamApsFxState.BloodSugar(value, unit, trend)
+                    } catch (e: Exception) {
+                        CamApsFxState.Error("Failed to send reading: $value $unit")
+                    }
                 }
-                isStarting -> CamApsFxState.Starting
-                isOff -> CamApsFxState.Off
                 else -> {
                     CamApsFxState.Error(
                         message = "Could not determine state from notification: ${textViews.joinToString()}",

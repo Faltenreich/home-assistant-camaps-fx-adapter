@@ -220,7 +220,7 @@ class HomeAssistantController(context: Context) {
                     webhookId = webhookId,
                 )
                 Log.d(TAG, "Sensor updated")
-                mainStateProvider.setHomeAssistantState(HomeAssistantState.UpdatedSensor(HomeAssistantData.BloodSugar(data.value, data.unitOfMeasurement)))
+                mainStateProvider.setHomeAssistantState(HomeAssistantState.UpdatedSensor(HomeAssistantData.BloodSugar(data.value, data.unitOfMeasurement, data.trend)))
             } catch (exception: Exception) {
                 Log.e(TAG, "Sensor could not be updated: $exception")
                 mainStateProvider.setHomeAssistantState(

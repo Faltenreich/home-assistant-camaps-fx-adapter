@@ -13,7 +13,10 @@ sealed interface CamApsFxState {
         val unitOfMeasurement: String,
         val trend: Trend?,
     ) : CamApsFxState {
-        // LOGO: 2131230904
+        companion object {
+            val LOGO_IMAGE_RESOURCE_IDS = listOf(2131230904, 2131230907)
+        }
+
         enum class Trend(val imageResourceId: Int) {
             RISING_FAST(-1), // TODO
             RISING(2131230960),
@@ -22,6 +25,7 @@ sealed interface CamApsFxState {
             DROPPING_SLOW(2131230942),
             DROPPING(2131230949),
             DROPPING_FAST(2131230946),
+            UNKNOWN(-1),
         }
     }
 

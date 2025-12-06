@@ -16,8 +16,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 class MainService : NotificationListenerService() {
@@ -33,23 +31,6 @@ class MainService : NotificationListenerService() {
         Log.d(TAG, "onCreate: Service creating")
         mainStateProvider.addLog("Service creating")
         homeAssistantController = HomeAssistantController(this)
-        scope.launch {
-            mainStateProvider.state
-                .map { it.camApsFxState }
-                .distinctUntilChanged()
-                .collect { state ->
-                    when (state) {
-                        is CamApsFxState.Blank -> Unit
-                        is CamApsFxState.Off -> Unit // TODO
-                        is CamApsFxState.Starting -> Unit // TODO
-                        is CamApsFxState.BloodSugar -> {
-                            homeAssistantController.update(state)
-                        }
-                        is CamApsFxState.Error -> Unit // TODO
-                    }
-                }
-        }
-
         scope.launch {
             ReinitializationManager.onSuccess.collect {
                 Log.d(TAG, "Re-initializing Home Assistant connection")
@@ -114,7 +95,12 @@ class MainService : NotificationListenerService() {
 
     override fun onNotificationPosted(statusBarNotification: StatusBarNotification?) {
         Log.d(TAG, "onNotificationPosted: $statusBarNotification")
-        camApsFxController.handleNotification(this, statusBarNotification)
+        val state = camApsFxController.handleNotification(this, statusBarNotification)
+        if (state is CamApsFxState.BloodSugar) {
+            scope.launch {
+                homeAssistantController.update(state)
+            }
+        }
     }
 
     companion object {

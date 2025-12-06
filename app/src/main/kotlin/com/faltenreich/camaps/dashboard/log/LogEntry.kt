@@ -1,5 +1,6 @@
 package com.faltenreich.camaps.dashboard.log
 
+import com.faltenreich.camaps.camaps.CamApsFxState
 import com.faltenreich.camaps.homeassistant.HomeAssistantData
 import com.faltenreich.camaps.homeassistant.HomeAssistantState
 import java.text.SimpleDateFormat
@@ -24,7 +25,7 @@ data class LogEntry(
                 is HomeAssistantState.UpdatedSensor -> {
                     val bloodSugar = homeAssistantState.data as? HomeAssistantData.BloodSugar
                     if (bloodSugar != null) {
-                        "Sensor updated: ${bloodSugar.value} ${bloodSugar.unitOfMeasurement}"
+                        "Sensor updated: ${bloodSugar.value} ${bloodSugar.unitOfMeasurement} ${bloodSugar.trend.toArrow()}".trim()
                     } else {
                         "Sensor updated with unknown data"
                     }
@@ -43,6 +44,17 @@ data class LogEntry(
                 source = "System",
                 message = message,
             )
+        }
+
+        private fun CamApsFxState.BloodSugar.Trend?.toArrow(): String = when (this) {
+            CamApsFxState.BloodSugar.Trend.RISING_FAST -> "↟"
+            CamApsFxState.BloodSugar.Trend.RISING -> "↑"
+            CamApsFxState.BloodSugar.Trend.RISING_SLOW -> "↗"
+            CamApsFxState.BloodSugar.Trend.STEADY -> "→"
+            CamApsFxState.BloodSugar.Trend.DROPPING_SLOW -> "↘"
+            CamApsFxState.BloodSugar.Trend.DROPPING -> "↓"
+            CamApsFxState.BloodSugar.Trend.DROPPING_FAST -> "↡"
+            else -> ""
         }
     }
 }
