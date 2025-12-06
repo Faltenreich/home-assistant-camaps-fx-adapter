@@ -96,6 +96,9 @@ class MainService : NotificationListenerService() {
         Log.d(TAG, "onNotificationPosted: $statusBarNotification")
         val state = camApsFxController.handleNotification(this, statusBarNotification)
         if (state is CamApsFxState.BloodSugar) {
+            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.cancel(NOTIFICATION_TIMEOUT_ID)
+
             notificationTimeoutJob?.cancel()
             scope.launch {
                 homeAssistantController.update(state)
@@ -119,9 +122,10 @@ class MainService : NotificationListenerService() {
 
     private fun sendTimeoutNotification(timeoutMinutes: Int) {
         val notification = NotificationCompat.Builder(this, NOTIFICATION_TIMEOUT_CHANNEL_ID)
-            .setContentTitle("No New Readings")
+            .setContentTitle(getString(R.string.app_name))
             .setContentText("No new readings received in the last $timeoutMinutes minutes.")
             .setSmallIcon(R.mipmap.ic_launcher)
+            .setOngoing(true)
             .build()
 
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
