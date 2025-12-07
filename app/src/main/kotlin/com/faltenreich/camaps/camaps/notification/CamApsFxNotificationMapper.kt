@@ -34,7 +34,7 @@ class CamApsFxNotificationMapper {
             val imageViews = mutableListOf<Int>()
             findImageViews(view, imageViews)
             val trendImageResourceIds =
-                CamApsFxState.BloodSugar.Trend.entries.map { it.imageResourceId }
+                CamApsFxState.BloodSugar.Trend.entries.flatMap { it.imageResourceIds }
             val unknownImageResourceIds =
                 imageViews.filter { it !in CamApsFxState.BloodSugar.LOGO_IMAGE_RESOURCE_IDS && it !in trendImageResourceIds }
             if (unknownImageResourceIds.isNotEmpty()) {
@@ -44,7 +44,7 @@ class CamApsFxNotificationMapper {
                 )
             }
             val trend = CamApsFxState.BloodSugar.Trend.entries
-                .firstOrNull { trend -> imageViews.any { it == trend.imageResourceId } }
+                .firstOrNull { trend -> imageViews.any { it in trend.imageResourceIds } }
                 ?: CamApsFxState.BloodSugar.Trend.UNKNOWN
 
             val value = textViews.mapNotNull { it.replace(',', '.').toFloatOrNull() }.firstOrNull()
