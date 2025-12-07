@@ -136,14 +136,23 @@ class CamApsFxNotificationMapper {
     // --- pHash and Traversal Helpers ---
 
     /**
-     * Computes a 256-bit perceptual hash for a bitmap.
+     * Computes a 256-bit perceptual hash for a bitmap after cropping to the center 50%.
      */
     private fun Bitmap.pHash(): ByteArray {
+        // 1. Crop to the center 50% of the image.
+        val cropWidth = width / 2
+        val cropHeight = height / 2
+        val startX = width / 4
+        val startY = height / 4
+        val croppedBitmap = Bitmap.createBitmap(this, startX, startY, cropWidth, cropHeight)
+
+        // 2. Resize the cropped image to a small, fixed size (16x16).
         val size = 16
-        val smallBitmap = Bitmap.createScaledBitmap(this, size, size, true)
+        val smallBitmap = Bitmap.createScaledBitmap(croppedBitmap, size, size, true)
         val hashBits = BooleanArray(size * size)
         var averageLuminance = 0.0
 
+        // 3. Convert to grayscale and calculate the average pixel value.
         val luminances = IntArray(size * size)
         for (y in 0 until size) {
             for (x in 0 until size) {
@@ -155,10 +164,12 @@ class CamApsFxNotificationMapper {
         }
         averageLuminance /= (size * size)
 
+        // 4. For each pixel, create a bit: 1 if brighter than average, 0 if darker.
         for (i in 0 until (size * size)) {
             hashBits[i] = luminances[i] > averageLuminance
         }
 
+        // 5. Pack the bits into a ByteArray.
         val hashBytes = ByteArray(size * size / 8)
         for (i in hashBytes.indices) {
             var byte = 0
