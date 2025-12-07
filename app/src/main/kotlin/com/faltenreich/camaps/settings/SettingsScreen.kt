@@ -42,6 +42,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 @Composable
 fun SettingsScreen(
     onBack: () -> Unit,
+    onNavigateToArrowMapping: () -> Unit,
     viewModel: SettingsViewModel = viewModel(),
 ) {
     val context = LocalContext.current
@@ -122,6 +123,13 @@ fun SettingsScreen(
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(
+                onClick = onNavigateToArrowMapping,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Map trending arrows")
+            }
             Spacer(modifier = Modifier.height(16.dp))
             Button(
                 onClick = { viewModel.openNotificationSettings(context as Activity) },
