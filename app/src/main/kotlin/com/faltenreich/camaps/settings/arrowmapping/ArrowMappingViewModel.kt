@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.lifecycle.AndroidViewModel
 import com.faltenreich.camaps.camaps.CamApsFxState
+import com.faltenreich.camaps.camaps.notification.TrendMappingManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.io.File
@@ -24,11 +25,8 @@ class ArrowMappingViewModel(application: Application) : AndroidViewModel(applica
         val mappings = mutableListOf<ArrowMapping>()
 
         arrowsDir?.listFiles { _, name -> name.endsWith(".png") }?.forEach { file ->
-            val trend = try {
-                CamApsFxState.BloodSugar.Trend.valueOf(file.nameWithoutExtension.substringBefore("_").uppercase())
-            } catch (e: Exception) {
-                CamApsFxState.BloodSugar.Trend.UNKNOWN
-            }
+            // Use the centralized, correct parser
+            val trend = TrendMappingManager.parseTrendFromFileName(file.nameWithoutExtension)
             val bitmap = BitmapFactory.decodeFile(file.absolutePath)
             mappings.add(ArrowMapping(file, bitmap, trend))
         }
@@ -37,16 +35,16 @@ class ArrowMappingViewModel(application: Application) : AndroidViewModel(applica
     }
 
     fun onTrendSelected(mapping: ArrowMapping, newTrend: CamApsFxState.BloodSugar.Trend) {
-        val newFileName = if (newTrend == CamApsFxState.BloodSugar.Trend.UNKNOWN) {
-            "unknown_${System.currentTimeMillis()}.png"
-        } else if (newTrend == CamApsFxState.BloodSugar.Trend.IGNORE) {
-            "ignore_${System.currentTimeMillis()}.png"
-        } else {
-            "${newTrend.name.lowercase()}_${System.currentTimeMillis()}.png"
+        val newFileNamePrefix = when (newTrend) {
+            CamApsFxState.BloodSugar.Trend.UNKNOWN -> "unknown"
+            CamApsFxState.BloodSugar.Trend.IGNORE -> "ignore"
+            else -> newTrend.name.lowercase()
         }
+        val newFileName = "${newFileNamePrefix}_${System.currentTimeMillis()}.png"
 
         val newFile = File(mapping.file.parent, newFileName)
         if (mapping.file.renameTo(newFile)) {
+            TrendMappingManager.invalidate()
             loadArrowMappings() // Reload to reflect the change
         }
     }
