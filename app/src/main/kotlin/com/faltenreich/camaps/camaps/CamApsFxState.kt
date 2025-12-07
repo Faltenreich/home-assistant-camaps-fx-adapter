@@ -1,11 +1,12 @@
 package com.faltenreich.camaps.camaps
 
+import androidx.annotation.DrawableRes
+import com.faltenreich.camaps.R
+
 sealed interface CamApsFxState {
 
     data object Blank : CamApsFxState
-
     data object Off : CamApsFxState
-
     data object Starting : CamApsFxState
 
     data class BloodSugar(
@@ -14,30 +15,50 @@ sealed interface CamApsFxState {
         val trend: Trend?,
     ) : CamApsFxState {
         companion object {
+            /**
+             * These are the various logos for the CamAPS FX app itself, not trend arrows.
+             * Place your logo image files (e.g., 'logo_green.png') in the `res/drawable/` folder,
+             * then uncomment and add their `R.drawable.*` IDs to this list.
+             */
+            @DrawableRes
             val LOGO_IMAGE_RESOURCE_IDS = listOf(
-                2131230905, /* Auto mode gray/off */
-                2131230904, /* Auto mode orange/starting/stopping/attempting */
-                2131230907, /* Auto mode green/on */
+                 R.drawable.logo_auto_mode_on,
+                // R.drawable.logo_auto_mode_off,
+                // R.drawable.logo_auto_mode_starting,
             )
         }
 
-        enum class Trend(val imageResourceIds: List<Int>) {
+        /**
+         * This enum maps a trend to the list of official image assets in res/drawable.
+         * Place your arrow image files (e.g., 'arrow_stable_yellow.png') in `res/drawable/`
+         * and add their `R.drawable.*` IDs here.
+         */
+        enum class Trend(@DrawableRes val imageResourceIds: List<Int>) {
             RISING_FAST(listOf(
-                2131230956, /* Yellow? */
+                // R.drawable.arrow_rising_fast
             )),
-            RISING(listOf(2131230960)),
+            RISING(listOf(
+                // R.drawable.arrow_rising
+            )),
             RISING_SLOW(listOf(
-                2131230954, /* Gray */
-                2131230953, /* Yellow */
+                // R.drawable.arrow_rising_slow_gray,
+                // R.drawable.arrow_rising_slow_yellow
             )),
             STEADY(listOf(
-                2131230951, /* Gray */
-                2131230950, /* Yellow */
+                 R.drawable.arrow_steady_gray,
+                 R.drawable.arrow_steady_yellow,
+                // R.drawable.arrow_stable_yellow // Your new arrow
             )),
-            DROPPING_SLOW(listOf(2131230942)),
-            DROPPING(listOf(2131230949)),
-            DROPPING_FAST(listOf(2131230946)),
-            UNKNOWN(listOf(-1)),
+            DROPPING_SLOW(listOf(
+                // R.drawable.arrow_dropping_slow
+            )),
+            DROPPING(listOf(
+                // R.drawable.arrow_dropping
+            )),
+            DROPPING_FAST(listOf(
+                // R.drawable.arrow_dropping_fast
+            )),
+            UNKNOWN(listOf());
         }
     }
 
