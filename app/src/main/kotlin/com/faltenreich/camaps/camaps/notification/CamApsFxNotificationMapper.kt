@@ -20,8 +20,8 @@ import java.io.FileOutputStream
 class CamApsFxNotificationMapper {
 
     // Cache for our labeled arrow pHashes, loaded from the filesystem
-    private val labeledHashes = mutableMapOf<CamApsFxState.BloodSugar.Trend, MutableList<Long>>()
-    private val HAMMING_DISTANCE_THRESHOLD = 2
+    private val labeledHashes = mutableMapOf<CamApsFxState.BloodSugar.Trend, MutableList<ByteArray>>()
+    private val HAMMING_DISTANCE_THRESHOLD = 4
 
     operator fun invoke(context: Context, statusBarNotification: StatusBarNotification): CamApsFxState? {
         val camApsFxNotification = statusBarNotification
@@ -98,7 +98,7 @@ class CamApsFxNotificationMapper {
                 val trend = CamApsFxState.BloodSugar.Trend.valueOf(trendName)
                 val bitmap = BitmapFactory.decodeFile(file.absolutePath)
                 val pHash = bitmap.pHash()
-                if (labeledHashes.values.flatten().none { it == pHash }) {
+                if (labeledHashes.values.flatten().none { it.contentEquals(pHash) }) {
                     labeledHashes.getOrPut(trend) { mutableListOf() }.add(pHash)
                     Log.d(TAG, "Loaded user-labeled trend from file: ${file.name}")
                 }
@@ -136,41 +136,52 @@ class CamApsFxNotificationMapper {
     // --- pHash and Traversal Helpers ---
 
     /**
-     * Computes a 64-bit "average hash" (aHash) for a bitmap.
-     * This is a simple type of perceptual hash resistant to minor variations.
+     * Computes a 256-bit perceptual hash for a bitmap.
      */
-    private fun Bitmap.pHash(): Long {
-        val size = 8
+    private fun Bitmap.pHash(): ByteArray {
+        val size = 16
         val smallBitmap = Bitmap.createScaledBitmap(this, size, size, true)
-        var hash: Long = 0
-        var averagePixelValue = 0
+        val hashBits = BooleanArray(size * size)
+        var averageLuminance = 0.0
 
+        val luminances = IntArray(size * size)
         for (y in 0 until size) {
             for (x in 0 until size) {
                 val pixel = smallBitmap.getPixel(x, y)
-                val luminance = (0.299 * Color.red(pixel) + 0.587 * Color.green(pixel) + 0.114 * Color.blue(pixel)).toInt()
-                averagePixelValue += luminance
+                val luminance = (0.299 * Color.red(pixel) + 0.587 * Color.green(pixel) + 0.114 * Color.blue(pixel))
+                luminances[y * size + x] = luminance.toInt()
+                averageLuminance += luminance
             }
         }
-        averagePixelValue /= (size * size)
+        averageLuminance /= (size * size)
 
-        for (y in 0 until size) {
-            for (x in 0 until size) {
-                val pixel = smallBitmap.getPixel(x, y)
-                val luminance = (0.299 * Color.red(pixel) + 0.587 * Color.green(pixel) + 0.114 * Color.blue(pixel)).toInt()
-                hash = (hash shl 1) or if (luminance > averagePixelValue) 1 else 0
-            }
+        for (i in 0 until (size * size)) {
+            hashBits[i] = luminances[i] > averageLuminance
         }
-        return hash
+
+        val hashBytes = ByteArray(size * size / 8)
+        for (i in hashBytes.indices) {
+            var byte = 0
+            for (j in 0 until 8) {
+                if (hashBits[i * 8 + j]) {
+                    byte = byte or (1 shl (7 - j))
+                }
+            }
+            hashBytes[i] = byte.toByte()
+        }
+        return hashBytes
     }
 
-
     /**
-     * Calculates the Hamming distance between two 64-bit hashes.
-     * This counts how many bits are different.
+     * Calculates the Hamming distance between two pHashes (ByteArray).
      */
-    private fun Long.hammingDistance(other: Long): Int {
-        return java.lang.Long.bitCount(this xor other)
+    private fun ByteArray.hammingDistance(other: ByteArray): Int {
+        if (this.size != other.size) return Int.MAX_VALUE
+        var distance = 0
+        for (i in this.indices) {
+            distance += Integer.bitCount((this[i].toInt() xor other[i].toInt()))
+        }
+        return distance
     }
 
     private fun findTextViews(view: View, out: MutableList<String>) {
