@@ -114,16 +114,17 @@ class MainService : NotificationListenerService() {
             notificationManager.cancel(NOTIFICATION_TIMEOUT_ID)
 
             notificationTimeoutJob?.cancel()
+
+            val timeoutMinutes = settingsRepository.getNotificationTimeoutMinutes()
+            if (timeoutMinutes > 0) {
+                notificationTimeoutJob = scope.launch {
+                    delay(timeoutMinutes * 60 * 1000L)
+                    sendTimeoutNotification(timeoutMinutes)
+                }
+            }
+
             scope.launch {
                 homeAssistantController.update(state)
-
-                val timeoutMinutes = settingsRepository.getNotificationTimeoutMinutes()
-                if (timeoutMinutes > 0) {
-                    notificationTimeoutJob = scope.launch {
-                        delay(timeoutMinutes * 60 * 1000L)
-                        sendTimeoutNotification(timeoutMinutes)
-                    }
-                }
             }
         }
     }
