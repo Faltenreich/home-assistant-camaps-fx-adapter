@@ -1,5 +1,8 @@
 package com.faltenreich.camaps.camaps
 
+import androidx.annotation.DrawableRes
+import com.faltenreich.camaps.R
+
 sealed interface CamApsFxState {
 
     data object Blank : CamApsFxState
@@ -13,20 +16,46 @@ sealed interface CamApsFxState {
     ) : CamApsFxState {
 
         /**
-         * This enum represents the possible trend directions.
-         * The mapping to specific arrow images is now handled entirely by the
-         * file-based system in the 'arrows' directory.
+         * This enum maps a trend to the list of official SVG/VectorDrawable assets
+         * bundled in the app's `res/drawable` folder.
          */
-        enum class Trend {
-            RISING_FAST,
-            RISING,
-            RISING_SLOW,
-            STEADY,
-            DROPPING_SLOW,
-            DROPPING,
-            DROPPING_FAST,
-            UNKNOWN,
-            IGNORE;
+        enum class Trend(@DrawableRes val imageResourceIds: List<Int>) {
+            RISING_FAST(listOf(
+                R.drawable.rising_fast_yellow,
+                R.drawable.rising_fast_red,
+                R.drawable.rising_fast_gray,
+            )),
+            RISING(listOf(
+                R.drawable.rising_yellow,
+                R.drawable.rising_red,
+                R.drawable.rising_gray,
+            )),
+            RISING_SLOW(listOf(
+                R.drawable.rising_slow_yellow,
+                R.drawable.rising_slow_red,
+                R.drawable.rising_slow_gray,
+            )),
+            STEADY(listOf(
+                R.drawable.steady_yellow,
+                R.drawable.steady_red,
+                R.drawable.steady_gray,
+            )),
+            DROPPING_SLOW(listOf(
+                R.drawable.dropping_slow_yellow,
+                R.drawable.dropping_slow_red,
+                R.drawable.dropping_slow_gray,
+            )),
+            DROPPING(listOf(
+                R.drawable.dropping_yellow,
+                R.drawable.dropping_red,
+                R.drawable.dropping_gray,
+            )),
+            DROPPING_FAST(listOf(
+                R.drawable.dropping_fast_yellow,
+                R.drawable.dropping_fast_red,
+                R.drawable.dropping_fast_gray,
+            )),
+            UNKNOWN(listOf());
         }
     }
 

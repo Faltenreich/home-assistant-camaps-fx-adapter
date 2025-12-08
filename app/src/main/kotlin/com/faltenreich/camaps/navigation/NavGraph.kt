@@ -7,7 +7,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.faltenreich.camaps.dashboard.Dashboard
 import com.faltenreich.camaps.settings.SettingsScreen
-import com.faltenreich.camaps.settings.arrowmapping.ArrowMappingScreen
 
 @Composable
 fun NavGraph() {
@@ -18,13 +17,7 @@ fun NavGraph() {
             Dashboard(onSettingsClick = { navController.navigate("settings") })
         }
         composable("settings") {
-            SettingsScreen(
-                onBack = { navController.popBackStack() },
-                onNavigateToArrowMapping = { navController.navigate("arrow_mapping") }
-            )
-        }
-        composable("arrow_mapping") {
-            ArrowMappingScreen(onBack = { navController.popBackStack() })
+            SettingsScreen(onBack = { navController.popBackStack() })
         }
     }
 }

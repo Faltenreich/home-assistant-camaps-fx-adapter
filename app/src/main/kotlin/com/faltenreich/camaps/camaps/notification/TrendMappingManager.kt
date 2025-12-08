@@ -2,105 +2,87 @@ package com.faltenreich.camaps.camaps.notification
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.util.Log
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toBitmap
 import com.faltenreich.camaps.camaps.CamApsFxState
-import java.io.File
-import java.io.FileOutputStream
 
 object TrendMappingManager {
 
     private val TAG = TrendMappingManager::class.java.simpleName
-    private val labeledHashes = mutableMapOf<CamApsFxState.BloodSugar.Trend, MutableList<ByteArray>>()
+    // Cache for pHashes, keyed by the size they were rendered at.
+    private val cachedHashes = mutableMapOf<Int, Map<CamApsFxState.BloodSugar.Trend, List<ByteArray>>>()
+    private var cachedIconSize = 0
     private const val HAMMING_DISTANCE_THRESHOLD = 4
 
-    fun invalidate() {
-        labeledHashes.clear()
-    }
-
+    /**
+     * Matches a bitmap from a notification against our cached, size-matched drawable hashes.
+     */
     fun matchTrend(bitmap: Bitmap, context: Context): CamApsFxState.BloodSugar.Trend {
-        if (labeledHashes.isEmpty()) {
-            loadAllLabeledBitmaps(context)
+        // If the notification icon size changes, we must invalidate our cache and re-render.
+        if (cachedIconSize != bitmap.width) {
+            Log.d(TAG, "Notification icon size changed from $cachedIconSize to ${bitmap.width}. Re-rendering hashes.")
+            cachedHashes.clear()
+            cachedIconSize = bitmap.width
         }
+
+        // If the cache is empty for this size, build it.
+        if (cachedHashes[cachedIconSize] == null) {
+            buildHashCacheForSize(context, cachedIconSize)
+        }
+
+        val hashesForSize = cachedHashes[cachedIconSize] ?: return CamApsFxState.BloodSugar.Trend.UNKNOWN
         val extractedHash = bitmap.pHash()
-        for ((trend, hashes) in labeledHashes) {
+
+        for ((trend, hashes) in hashesForSize) {
             if (hashes.any { labeledHash -> labeledHash.hammingDistance(extractedHash) <= HAMMING_DISTANCE_THRESHOLD }) {
                 return trend
             }
         }
+
         return CamApsFxState.BloodSugar.Trend.UNKNOWN
     }
 
-    fun saveNewBitmap(context: Context, bitmap: Bitmap) {
-        val arrowsDir = context.getExternalFilesDir("arrows") ?: return
-        if (!arrowsDir.exists()) arrowsDir.mkdirs()
-
-        val newHash = bitmap.pHash()
-        val alreadyExists = labeledHashes.values.flatten().any { knownHash ->
-            knownHash.hammingDistance(newHash) <= HAMMING_DISTANCE_THRESHOLD
-        }
-
-        if (!alreadyExists) {
-            val fileName = "unknown_${System.currentTimeMillis()}.png"
-            val file = File(arrowsDir, fileName)
-            try {
-                FileOutputStream(file).use { out ->
-                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
-                    Log.i(TAG, "SAVED NEW UNKNOWN ARROW to: ${file.absolutePath}. Please rename it to label it.")
-                }
-                labeledHashes.getOrPut(CamApsFxState.BloodSugar.Trend.UNKNOWN) { mutableListOf() }.add(newHash)
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to save new bitmap", e)
-            }
-        }
-    }
-
-    internal fun parseTrendFromFileName(fileName: String): CamApsFxState.BloodSugar.Trend {
-        val cleanFileName = fileName.lowercase()
-        var longestMatch = ""
-        var matchedTrend = CamApsFxState.BloodSugar.Trend.UNKNOWN
-
-        for (trendEnum in CamApsFxState.BloodSugar.Trend.values()) {
-            val trendPrefix = trendEnum.name.lowercase()
-            if (cleanFileName.startsWith(trendPrefix)) {
-                if (trendPrefix.length > longestMatch.length) {
-                    longestMatch = trendPrefix
-                    matchedTrend = trendEnum
+    /**
+     * Renders all our vector drawables to a specific size, computes their pHashes, and caches the results.
+     */
+    private fun buildHashCacheForSize(context: Context, size: Int) {
+        Log.d(TAG, "Building pHash cache for icon size: $size")
+        val newHashes = mutableMapOf<CamApsFxState.BloodSugar.Trend, MutableList<ByteArray>>()
+        for (trend in CamApsFxState.BloodSugar.Trend.values()) {
+            for (resId in trend.imageResourceIds) {
+                try {
+                    val drawable = ContextCompat.getDrawable(context, resId)
+                    if (drawable != null) {
+                        // Render the vector to the EXACT size of the notification icon
+                        val bitmap = drawable.toBitmap(size, size)
+                        val pHash = bitmap.pHash()
+                        newHashes.getOrPut(trend) { mutableListOf() }.add(pHash)
+                    }
+                } catch (e: Exception) {
+                    Log.w(TAG, "Could not load or hash drawable resource for trend: $trend")
                 }
             }
         }
-        return matchedTrend
-    }
-
-    private fun loadAllLabeledBitmaps(context: Context) {
-        Log.d(TAG, "Loading and hashing all labeled trend bitmaps from filesystem...")
-        val arrowsDir = context.getExternalFilesDir("arrows")
-        arrowsDir?.listFiles { _, name -> name.endsWith(".png") }?.forEach { file ->
-            try {
-                val trend = parseTrendFromFileName(file.nameWithoutExtension)
-                val bitmap = BitmapFactory.decodeFile(file.absolutePath)
-                val pHash = bitmap.pHash()
-                if (labeledHashes.values.flatten().none { it.contentEquals(pHash) }) {
-                    labeledHashes.getOrPut(trend) { mutableListOf() }.add(pHash)
-                    Log.d(TAG, "Loaded user-labeled trend from file: ${file.name}")
-                }
-            } catch (e: Exception) { /* Ignore improperly named files */ }
-        }
+        cachedHashes[size] = newHashes
     }
 
     private fun Bitmap.pHash(): ByteArray {
+        // 1. Crop to the center 50% of the image.
         val cropWidth = width / 2
         val cropHeight = height / 2
         val startX = width / 4
         val startY = height / 4
         val croppedBitmap = Bitmap.createBitmap(this, startX, startY, cropWidth, cropHeight)
 
+        // 2. Resize the cropped image to a small, fixed size (16x16).
         val size = 16
         val smallBitmap = Bitmap.createScaledBitmap(croppedBitmap, size, size, true)
         val hashBits = BooleanArray(size * size)
         var averageLuminance = 0.0
 
+        // 3. Convert to grayscale and calculate the average pixel value.
         val luminances = IntArray(size * size)
         for (y in 0 until size) {
             for (x in 0 until size) {
@@ -112,10 +94,12 @@ object TrendMappingManager {
         }
         averageLuminance /= (size * size)
 
+        // 4. For each pixel, create a bit: 1 if brighter than average, 0 if darker.
         for (i in 0 until (size * size)) {
             hashBits[i] = luminances[i] > averageLuminance
         }
 
+        // 5. Pack the bits into a ByteArray.
         val hashBytes = ByteArray(size * size / 8)
         for (i in hashBytes.indices) {
             var byte = 0

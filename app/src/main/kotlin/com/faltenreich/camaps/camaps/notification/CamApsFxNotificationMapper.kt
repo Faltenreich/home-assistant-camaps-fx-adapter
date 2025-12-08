@@ -1,5 +1,3 @@
-@file:Suppress("DEPRECATION")
-
 package com.faltenreich.camaps.camaps.notification
 
 import android.content.Context
@@ -32,21 +30,16 @@ class CamApsFxNotificationMapper {
             val textViews = mutableListOf<String>()
             findTextViews(view, textViews)
 
-            val arrowBitmaps = mutableListOf<Bitmap>()
-            findImageViewBitmaps(view, arrowBitmaps)
+            val extractedBitmaps = mutableListOf<Bitmap>()
+            findImageViewBitmaps(view, extractedBitmaps)
 
+            // We only care about the second image, which should be the trend arrow.
+            val trendBitmap = extractedBitmaps.getOrNull(1)
             var detectedTrend = CamApsFxState.BloodSugar.Trend.UNKNOWN
 
-            for (bitmap in arrowBitmaps) {
-                val matchedTrend = TrendMappingManager.matchTrend(bitmap, context)
-
-                if (matchedTrend == CamApsFxState.BloodSugar.Trend.UNKNOWN) {
-                    TrendMappingManager.saveNewBitmap(context, bitmap)
-                } else if (matchedTrend != CamApsFxState.BloodSugar.Trend.IGNORE) {
-                    detectedTrend = matchedTrend
-                    Log.d(TAG, "Notification bitmap matched Trend: $matchedTrend")
-                    break
-                }
+            if (trendBitmap != null) {
+                detectedTrend = TrendMappingManager.matchTrend(trendBitmap, context)
+                Log.d(TAG, "Notification bitmap matched Trend: $detectedTrend")
             }
 
             val value = textViews.mapNotNull { it.replace(',', '.').toFloatOrNull() }.firstOrNull()
