@@ -50,3 +50,4 @@ output-metadata.json
 
 .kotlin/
 .kotlin/*
+/.vscode
