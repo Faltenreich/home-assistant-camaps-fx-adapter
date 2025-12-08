@@ -14,7 +14,7 @@ object TrendMappingManager {
     // Cache for pHashes, keyed by the size they were rendered at.
     private val cachedHashes = mutableMapOf<Int, Map<CamApsFxState.BloodSugar.Trend, List<ByteArray>>>()
     private var cachedIconSize = 0
-    private const val HAMMING_DISTANCE_THRESHOLD = 4
+    private const val HAMMING_DISTANCE_THRESHOLD = 1
 
     /**
      * Matches a bitmap from a notification against our cached, size-matched drawable hashes.
@@ -34,6 +34,14 @@ object TrendMappingManager {
 
         val hashesForSize = cachedHashes[cachedIconSize] ?: return CamApsFxState.BloodSugar.Trend.UNKNOWN
         val extractedHash = bitmap.pHash()
+
+        // A hash of all 0s or all 1s indicates a blank/uniform image. These can cause false positives.
+        val allZeros = extractedHash.all { it == 0.toByte() }
+        val allOnes = extractedHash.all { it == (-1).toByte() } // -1 is all bits set to 1 in a signed byte
+        if (allZeros || allOnes) {
+            Log.d(TAG, "Bitmap appears to be blank (pHash is all 0s or 1s), skipping trend matching.")
+            return CamApsFxState.BloodSugar.Trend.UNKNOWN
+        }
 
         for ((trend, hashes) in hashesForSize) {
             if (hashes.any { labeledHash -> labeledHash.hammingDistance(extractedHash) <= HAMMING_DISTANCE_THRESHOLD }) {
@@ -76,8 +84,8 @@ object TrendMappingManager {
         val startY = height / 4
         val croppedBitmap = Bitmap.createBitmap(this, startX, startY, cropWidth, cropHeight)
 
-        // 2. Resize the cropped image to a small, fixed size (16x16).
-        val size = 16
+        // 2. Resize the cropped image to a small, fixed size (12x12).
+        val size = 12
         val smallBitmap = Bitmap.createScaledBitmap(croppedBitmap, size, size, true)
         val hashBits = BooleanArray(size * size)
         var averageLuminance = 0.0
