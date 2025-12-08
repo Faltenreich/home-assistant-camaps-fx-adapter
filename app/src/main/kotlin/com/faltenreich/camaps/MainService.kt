@@ -62,6 +62,12 @@ class MainService : NotificationListenerService() {
         return super.onBind(intent)
     }
 
+    override fun onRebind(intent: Intent?) {
+        super.onRebind(intent)
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.cancel(RECONNECT_REQUIRED_NOTIFICATION_ID)
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         Log.d(TAG, "onDestroy: Service destroying")
@@ -75,6 +81,7 @@ class MainService : NotificationListenerService() {
 
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.cancel(PERMISSION_REQUIRED_NOTIFICATION_ID)
+        notificationManager.cancel(RECONNECT_REQUIRED_NOTIFICATION_ID)
 
         createNotificationChannel(NOTIFICATION_CHANNEL_ID, getString(R.string.notification_channel_name), NotificationManager.IMPORTANCE_LOW)
         createNotificationChannel(NOTIFICATION_TIMEOUT_CHANNEL_ID, getString(R.string.notification_timeout_channel_name), NotificationManager.IMPORTANCE_HIGH)
@@ -104,6 +111,7 @@ class MainService : NotificationListenerService() {
         Log.d(TAG, "onListenerDisconnected: Service disconnected")
         mainStateProvider.addLog("Service disconnected. If this was unexpected, try toggling the notification permission.")
         mainStateProvider.setServiceState(MainServiceState.Disconnected)
+        sendReconnectRequiredNotification()
     }
 
     override fun onNotificationPosted(statusBarNotification: StatusBarNotification?) {
@@ -165,14 +173,34 @@ class MainService : NotificationListenerService() {
         notificationManager.notify(PERMISSION_REQUIRED_NOTIFICATION_ID, notification)
     }
 
+    private fun sendReconnectRequiredNotification() {
+        createNotificationChannel(RECONNECT_REQUIRED_CHANNEL_ID, "Action Required", NotificationManager.IMPORTANCE_HIGH)
+
+        val intent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
+        val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+
+        val notification = NotificationCompat.Builder(this, RECONNECT_REQUIRED_CHANNEL_ID)
+            .setContentTitle(getString(R.string.app_name))
+            .setContentText("Service was disconnected. Tap to re-enable.")
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+            .build()
+
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.notify(RECONNECT_REQUIRED_NOTIFICATION_ID, notification)
+    }
+
     companion object {
 
         private val TAG = MainService::class.java.simpleName
         private const val NOTIFICATION_CHANNEL_ID = "com.faltenreich.camaps.background_service"
         private const val NOTIFICATION_TIMEOUT_CHANNEL_ID = "com.faltenreich.camaps.timeout_notification"
         private const val PERMISSION_REQUIRED_CHANNEL_ID = "com.faltenreich.camaps.permission_required"
+        private const val RECONNECT_REQUIRED_CHANNEL_ID = "com.faltenreich.camaps.reconnect_required"
         private const val NOTIFICATION_ID = 1
         private const val NOTIFICATION_TIMEOUT_ID = 2
         private const val PERMISSION_REQUIRED_NOTIFICATION_ID = 3
+        private const val RECONNECT_REQUIRED_NOTIFICATION_ID = 4
     }
 }
