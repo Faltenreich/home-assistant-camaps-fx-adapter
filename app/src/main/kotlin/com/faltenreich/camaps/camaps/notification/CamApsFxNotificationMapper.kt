@@ -39,7 +39,6 @@ class CamApsFxNotificationMapper {
 
             if (trendBitmap != null) {
                 detectedTrend = TrendMappingManager.matchTrend(trendBitmap, context)
-                Log.d(TAG, "Notification bitmap matched Trend: $detectedTrend")
             }
 
             val value = textViews.mapNotNull { it.replace(',', '.').toFloatOrNull() }.firstOrNull()

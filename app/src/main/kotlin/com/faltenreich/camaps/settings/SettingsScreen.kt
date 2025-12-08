@@ -97,14 +97,6 @@ fun SettingsScreen(
                 visualTransformation = PasswordVisualTransformation()
             )
             Spacer(modifier = Modifier.height(16.dp))
-            OutlinedTextField(
-                value = notificationTimeoutMinutes.toString(),
-                onValueChange = viewModel::onNotificationTimeoutMinutesChanged,
-                label = { Text("Notify if no readings in x minutes") },
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-            )
-            Spacer(modifier = Modifier.height(16.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Button(
                     onClick = viewModel::testConnection,
@@ -122,6 +114,14 @@ fun SettingsScreen(
                     ConnectionState.Idle -> { /* Do nothing */ }
                 }
             }
+            Spacer(modifier = Modifier.height(16.dp))
+            OutlinedTextField(
+                value = notificationTimeoutMinutes.toString(),
+                onValueChange = viewModel::onNotificationTimeoutMinutesChanged,
+                label = { Text("Notify if no readings in x minutes") },
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+            )
             Spacer(modifier = Modifier.height(16.dp))
             Button(
                 onClick = { viewModel.openNotificationSettings(context as Activity) },
