@@ -25,6 +25,7 @@ class HomeAssistantController(context: Context) {
     private var webhookId: String? = null
     private val registeredSensorUniqueIds = mutableSetOf<String>()
     private var isDeviceRegistered = false
+    private var lastSentState: CamApsFxState.BloodSugar? = null
 
     private val dummySensorId: String
         get() = "binary_sensor.camaps_fx_adapter_${deviceId}_dummy_sensor"
@@ -196,6 +197,11 @@ class HomeAssistantController(context: Context) {
             return
         }
 
+        if (lastSentState?.value == data.value && lastSentState?.trend == data.trend) {
+            Log.d(TAG, "Sensor state has not changed, skipping update: ${data.value} ${data.unitOfMeasurement}, Trend: ${data.trend}")
+            return
+        }
+
         val webhookId = webhookId ?: run {
             Log.e(TAG, "Device registered but webhookId is null. This should not happen.")
             return
@@ -219,7 +225,8 @@ class HomeAssistantController(context: Context) {
                     requestBody = requestBody,
                     webhookId = webhookId,
                 )
-                Log.d(TAG, "Sensor updated")
+                Log.d(TAG, "Sensor updated successfully: ${data.value} ${data.unitOfMeasurement}")
+                lastSentState = data
                 mainStateProvider.setHomeAssistantState(HomeAssistantState.UpdatedSensor(HomeAssistantData.BloodSugar(data.value, data.unitOfMeasurement, data.trend)))
             } catch (exception: Exception) {
                 Log.e(TAG, "Sensor could not be updated: $exception")
