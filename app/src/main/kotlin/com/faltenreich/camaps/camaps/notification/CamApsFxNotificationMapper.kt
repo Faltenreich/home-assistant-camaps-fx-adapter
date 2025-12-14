@@ -33,7 +33,6 @@ class CamApsFxNotificationMapper {
             val extractedBitmaps = mutableListOf<Bitmap>()
             findImageViewBitmaps(view, extractedBitmaps)
 
-            // We only care about the second image, which should be the trend arrow.
             val trendBitmap = extractedBitmaps.getOrNull(1)
             var detectedTrend = CamApsFxState.BloodSugar.Trend.UNKNOWN
 
