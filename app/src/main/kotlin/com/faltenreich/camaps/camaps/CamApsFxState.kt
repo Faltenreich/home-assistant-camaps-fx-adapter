@@ -14,11 +14,6 @@ sealed interface CamApsFxState {
         val unitOfMeasurement: String,
         val trend: Trend?,
     ) : CamApsFxState {
-
-        /**
-         * This enum maps a trend to the list of official SVG/VectorDrawable assets
-         * bundled in the app's `res/drawable` folder.
-         */
         enum class Trend(@DrawableRes val imageResourceIds: List<Int>) {
             RISING_FAST(listOf(
                 R.drawable.rising_fast_yellow,
