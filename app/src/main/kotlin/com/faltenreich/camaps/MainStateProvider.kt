@@ -2,6 +2,7 @@ package com.faltenreich.camaps
 
 import com.faltenreich.camaps.camaps.CamApsFxState
 import com.faltenreich.camaps.dashboard.log.LogEntry
+import com.faltenreich.camaps.dashboard.log.LogEntryFactory
 import com.faltenreich.camaps.homeassistant.HomeAssistantState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -22,7 +23,12 @@ object MainStateProvider {
     val state = _state.asStateFlow()
 
     fun setServiceState(serviceState: MainServiceState) {
-        _state.update { it.copy(serviceState = serviceState) }
+        _state.update { state ->
+            state.copy(
+                serviceState = serviceState,
+                log = state.log + LogEntryFactory.create(serviceState),
+            )
+        }
     }
 
     fun setCamApsFxState(camApsFxState: CamApsFxState) {
@@ -30,7 +36,7 @@ object MainStateProvider {
     }
 
     fun setHomeAssistantState(homeAssistantState: HomeAssistantState) {
-        val logEntry = LogEntry.from(homeAssistantState)
+        val logEntry = LogEntryFactory.create(homeAssistantState)
         _state.update {
             it.copy(
                 homeAssistantState = homeAssistantState,
@@ -40,7 +46,7 @@ object MainStateProvider {
     }
 
     fun addLog(message: String) {
-        val logEntry = LogEntry.system(message)
+        val logEntry = LogEntryFactory.create(message)
         _state.update { it.copy(log = (it.log + logEntry).takeLast(MAX_LOG_ENTRIES)) }
     }
 }
