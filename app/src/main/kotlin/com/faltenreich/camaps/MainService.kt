@@ -23,6 +23,11 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
+/**
+ * NotificationListenerService breaks between builds during development.
+ * This can be fixed by rebooting the device or toggling notification permission.
+ * see https://stackoverflow.com/a/37081128/3269827
+ */
 class MainService : NotificationListenerService() {
 
     private val mainStateProvider = MainStateProvider
