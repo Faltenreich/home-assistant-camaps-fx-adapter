@@ -24,7 +24,7 @@ class CamApsFxNotificationMapper {
         }
 
         try {
-            val remotePackageContext = context.createPackageContext(statusBarNotification.packageName, Context.CONTEXT_IGNORE_SECURITY)
+            val remotePackageContext = context.createPackageContext(statusBarNotification.packageName, Context.CONTEXT_RESTRICTED)
             val view = remoteViews.apply(remotePackageContext, null)
 
             val textViews = mutableListOf<String>()
