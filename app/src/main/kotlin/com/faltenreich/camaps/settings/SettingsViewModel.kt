@@ -28,9 +28,6 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     private val _token = MutableStateFlow(settingsRepository.getHomeAssistantToken())
     val token = _token.asStateFlow()
 
-    private val _unitType = MutableStateFlow(settingsRepository.getUnitType())
-    val unitType = _unitType.asStateFlow()
-
     private val _notificationTimeoutMinutes = MutableStateFlow(settingsRepository.getNotificationTimeoutMinutes())
     val notificationTimeoutMinutes = _notificationTimeoutMinutes.asStateFlow()
 
@@ -50,11 +47,6 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         _token.value = token
         settingsRepository.saveHomeAssistantToken(token)
         _connectionState.value = ConnectionState.Idle // Reset on change
-    }
-
-    fun onUnitTypeChanged(unitType: String) {
-        _unitType.value = unitType
-        settingsRepository.saveUnitType(unitType)
     }
 
     fun onNotificationTimeoutMinutesChanged(minutes: String) {
