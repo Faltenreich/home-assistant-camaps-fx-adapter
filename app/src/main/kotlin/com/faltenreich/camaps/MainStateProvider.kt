@@ -11,7 +11,14 @@ object MainStateProvider {
 
     private const val MAX_LOG_ENTRIES = 200
 
-    private val _state = MutableStateFlow(MainState())
+    private val _state = MutableStateFlow<MainState>(
+        MainState(
+            serviceState = MainServiceState.Disconnected,
+            camApsFxState = CamApsFxState.Blank,
+            homeAssistantState = HomeAssistantState.Disconnected,
+            log = emptyList(),
+        )
+    )
     val state = _state.asStateFlow()
 
     fun setServiceState(serviceState: MainServiceState) {
