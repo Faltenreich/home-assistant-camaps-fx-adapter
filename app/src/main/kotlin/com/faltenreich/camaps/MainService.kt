@@ -105,7 +105,7 @@ class MainService : NotificationListenerService() {
                 homeAssistantController.start()
             } catch (e: Exception) {
                 mainStateProvider.addLog("Failed to connect to Home Assistant. Retrying in 10 minutes.")
-                delay(600_000) // 10 minutes
+                delay(10.minutes)
                 homeAssistantController.start()
             }
         }
