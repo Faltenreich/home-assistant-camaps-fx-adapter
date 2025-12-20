@@ -2,10 +2,13 @@ package com.faltenreich.camaps.settings
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.provider.Settings
 
 class SettingsRepository(context: Context) {
 
     private val sharedPreferences: SharedPreferences = context.getSharedPreferences("app_settings", Context.MODE_PRIVATE)
+
+    val deviceId: String = Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
 
     fun getHomeAssistantUri(): String {
         return sharedPreferences.getString(KEY_HOME_ASSISTANT_URI, "http://homeassistant.local:8026") ?: ""

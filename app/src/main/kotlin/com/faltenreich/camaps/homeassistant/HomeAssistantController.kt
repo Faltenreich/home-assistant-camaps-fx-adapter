@@ -1,8 +1,6 @@
 package com.faltenreich.camaps.homeassistant
 
-import android.content.Context
 import android.os.Build
-import android.provider.Settings
 import android.util.Log
 import com.faltenreich.camaps.BuildConfig
 import com.faltenreich.camaps.MainStateProvider
@@ -16,12 +14,10 @@ import com.faltenreich.camaps.homeassistant.sensor.HomeAssistantUpdateSensorRequ
 import com.faltenreich.camaps.settings.SettingsRepository
 import io.ktor.client.plugins.ResponseException
 
-class HomeAssistantController(context: Context) {
-
+class HomeAssistantController(private val settingsRepository: SettingsRepository) {
     private val mainStateProvider = MainStateProvider
-    private val settingsRepository = SettingsRepository(context)
     private lateinit var homeAssistantClient: HomeAssistantApi
-    private val deviceId: String = Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
+    private val deviceId = settingsRepository.deviceId
     private var webhookId: String? = null
     private val registeredSensorUniqueIds = mutableSetOf<String>()
     private var isDeviceRegistered = false

@@ -50,8 +50,8 @@ class MainService : NotificationListenerService() {
             sendPermissionRequiredNotification()
         }
 
-        homeAssistantController = HomeAssistantController(this)
         settingsRepository = SettingsRepository(this)
+        homeAssistantController = HomeAssistantController(settingsRepository)
         scope.launch {
             ReinitializationManager.onSuccess.collect {
                 Log.d(TAG, "Re-initializing Home Assistant connection")
