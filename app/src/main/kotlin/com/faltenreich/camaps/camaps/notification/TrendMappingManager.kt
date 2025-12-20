@@ -65,6 +65,14 @@ object TrendMappingManager {
         cachedHashes[size] = newHashes
     }
 
+    /*
+    Convert our image to a perceptual hash for comparison
+    - crop the center 50% of the image containing the arrow
+    - resize to 12x12 pixels to reduce the comparison size
+    - Convert pixels to luminance values
+    - Compare each pixel to the average luminance
+    - Store the resulting binary values
+     */
     private fun Bitmap.pHash(): ByteArray {
         val cropWidth = width / 2
         val cropHeight = height / 2
@@ -105,6 +113,9 @@ object TrendMappingManager {
         return hashBytes
     }
 
+    /*
+    Compare two hashes by counting the number of different bits
+     */
     private fun ByteArray.hammingDistance(other: ByteArray): Int {
         if (this.size != other.size) return Int.MAX_VALUE
         var distance = 0
