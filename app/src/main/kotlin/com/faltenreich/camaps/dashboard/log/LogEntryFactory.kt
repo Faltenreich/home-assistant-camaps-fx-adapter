@@ -48,25 +48,13 @@ object LogEntryFactory {
         val source = "CamAPS FX"
         when (this) {
             is CamApsFxState.Blank -> null
-            is CamApsFxState.Off -> LogEntry(
-                dateTime = dateTime,
-                source = source,
-                message = "is off",
-            )
-            is CamApsFxState.Starting -> LogEntry(
-                dateTime = dateTime,
-                source = source,
-                message = "is starting",
-            )
+            is CamApsFxState.Off -> null
+            is CamApsFxState.Starting -> null
+            is CamApsFxState.Error -> null
             is CamApsFxState.BloodSugar -> LogEntry(
                 dateTime = dateTime,
                 source = source,
-                message = "sent data:  mg/dL",
-            )
-            is CamApsFxState.Error -> LogEntry(
-                dateTime = dateTime,
-                source = source,
-                message = "sent something: $message",
+                message = "Logged data: ${value} ${unitOfMeasurement} ${trend.toArrow()}",
             )
         }
     }

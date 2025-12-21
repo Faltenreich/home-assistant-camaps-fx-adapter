@@ -1,7 +1,6 @@
 package com.faltenreich.camaps
 
 import com.faltenreich.camaps.camaps.CamApsFxState
-import com.faltenreich.camaps.dashboard.log.LogEntry
 import com.faltenreich.camaps.dashboard.log.LogEntryFactory
 import com.faltenreich.camaps.homeassistant.HomeAssistantState
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,7 +11,7 @@ object MainStateProvider {
 
     private const val MAX_LOG_ENTRIES = 200
 
-    private val _state = MutableStateFlow<MainState>(
+    private val _state = MutableStateFlow(
         MainState(
             serviceState = MainServiceState.Disconnected,
             camApsFxState = CamApsFxState.Blank,
@@ -32,21 +31,31 @@ object MainStateProvider {
     }
 
     fun setCamApsFxState(camApsFxState: CamApsFxState) {
-        _state.update { it.copy(camApsFxState = camApsFxState) }
+        val logEntry = LogEntryFactory.create(camApsFxState) ?: return;
+        _state.update { state ->
+            state.copy(
+                camApsFxState = camApsFxState,
+                log = state.log + logEntry,
+            )
+        }
     }
 
     fun setHomeAssistantState(homeAssistantState: HomeAssistantState) {
         val logEntry = LogEntryFactory.create(homeAssistantState)
-        _state.update {
-            it.copy(
+        _state.update { state ->
+            state.copy(
                 homeAssistantState = homeAssistantState,
-                log = (it.log + logEntry).takeLast(MAX_LOG_ENTRIES),
+                log = (state.log + logEntry).takeLast(MAX_LOG_ENTRIES),
             )
         }
     }
 
     fun addLog(message: String) {
         val logEntry = LogEntryFactory.create(message)
-        _state.update { it.copy(log = (it.log + logEntry).takeLast(MAX_LOG_ENTRIES)) }
+        _state.update { state ->
+            state.copy(
+                log = state.log + logEntry,
+            )
+        }
     }
 }
