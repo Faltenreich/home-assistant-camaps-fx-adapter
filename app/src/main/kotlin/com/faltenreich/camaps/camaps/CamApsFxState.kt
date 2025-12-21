@@ -56,3 +56,14 @@ sealed interface CamApsFxState {
 
     data class Error(val message: String) : CamApsFxState
 }
+
+fun CamApsFxState.BloodSugar.Trend?.toArrow(): String = when (this) {
+    CamApsFxState.BloodSugar.Trend.RISING_FAST -> "↟"
+    CamApsFxState.BloodSugar.Trend.RISING -> "↑"
+    CamApsFxState.BloodSugar.Trend.RISING_SLOW -> "↗"
+    CamApsFxState.BloodSugar.Trend.STEADY -> "→"
+    CamApsFxState.BloodSugar.Trend.DROPPING_SLOW -> "↘"
+    CamApsFxState.BloodSugar.Trend.DROPPING -> "↓"
+    CamApsFxState.BloodSugar.Trend.DROPPING_FAST -> "↡"
+    else -> ""
+}

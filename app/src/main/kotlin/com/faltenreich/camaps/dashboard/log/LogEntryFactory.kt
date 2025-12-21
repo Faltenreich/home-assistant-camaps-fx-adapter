@@ -4,6 +4,7 @@ import com.faltenreich.camaps.MainServiceState
 import com.faltenreich.camaps.camaps.CamApsFxState
 import com.faltenreich.camaps.homeassistant.HomeAssistantData
 import com.faltenreich.camaps.homeassistant.HomeAssistantState
+import com.faltenreich.camaps.camaps.toArrow
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -76,16 +77,5 @@ object LogEntryFactory {
             source = "Home Assistant",
             message = message,
         )
-    }
-
-    private fun CamApsFxState.BloodSugar.Trend?.toArrow(): String = when (this) {
-        CamApsFxState.BloodSugar.Trend.RISING_FAST -> "↟"
-        CamApsFxState.BloodSugar.Trend.RISING -> "↑"
-        CamApsFxState.BloodSugar.Trend.RISING_SLOW -> "↗"
-        CamApsFxState.BloodSugar.Trend.STEADY -> "→"
-        CamApsFxState.BloodSugar.Trend.DROPPING_SLOW -> "↘"
-        CamApsFxState.BloodSugar.Trend.DROPPING -> "↓"
-        CamApsFxState.BloodSugar.Trend.DROPPING_FAST -> "↡"
-        else -> ""
     }
 }
