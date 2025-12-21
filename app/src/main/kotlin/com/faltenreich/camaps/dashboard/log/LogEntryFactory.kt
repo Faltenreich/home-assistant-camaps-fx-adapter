@@ -26,16 +26,8 @@ object LogEntryFactory {
         val dateTime = createDateTime()
         val source = "Service"
         when (this) {
-            is MainServiceState.Disconnected -> LogEntry(
-                dateTime = dateTime,
-                source = source,
-                message = "disconnected",
-            )
-            is MainServiceState.Connected -> LogEntry(
-                dateTime = dateTime,
-                source = source,
-                message = "connected",
-            )
+            is MainServiceState.Disconnected -> null
+            is MainServiceState.Connected -> null
         }
     }
 
