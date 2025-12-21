@@ -46,16 +46,13 @@ object LogEntryFactory {
     fun create(camApsFxState: CamApsFxState): LogEntry? = with(camApsFxState) {
         val dateTime = createDateTime()
         val source = "CamAPS FX"
+        // TODO: do we want to do anything with this later on
         when (this) {
             is CamApsFxState.Blank -> null
             is CamApsFxState.Off -> null
             is CamApsFxState.Starting -> null
             is CamApsFxState.Error -> null
-            is CamApsFxState.BloodSugar -> LogEntry(
-                dateTime = dateTime,
-                source = source,
-                message = "Logged data: ${value} ${unitOfMeasurement} ${trend.toArrow()}",
-            )
+            is CamApsFxState.BloodSugar -> null
         }
     }
 
