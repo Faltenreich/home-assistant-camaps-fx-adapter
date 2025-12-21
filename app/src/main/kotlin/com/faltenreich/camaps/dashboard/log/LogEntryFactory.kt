@@ -2,31 +2,26 @@ package com.faltenreich.camaps.dashboard.log
 
 import com.faltenreich.camaps.MainServiceState
 import com.faltenreich.camaps.camaps.CamApsFxState
-import java.text.SimpleDateFormat
 import com.faltenreich.camaps.homeassistant.HomeAssistantData
 import com.faltenreich.camaps.homeassistant.HomeAssistantState
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
-import java.util.Date
-import java.util.Locale
 
 object LogEntryFactory {
-    private val simpleDateFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
-
     private fun createDateTime(): String {
         return LocalDateTime.now().format(DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM))
     }
 
     fun create(message: String): LogEntry {
         return LogEntry(
-            dateTime = simpleDateFormat.format(Date()),
+            dateTime = createDateTime(),
             source = "System",
             message = message,
         )
     }
 
-    fun create(serviceState: MainServiceState): LogEntry = with(serviceState) {
+    fun create(serviceState: MainServiceState): LogEntry? = with(serviceState) {
         val dateTime = createDateTime()
         val source = "Service"
         when (this) {
@@ -51,12 +46,16 @@ object LogEntryFactory {
             is CamApsFxState.Blank -> null
             is CamApsFxState.Off -> null
             is CamApsFxState.Starting -> null
-            is CamApsFxState.Error -> null
+            is CamApsFxState.Error -> LogEntry(
+                dateTime = dateTime,
+                source = source,
+                message = "Error: $message",
+            )
             is CamApsFxState.BloodSugar -> null
         }
     }
 
-    fun create(homeAssistantState: HomeAssistantState): LogEntry = with(homeAssistantState) {
+    fun create(homeAssistantState: HomeAssistantState): LogEntry? = with(homeAssistantState) {
         val message = when (homeAssistantState) {
             is HomeAssistantState.ConnectedDevice -> homeAssistantState.message
             is HomeAssistantState.ConnectedSensor -> homeAssistantState.message
@@ -73,7 +72,7 @@ object LogEntryFactory {
             }
         }
         return LogEntry(
-            dateTime = simpleDateFormat.format(Date()),
+            dateTime = createDateTime(),
             source = "Home Assistant",
             message = message,
         )
