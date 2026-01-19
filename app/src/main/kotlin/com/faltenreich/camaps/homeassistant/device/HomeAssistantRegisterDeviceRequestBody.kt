@@ -25,4 +25,8 @@ data class HomeAssistantRegisterDeviceRequestBody(
     val osVersion: String,
     @SerialName("supports_encryption")
     val supportsEncryption: Boolean,
+    @SerialName("app_data")
+    val appData: Map<String, String?>,
+    @SerialName("identifiers")
+    val identifiers: List<String>,
 )

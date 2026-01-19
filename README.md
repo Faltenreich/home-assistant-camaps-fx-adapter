@@ -3,15 +3,22 @@
 <img src="./images/showcase.jpg" alt="Showcase that illustrates data being read from CamAPS FX and written to Home Assistant">
 
 This app reads blood sugar values from CamAPS FX by observing its notifications and sends them to the HomeAssistant API.
-
-This project is purely for scientific purposes and illustrates practices that are explained in a blog post on 
+This project serves as showcase for a blog post on
 [writingbits.de](https://writingbits.de/2025/01/06/reading-android-notifications-with-custom-views-using-reflection.html).
+This app will run in the background and constantly send your readings to home assistant.
+Support for mmol/L and mg/dL.
+
+### Build
+
+debug-app.apk: `gradlew.bat assembleDebug`
 
 ### Setup
 
-1. Create [long-lived access token](https://developers.home-assistant.io/docs/auth_api/#long-lived-access-token) for Home Assistant
-2. Store token as `homeAssistantToken` in Gradle properties, e.g. in `local.properties`
-3. Compile and run project, local Home Assistant instance will be used: http://homeassistant.local:8123
+1. Compile and run project
+2. Configure settings in app for home assistant uri and long lived access token.
+    - Default Home Assistant instance will be used: http://homeassistant.local:8123, set this to your Home Assistant URI
+    - Create a [long-lived access token](https://developers.home-assistant.io/docs/auth_api/#long-lived-access-token) for Home Assistant
+3. Allow notification access permissions
 
 ### Third-party licenses
 
@@ -21,6 +28,12 @@ This software uses following technologies with great appreciation:
 * [Home Assistant](https://www.home-assistant.io/integrations/api)
 * [Kotlin](https://kotlinlang.org)
 * [Ktor](https://ktor.io)
+
+### Disclaimer
+
+This project is purely for scientific purposes and is not linked to CamDiab Ltd. or Open Home Foundation.
+Its source code is presented as-is and will not be compiled, bundled and published, neither commercially nor non-commercially.
+The author does not assume any liability for timeliness, correctness, completeness or quality of the provided source code.
 
 ### License
 

@@ -1,20 +1,28 @@
 package com.faltenreich.camaps
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
 import android.os.IBinder
+import android.provider.Settings
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Log
+import androidx.core.app.NotificationCompat
 import com.faltenreich.camaps.camaps.CamApsFxController
 import com.faltenreich.camaps.camaps.CamApsFxState
 import com.faltenreich.camaps.homeassistant.HomeAssistantController
-import com.faltenreich.camaps.homeassistant.HomeAssistantData
+import com.faltenreich.camaps.settings.SettingsRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.minutes
 
 /**
  * NotificationListenerService breaks between builds during development.
@@ -25,64 +33,180 @@ class MainService : NotificationListenerService() {
 
     private val mainStateProvider = MainStateProvider
     private val camApsFxController = CamApsFxController()
-    private val homeAssistantController = HomeAssistantController()
+    private lateinit var homeAssistantController: HomeAssistantController
+    private lateinit var settingsRepository: SettingsRepository
 
     private val scope = CoroutineScope(Dispatchers.IO)
+    private var notificationTimeoutJob: Job? = null
 
     override fun onCreate() {
         super.onCreate()
-        Log.d(TAG, "Service created")
+        Log.d(TAG, "onCreate: Service creating")
+        mainStateProvider.addLog("Service creating")
+
+        val componentName = ComponentName(this, MainService::class.java)
+        val enabledListeners = Settings.Secure.getString(contentResolver, "enabled_notification_listeners")
+        if (enabledListeners?.contains(componentName.flattenToString()) != true) {
+            mainStateProvider.addLog("Notification Listener permission not granted. Please enable it in settings.")
+            sendPermissionRequiredNotification()
+        }
+
+        settingsRepository = SettingsRepository(this)
+        homeAssistantController = HomeAssistantController(settingsRepository)
         scope.launch {
-            mainStateProvider.state
-                .map { it.camApsFxState }
-                .distinctUntilChanged()
-                .collectLatest { state ->
-                    when (state) {
-                        is CamApsFxState.Blank -> Unit
-                        is CamApsFxState.Off -> Unit // TODO
-                        is CamApsFxState.Starting -> Unit // TODO
-                        is CamApsFxState.BloodSugar -> {
-                            val data = HomeAssistantData.BloodSugar(mgDl = state.mgDl)
-                            homeAssistantController.update(data)
-                        }
-                        is CamApsFxState.Error -> Unit // TODO
-                    }
-                }
+            ReinitializationManager.onSuccess.collect {
+                Log.d(TAG, "Re-initializing Home Assistant connection")
+                mainStateProvider.addLog("Re-initializing Home Assistant connection")
+                homeAssistantController.start()
+            }
         }
     }
 
     override fun onBind(intent: Intent?): IBinder? {
-        Log.d(TAG, "Service bound")
+        Log.d(TAG, "onBind: Service binding")
+        mainStateProvider.addLog("Service binding")
         return super.onBind(intent)
+    }
+
+    override fun onRebind(intent: Intent?) {
+        super.onRebind(intent)
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.cancel(RECONNECT_REQUIRED_NOTIFICATION_ID)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        Log.d(TAG, "Service destroyed")
+        Log.d(TAG, "onDestroy: Service destroying")
+        mainStateProvider.addLog("Service destroying")
     }
 
     override fun onListenerConnected() {
         super.onListenerConnected()
-        Log.d(TAG, "Service connected")
+        Log.d(TAG, "onListenerConnected: Service connected")
+        mainStateProvider.addLog("Service connected")
+
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.cancel(PERMISSION_REQUIRED_NOTIFICATION_ID)
+        notificationManager.cancel(RECONNECT_REQUIRED_NOTIFICATION_ID)
+
+        createNotificationChannel(NOTIFICATION_CHANNEL_ID, getString(R.string.notification_channel_name), NotificationManager.IMPORTANCE_LOW)
+        createNotificationChannel(NOTIFICATION_TIMEOUT_CHANNEL_ID, getString(R.string.notification_timeout_channel_name), NotificationManager.IMPORTANCE_HIGH)
+
+        val notification = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
+            .setContentTitle(getString(R.string.app_name))
+            .setContentText("Listening for CamAPS FX notifications")
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .build()
+
+        startForeground(NOTIFICATION_ID, notification)
+
         scope.launch {
             mainStateProvider.setServiceState(MainServiceState.Connected)
-            homeAssistantController.start()
+            try {
+                homeAssistantController.start()
+            } catch (e: Exception) {
+                mainStateProvider.addLog("Failed to connect to Home Assistant. Retrying in 10 minutes.")
+                delay(10.minutes)
+                homeAssistantController.start()
+            }
         }
     }
 
     override fun onListenerDisconnected() {
         super.onListenerDisconnected()
-        Log.d(TAG, "Service disconnected")
+        Log.d(TAG, "onListenerDisconnected: Service disconnected")
+        mainStateProvider.addLog("Service disconnected. If this was unexpected, try toggling the notification permission.")
         mainStateProvider.setServiceState(MainServiceState.Disconnected)
+        sendReconnectRequiredNotification()
     }
 
     override fun onNotificationPosted(statusBarNotification: StatusBarNotification?) {
-        Log.d(TAG, "Notification posted")
-        camApsFxController.handleNotification(statusBarNotification)
+        Log.d(TAG, "onNotificationPosted: $statusBarNotification")
+        val state = camApsFxController.handleNotification(this, statusBarNotification)
+        if (state is CamApsFxState.BloodSugar) {
+            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.cancel(NOTIFICATION_TIMEOUT_ID)
+
+            notificationTimeoutJob?.cancel()
+
+            val timeoutMinutes = settingsRepository.getNotificationTimeoutMinutes()
+            if (timeoutMinutes > 0) {
+                notificationTimeoutJob = scope.launch {
+                    delay(timeoutMinutes.minutes)
+                    sendTimeoutNotification(timeoutMinutes)
+                }
+            }
+
+            scope.launch {
+                homeAssistantController.update(state)
+            }
+        }
+    }
+
+    private fun createNotificationChannel(channelId: String, name: String, importance: Int) {
+        val channel = NotificationChannel(channelId, name, importance)
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(channel)
+    }
+
+    private fun sendTimeoutNotification(timeoutMinutes: Int) {
+        val notification = NotificationCompat.Builder(this, NOTIFICATION_TIMEOUT_CHANNEL_ID)
+            .setContentTitle(getString(R.string.app_name))
+            .setContentText("No new readings received in the last $timeoutMinutes minutes.")
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setOngoing(true)
+            .build()
+
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.notify(NOTIFICATION_TIMEOUT_ID, notification)
+    }
+
+    private fun sendPermissionRequiredNotification() {
+        createNotificationChannel(PERMISSION_REQUIRED_CHANNEL_ID, "Action Required", NotificationManager.IMPORTANCE_HIGH)
+
+        val intent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
+        val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+
+        val notification = NotificationCompat.Builder(this, PERMISSION_REQUIRED_CHANNEL_ID)
+            .setContentTitle(getString(R.string.app_name))
+            .setContentText("Permission Required: Notification access needed for app to function.")
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+            .build()
+
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.notify(PERMISSION_REQUIRED_NOTIFICATION_ID, notification)
+    }
+
+    private fun sendReconnectRequiredNotification() {
+        createNotificationChannel(RECONNECT_REQUIRED_CHANNEL_ID, "Action Required", NotificationManager.IMPORTANCE_HIGH)
+
+        val intent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
+        val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+
+        val notification = NotificationCompat.Builder(this, RECONNECT_REQUIRED_CHANNEL_ID)
+            .setContentTitle(getString(R.string.app_name))
+            .setContentText("Service was disconnected. Tap to re-enable.")
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+            .build()
+
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.notify(RECONNECT_REQUIRED_NOTIFICATION_ID, notification)
     }
 
     companion object {
 
         private val TAG = MainService::class.java.simpleName
+        private const val NOTIFICATION_CHANNEL_ID = "com.faltenreich.camaps.background_service"
+        private const val NOTIFICATION_TIMEOUT_CHANNEL_ID = "com.faltenreich.camaps.timeout_notification"
+        private const val PERMISSION_REQUIRED_CHANNEL_ID = "com.faltenreich.camaps.permission_required"
+        private const val RECONNECT_REQUIRED_CHANNEL_ID = "com.faltenreich.camaps.reconnect_required"
+        private const val NOTIFICATION_ID = 1
+        private const val NOTIFICATION_TIMEOUT_ID = 2
+        private const val PERMISSION_REQUIRED_NOTIFICATION_ID = 3
+        private const val RECONNECT_REQUIRED_NOTIFICATION_ID = 4
     }
 }

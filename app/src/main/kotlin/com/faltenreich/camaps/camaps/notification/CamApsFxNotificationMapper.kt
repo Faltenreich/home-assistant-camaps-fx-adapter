@@ -1,83 +1,79 @@
-@file:Suppress("DEPRECATION")
-
 package com.faltenreich.camaps.camaps.notification
 
+import android.content.Context
+import android.graphics.Bitmap
 import android.service.notification.StatusBarNotification
-import android.widget.RemoteViews
+import android.util.Log
+import android.view.View
+import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.TextView
+import androidx.core.graphics.drawable.toBitmap
 import com.faltenreich.camaps.camaps.CamApsFxState
-import java.util.ArrayList
-import kotlin.reflect.full.memberProperties
-import kotlin.reflect.jvm.isAccessible
 
 class CamApsFxNotificationMapper {
 
-    operator fun invoke(statusBarNotification: StatusBarNotification): CamApsFxState? {
+    operator fun invoke(context: Context, statusBarNotification: StatusBarNotification): CamApsFxState? {
         val camApsFxNotification = statusBarNotification
-            .takeIf { it.packageName == CAM_APS_FX_PACKAGE_NAME }
+            .takeIf { it.packageName.startsWith(CAM_APS_FX_PACKAGE_NAME_PREFIX) }
             ?.notification
             ?: return null
-        val remoteViews = camApsFxNotification.contentView ?: run {
-            return CamApsFxState.Error("Missing contentView")
-        }
-        val remoteViewActions = getRemoteViewActions(remoteViews).takeIf(List<*>::isNotEmpty) ?: run {
-            return CamApsFxState.Error("Missing actions")
-        }
-        val setTextActions = remoteViewActions.filter { it.methodName == "setText" }
 
-        val mgDl = setTextActions.mapNotNull { (it.value as? String)?.toFloatOrNull() }.firstOrNull()
-        val isOff = setTextActions.any { (it.value as? String) == "Aus" }
-        val isStarting = setTextActions.any { (it.value as? String) == "Starten" }
+        val remoteViews = camApsFxNotification.bigContentView ?: camApsFxNotification.contentView ?: run {
+            return CamApsFxState.Error("Missing both bigContentView and contentView")
+        }
 
-        return when {
-            mgDl != null -> {
-                val trendImageResourceId = remoteViewActions
-                    .filter { it.methodName == "setImageResource" }
-                    .mapNotNull { it.value as? Int }
-                    .lastOrNull()
-                val trend = CamApsFxState.BloodSugar.Trend.entries
-                    .firstOrNull { it.imageResourceId == trendImageResourceId }
-                CamApsFxState.BloodSugar(mgDl, trend)
+        try {
+            val remotePackageContext = context.createPackageContext(statusBarNotification.packageName, Context.CONTEXT_RESTRICTED)
+            val view = remoteViews.apply(remotePackageContext, null)
+
+            val textViews = mutableListOf<String>()
+            findTextViews(view, textViews)
+
+            val extractedBitmaps = mutableListOf<Bitmap>()
+            findImageViewBitmaps(view, extractedBitmaps)
+
+            val trendBitmap = extractedBitmaps.getOrNull(1)
+            var detectedTrend = CamApsFxState.BloodSugar.Trend.UNKNOWN
+
+            if (trendBitmap != null) {
+                detectedTrend = TrendMappingManager.matchTrend(trendBitmap, context)
             }
-            isStarting -> CamApsFxState.Starting
-            isOff -> CamApsFxState.Off
-            else -> {
-                val actionsJoined = remoteViewActions
-                    .map { action -> "${action.methodName}: ${action.value}" }
-                    .joinToString()
-                CamApsFxState.Error(
-                    message = "Unknown actions: $actionsJoined",
-                )
+
+            val value = textViews.mapNotNull { it.replace(',', '.').toFloatOrNull() }.firstOrNull()
+            val unit = textViews.firstOrNull { it.equals("mmol/L", ignoreCase = true) || it.equals("mg/dL", ignoreCase = true) }
+
+            return when {
+                value != null && unit != null -> CamApsFxState.BloodSugar(value, unit, detectedTrend)
+                else -> CamApsFxState.Error("Could not determine state from notification: ${textViews.joinToString()}")
             }
+
+        } catch (e: Exception) {
+            Log.e(TAG, "Error processing notification", e)
+            return CamApsFxState.Error("Failed to process notification: ${e.message}")
         }
     }
 
-    private fun getRemoteViewActions(from: RemoteViews): List<RemoteViewAction> {
-        val actionsProperty = RemoteViews::class.memberProperties
-            .firstOrNull { it.name == "mActions" }
-            ?: return emptyList()
-        actionsProperty.isAccessible = true
-        val actions = actionsProperty.get(from) as? ArrayList<*> ?: return emptyList()
-        return actions.mapNotNull(::getRemoteViewAction)
+    private fun findTextViews(view: View, out: MutableList<String>) {
+        if (view is TextView) {
+            view.text?.toString()?.takeIf { it.isNotBlank() }?.let(out::add)
+        }
+        if (view is ViewGroup) {
+            (0 until view.childCount).forEach { findTextViews(view.getChildAt(it), out) }
+        }
     }
 
-    private fun getRemoteViewAction(from: Any): RemoteViewAction? {
-        val memberProperties = from::class.memberProperties
-
-        val methodNameProperty = memberProperties
-            .firstOrNull { it.name == "mMethodName" }
-            ?: return null
-        methodNameProperty.isAccessible = true
-        val methodName = methodNameProperty.getter.call(from) as? String ?: return null
-
-        val valueProperty = memberProperties.firstOrNull { it.name == "mValue" } ?: return null
-        valueProperty.isAccessible = true
-        val value = valueProperty.getter.call(from)
-
-        return RemoteViewAction(methodName, value)
+    private fun findImageViewBitmaps(view: View, out: MutableList<Bitmap>) {
+        if (view is ImageView && view.drawable != null) {
+            out.add(view.drawable.toBitmap())
+        }
+        if (view is ViewGroup) {
+            (0 until view.childCount).forEach { findImageViewBitmaps(view.getChildAt(it), out) }
+        }
     }
 
     companion object {
-
-        private const val CAM_APS_FX_PACKAGE_NAME = "com.camdiab.fx_alert.mgdl"
+        private val TAG = CamApsFxNotificationMapper::class.java.simpleName
+        private const val CAM_APS_FX_PACKAGE_NAME_PREFIX = "com.camdiab.fx_alert"
     }
 }

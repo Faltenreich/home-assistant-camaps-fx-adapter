@@ -16,17 +16,17 @@ data class HomeAssistantRegisterSensorRequestBody(
         @SerialName("device_class")
         val deviceClass: String = "blood_glucose_concentration",
         @SerialName("icon")
-        val icon: String = "mdi:water_drop",
+        val icon: String = "mdi:water-alert",
         @SerialName("name")
-        val name: String = "blood_sugar",
+        val name: String,
         @SerialName("state")
         val state: Float,
         @SerialName("type")
         val type: String = "sensor",
         @SerialName("unique_id")
-        val uniqueId: String = "blood_sugar",
+        val uniqueId: String,
         @SerialName("unit_of_measurement")
-        val unitOfMeasurement: String = "mg/dL",
+        val unitOfMeasurement: String,
         @SerialName("state_class")
         val stateClass: String = "measurement",
         @SerialName("entity_category")

@@ -21,7 +21,6 @@ android {
 
     buildTypes {
         getByName("debug") {
-            buildConfigField("String", "HOME_ASSISTANT_TOKEN", gradleLocalProperties(rootDir, providers).getProperty("homeAssistantToken"))
         }
         release {
             isMinifyEnabled = false
@@ -58,6 +57,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.navigation)
 
     implementation(kotlin("reflect"))
 
