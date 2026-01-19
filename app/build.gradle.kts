@@ -41,21 +41,13 @@ kotlin {
 }
 
 dependencies {
-    debugImplementation(libs.androidx.ui.tooling)
-
     testImplementation(libs.junit)
 
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.lifecycle.compose)
-    implementation(libs.androidx.activity.compose)
-    implementation(libs.androidx.ui)
-    implementation(libs.androidx.ui.graphics)
-    implementation(libs.androidx.ui.tooling.preview)
-    implementation(libs.androidx.material3)
-    implementation(libs.androidx.material.icons)
-    implementation(libs.androidx.navigation)
+    implementation(platform(libs.compose))
+    debugImplementation(libs.compose.tooling)
+    implementation(libs.material3)
+    implementation(libs.material.icons)
+    implementation(libs.navigation)
 
     implementation(kotlin("reflect"))
 

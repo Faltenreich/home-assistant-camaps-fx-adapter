@@ -1,33 +1,23 @@
 [versions]
 android-gradle = "9.0.0"
-androidx-activity-compose = "1.12.2"
-androidx-core = "1.17.0"
-androidx-lifecycle = "2.10.0"
-androidx-navigation = "2.9.6"
+navigation = "2.9.6"
 compose = "2026.01.00"
 junit = "4.13.2"
 kotlin = "2.3.0"
 ktor = "3.3.3"
 
 [libraries]
-androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "androidx-core" }
-androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "androidx-lifecycle" }
-androidx-lifecycle-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "androidx-lifecycle" }
-androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "androidx-activity-compose" }
-androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose" }
-androidx-ui = { group = "androidx.compose.ui", name = "ui" }
-androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
-androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
-androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
-androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
-androidx-material-icons = { module = "androidx.compose.material:material-icons-core" }
-androidx-navigation = { group = "androidx.navigation", name = "navigation-compose", version.ref = "androidx-navigation"}
-junit = { group = "junit", name = "junit", version.ref = "junit" }
+compose = { module = "androidx.compose:compose-bom", version.ref = "compose" }
+compose-tooling = { module = "androidx.compose.ui:ui-tooling" }
+junit = { module = "junit:junit", version.ref = "junit" }
 ktor-auth = { module = "io.ktor:ktor-client-auth", version.ref = "ktor" }
 ktor-contentnegotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
 ktor-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
 ktor-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
+material3 = { module = "androidx.compose.material3:material3" }
+material-icons = { module = "androidx.compose.material:material-icons-core" }
+navigation = { module = "androidx.navigation:navigation-compose", version.ref = "navigation"}
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "android-gradle" }
