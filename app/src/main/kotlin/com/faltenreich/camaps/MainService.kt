@@ -4,7 +4,6 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.ComponentName
-import android.content.Context
 import android.content.Intent
 import android.os.IBinder
 import android.provider.Settings
@@ -15,12 +14,12 @@ import androidx.core.app.NotificationCompat
 import com.faltenreich.camaps.camaps.CamApsFxController
 import com.faltenreich.camaps.camaps.CamApsFxState
 import com.faltenreich.camaps.homeassistant.HomeAssistantController
+import com.faltenreich.camaps.settings.ReinitializationManager
 import com.faltenreich.camaps.settings.SettingsRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.minutes
 
@@ -70,7 +69,7 @@ class MainService : NotificationListenerService() {
 
     override fun onRebind(intent: Intent?) {
         super.onRebind(intent)
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.cancel(RECONNECT_REQUIRED_NOTIFICATION_ID)
     }
 
@@ -85,7 +84,7 @@ class MainService : NotificationListenerService() {
         Log.d(TAG, "onListenerConnected: Service connected")
         mainStateProvider.addLog("Service connected")
 
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.cancel(PERMISSION_REQUIRED_NOTIFICATION_ID)
         notificationManager.cancel(RECONNECT_REQUIRED_NOTIFICATION_ID)
 
@@ -104,7 +103,7 @@ class MainService : NotificationListenerService() {
             mainStateProvider.setServiceState(MainServiceState.Connected)
             try {
                 homeAssistantController.start()
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 mainStateProvider.addLog("Failed to connect to Home Assistant. Retrying in 10 minutes.")
                 delay(10.minutes)
                 homeAssistantController.start()
@@ -124,7 +123,7 @@ class MainService : NotificationListenerService() {
         Log.d(TAG, "onNotificationPosted: $statusBarNotification")
         val state = camApsFxController.handleNotification(this, statusBarNotification)
         if (state is CamApsFxState.BloodSugar) {
-            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.cancel(NOTIFICATION_TIMEOUT_ID)
 
             notificationTimeoutJob?.cancel()
@@ -145,7 +144,7 @@ class MainService : NotificationListenerService() {
 
     private fun createNotificationChannel(channelId: String, name: String, importance: Int) {
         val channel = NotificationChannel(channelId, name, importance)
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.createNotificationChannel(channel)
     }
 
@@ -157,7 +156,7 @@ class MainService : NotificationListenerService() {
             .setOngoing(true)
             .build()
 
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.notify(NOTIFICATION_TIMEOUT_ID, notification)
     }
 
@@ -175,7 +174,7 @@ class MainService : NotificationListenerService() {
             .setAutoCancel(true)
             .build()
 
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.notify(PERMISSION_REQUIRED_NOTIFICATION_ID, notification)
     }
 
@@ -193,7 +192,7 @@ class MainService : NotificationListenerService() {
             .setAutoCancel(true)
             .build()
 
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.notify(RECONNECT_REQUIRED_NOTIFICATION_ID, notification)
     }
 

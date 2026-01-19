@@ -14,7 +14,8 @@ sealed interface CamApsFxState {
         val unitOfMeasurement: String,
         val trend: Trend?,
     ) : CamApsFxState {
-        enum class Trend(@DrawableRes val imageResourceIds: List<Int>) {
+
+        enum class Trend(@param:DrawableRes val imageResourceIds: List<Int>) {
             RISING_FAST(listOf(
                 R.drawable.rising_fast_yellow,
                 R.drawable.rising_fast_red,
