@@ -1,6 +1,5 @@
 package com.faltenreich.camaps.navigation
 
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -10,7 +9,6 @@ import com.faltenreich.camaps.settings.SettingsScreen
 
 @Composable
 fun NavGraph() {
-    Log.d("NavGraph", "Composing NavGraph")
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = "dashboard") {
         composable("dashboard") {

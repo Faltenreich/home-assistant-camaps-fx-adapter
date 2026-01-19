@@ -17,7 +17,6 @@ object TrendMappingManager {
 
     fun matchTrend(bitmap: Bitmap, context: Context): CamApsFxState.BloodSugar.Trend {
         if (cachedIconSize != bitmap.width) {
-            Log.d(TAG, "Notification icon size changed from $cachedIconSize to ${bitmap.width}. Re-rendering hashes.")
             cachedHashes.clear()
             cachedIconSize = bitmap.width
         }
@@ -32,7 +31,6 @@ object TrendMappingManager {
         val allZeros = extractedHash.all { it == 0.toByte() }
         val allOnes = extractedHash.all { it == (-1).toByte() }
         if (allZeros || allOnes) {
-            Log.d(TAG, "Bitmap appears to be blank (pHash is all 0s or 1s), skipping trend matching.")
             return CamApsFxState.BloodSugar.Trend.UNKNOWN
         }
 
@@ -48,7 +46,7 @@ object TrendMappingManager {
     private fun buildHashCacheForSize(context: Context, size: Int) {
         Log.d(TAG, "Building pHash cache for icon size: $size")
         val newHashes = mutableMapOf<CamApsFxState.BloodSugar.Trend, MutableList<ByteArray>>()
-        for (trend in CamApsFxState.BloodSugar.Trend.values()) {
+        for (trend in CamApsFxState.BloodSugar.Trend.entries) {
             for (resId in trend.imageResourceIds) {
                 try {
                     val drawable = ContextCompat.getDrawable(context, resId)
@@ -57,7 +55,7 @@ object TrendMappingManager {
                         val pHash = bitmap.pHash()
                         newHashes.getOrPut(trend) { mutableListOf() }.add(pHash)
                     }
-                } catch (e: Exception) {
+                } catch (_: Exception) {
                     Log.w(TAG, "Could not load or hash drawable resource for trend: $trend")
                 }
             }
