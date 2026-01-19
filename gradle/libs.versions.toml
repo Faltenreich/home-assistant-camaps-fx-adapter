@@ -1,5 +1,5 @@
 [versions]
-android-gradle = "8.11.2"
+android-gradle = "9.0.0"
 androidx-activity-compose = "1.12.2"
 androidx-core = "1.17.0"
 androidx-lifecycle = "2.10.0"
@@ -31,6 +31,5 @@ ktor-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "android-gradle" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
