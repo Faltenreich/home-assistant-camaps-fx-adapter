@@ -2,8 +2,6 @@ package com.faltenreich.camaps.homeassistant
 
 sealed interface HomeAssistantState {
 
-    data object Idle : HomeAssistantState
-
     data object Disconnected : HomeAssistantState
 
     data class ConnectedDevice(val message: String) : HomeAssistantState
