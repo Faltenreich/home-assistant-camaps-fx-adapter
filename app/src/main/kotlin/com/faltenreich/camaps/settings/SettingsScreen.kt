@@ -26,7 +26,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,6 +35,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 
@@ -46,11 +46,7 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = viewModel(),
 ) {
     val context = LocalContext.current
-    val uri by viewModel.uri.collectAsState()
-    val token by viewModel.token.collectAsState()
-    val notificationTimeoutMinutes by viewModel.notificationTimeoutMinutes.collectAsState()
-    val connectionState by viewModel.connectionState.collectAsState()
-    val hasPermission by viewModel.hasPermission.collectAsState()
+    val state by viewModel.state.collectAsStateWithLifecycle()
 
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
         viewModel.checkPermission(context)
@@ -82,7 +78,7 @@ fun SettingsScreen(
                 .padding(16.dp)
         ) {
             OutlinedTextField(
-                value = uri,
+                value = state.uri,
                 onValueChange = viewModel::onUriChanged,
                 label = { Text("Home Assistant URI") },
                 modifier = Modifier.fillMaxWidth(),
@@ -90,7 +86,7 @@ fun SettingsScreen(
             )
             Spacer(modifier = Modifier.height(16.dp))
             OutlinedTextField(
-                value = token,
+                value = state.token,
                 onValueChange = viewModel::onTokenChanged,
                 label = { Text("Long-Lived Token") },
                 modifier = Modifier.fillMaxWidth(),
@@ -105,19 +101,19 @@ fun SettingsScreen(
                 ) {
                     Text("Test Connection")
                 }
-                when (val state = connectionState) {
-                    ConnectionState.Loading -> CircularProgressIndicator(modifier = Modifier.size(24.dp).padding(start = 8.dp))
-                    ConnectionState.Success -> Icon(Icons.Default.Check, contentDescription = "Success", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(start = 8.dp))
-                    is ConnectionState.Failure -> Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(start = 8.dp)) {
+                when (val state = state.connection) {
+                    is SettingsState.Connection.Loading -> CircularProgressIndicator(modifier = Modifier.size(24.dp).padding(start = 8.dp))
+                    is SettingsState.Connection.Success -> Icon(Icons.Default.Check, contentDescription = "Success", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(start = 8.dp))
+                    is SettingsState.Connection.Failure -> Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(start = 8.dp)) {
                         Icon(Icons.Default.Close, contentDescription = "Failure", tint = MaterialTheme.colorScheme.error)
                         Text(text = state.message, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(start = 4.dp))
                     }
-                    ConnectionState.Idle -> { /* Do nothing */ }
+                    is SettingsState.Connection.Idle -> { /* Do nothing */ }
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
             OutlinedTextField(
-                value = notificationTimeoutMinutes.toString(),
+                value = state.notificationTimeoutMinutes.toString(),
                 onValueChange = viewModel::onNotificationTimeoutMinutesChanged,
                 label = { Text("Notify if no readings in x minutes") },
                 modifier = Modifier.fillMaxWidth(),
@@ -131,7 +127,7 @@ fun SettingsScreen(
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
                     Text("Permissions")
                     Spacer(modifier = Modifier.size(8.dp))
-                    if (hasPermission) {
+                    if (state.hasPermission) {
                         Icon(Icons.Default.Check, contentDescription = "Success", tint = MaterialTheme.colorScheme.onPrimary)
                     } else {
                         Icon(Icons.Default.Close, contentDescription = "Failure", tint = MaterialTheme.colorScheme.onError)

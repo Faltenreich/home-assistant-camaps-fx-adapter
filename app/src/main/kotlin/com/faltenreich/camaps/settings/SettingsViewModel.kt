@@ -14,71 +14,85 @@ import com.faltenreich.camaps.homeassistant.network.HomeAssistantClient
 import io.ktor.client.plugins.ResponseException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class SettingsViewModel(application: Application) : AndroidViewModel(application) {
 
     private val settingsRepository = SettingsRepository(application)
 
-    private val _uri = MutableStateFlow(settingsRepository.getHomeAssistantUri())
-    val uri = _uri.asStateFlow()
-
-    private val _token = MutableStateFlow(settingsRepository.getHomeAssistantToken())
-    val token = _token.asStateFlow()
-
-    private val _notificationTimeoutMinutes = MutableStateFlow(settingsRepository.getNotificationTimeoutMinutes())
-    val notificationTimeoutMinutes = _notificationTimeoutMinutes.asStateFlow()
-
-    private val _connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Idle)
-    val connectionState = _connectionState.asStateFlow()
-
-    private val _hasPermission = MutableStateFlow(false)
-    val hasPermission = _hasPermission.asStateFlow()
+    private val _state = MutableStateFlow(
+        SettingsState(
+            uri = settingsRepository.getHomeAssistantUri(),
+            token = settingsRepository.getHomeAssistantToken(),
+            notificationTimeoutMinutes = settingsRepository.getNotificationTimeoutMinutes(),
+            connection = SettingsState.Connection.Idle,
+            hasPermission = false,
+        )
+    )
+    val state = _state.asStateFlow()
 
     fun onUriChanged(uri: String) {
-        _uri.value = uri
         settingsRepository.saveHomeAssistantUri(uri)
-        _connectionState.value = ConnectionState.Idle // Reset on change
+        _state.update { state ->
+            state.copy(
+                uri = uri,
+                connection = SettingsState.Connection.Idle,
+            )
+        }
     }
 
     fun onTokenChanged(token: String) {
-        _token.value = token
         settingsRepository.saveHomeAssistantToken(token)
-        _connectionState.value = ConnectionState.Idle // Reset on change
+        _state.update { state ->
+            state.copy(
+                token = token,
+                connection = SettingsState.Connection.Idle,
+            )
+        }
     }
 
     fun onNotificationTimeoutMinutesChanged(minutes: String) {
-        val newMinutes = minutes.toIntOrNull()?.coerceAtLeast(0) ?: 0
-        _notificationTimeoutMinutes.value = newMinutes
-        settingsRepository.saveNotificationTimeoutMinutes(newMinutes)
+        val minutesAsNumber = minutes.toIntOrNull()?.coerceAtLeast(0) ?: 0
+        settingsRepository.saveNotificationTimeoutMinutes(minutesAsNumber)
+        _state.update { state ->
+            state.copy(
+                notificationTimeoutMinutes = minutesAsNumber,
+            )
+        }
     }
 
     fun checkPermission(context: Context) {
         val componentName = ComponentName(context, "com.faltenreich.camaps.MainService")
         val enabledListeners = Settings.Secure.getString(context.contentResolver, "enabled_notification_listeners")
-        _hasPermission.value = enabledListeners?.contains(componentName.flattenToString()) == true
+        _state.update { state ->
+            state.copy(
+                hasPermission = enabledListeners?.contains(componentName.flattenToString()) == true,
+            )
+        }
     }
 
     fun testConnection() {
         viewModelScope.launch {
-            _connectionState.value = ConnectionState.Loading
+            val state = _state.value
+            _state.update { state.copy(connection = SettingsState.Connection.Loading) }
             try {
-                Log.d(TAG, "Testing connection to ${uri.value} with token ${token.value.take(4)}...")
+                Log.d(TAG, "Testing connection to ${state.uri} with token ${state.token.take(4)}...")
                 val client = HomeAssistantClient.getInstance(
-                    host = uri.value,
-                    token = token.value
+                    host = state.uri,
+                    token = state.token,
                 )
                 client.testConnection()
-                _connectionState.value = ConnectionState.Success
+                _state.update { state -> state.copy(connection = SettingsState.Connection.Success) }
                 ReinitializationManager.reinitialize()
                 Log.d(TAG, "Connection successful")
-            } catch (e: Exception) {
-                val errorMessage = when (e) {
-                    is ResponseException -> e.response.status.value.toString()
-                    else -> e.message ?: "Unknown error"
+            } catch (exception: Exception) {
+                val errorMessage = when (exception) {
+                    is ResponseException -> exception.response.status.value.toString()
+                    else -> exception.message ?: "Unknown error"
                 }
-                _connectionState.value = ConnectionState.Failure(errorMessage)
-                Log.e(TAG, "Connection failed: $errorMessage", e)
+                Log.e(TAG, "Connection failed: $errorMessage", exception)
+                _state.update { state -> state.copy(connection = SettingsState.Connection.Failure(errorMessage)) }
             }
         }
     }
@@ -111,11 +125,4 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     companion object {
         private val TAG = SettingsViewModel::class.java.simpleName
     }
-}
-
-sealed class ConnectionState {
-    object Idle : ConnectionState()
-    object Loading : ConnectionState()
-    object Success : ConnectionState()
-    data class Failure(val message: String) : ConnectionState()
 }
