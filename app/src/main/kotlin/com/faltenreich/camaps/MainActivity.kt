@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import com.faltenreich.camaps.settings.SettingsRepository
+import com.faltenreich.camaps.settings.KeyValueStore
 
 class MainActivity : ComponentActivity() {
 
@@ -13,7 +13,7 @@ class MainActivity : ComponentActivity() {
 
         enableEdgeToEdge()
 
-        SettingsRepository.setup(this)
+        KeyValueStore.setup(this)
 
         setContent {
             MainScreen()

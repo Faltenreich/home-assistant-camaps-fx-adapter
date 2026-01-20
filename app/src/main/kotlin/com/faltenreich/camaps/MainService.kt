@@ -33,7 +33,7 @@ class MainService : NotificationListenerService() {
     private val mainStateProvider = MainStateProvider
     private val camApsFxController = CamApsFxController()
     private lateinit var homeAssistantController: HomeAssistantController
-    private lateinit var settingsRepository: SettingsRepository
+    private val settingsRepository: SettingsRepository = SettingsRepository
 
     private val scope = CoroutineScope(Dispatchers.IO)
     private var notificationTimeoutJob: Job? = null
@@ -50,7 +50,6 @@ class MainService : NotificationListenerService() {
             sendPermissionRequiredNotification()
         }
 
-        settingsRepository = SettingsRepository
         homeAssistantController = HomeAssistantController(settingsRepository)
         scope.launch {
             ReinitializationManager.onSuccess.collect {

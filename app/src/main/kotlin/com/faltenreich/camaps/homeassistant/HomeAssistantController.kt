@@ -11,13 +11,14 @@ import com.faltenreich.camaps.homeassistant.network.HomeAssistantClient
 import com.faltenreich.camaps.homeassistant.sensor.HomeAssistantRegisterBinarySensorRequestBody
 import com.faltenreich.camaps.homeassistant.sensor.HomeAssistantRegisterSensorRequestBody
 import com.faltenreich.camaps.homeassistant.sensor.HomeAssistantUpdateSensorRequestBody
+import com.faltenreich.camaps.settings.KeyValueStore
 import com.faltenreich.camaps.settings.SettingsRepository
 import io.ktor.client.plugins.ResponseException
 
 class HomeAssistantController(private val settingsRepository: SettingsRepository) {
     private val mainStateProvider = MainStateProvider
     private lateinit var homeAssistantClient: HomeAssistantApi
-    private val deviceId = settingsRepository.deviceId
+    private val deviceId = KeyValueStore.deviceId
     private var webhookId: String? = null
     private val registeredSensorUniqueIds = mutableSetOf<String>()
     private var isDeviceRegistered = false

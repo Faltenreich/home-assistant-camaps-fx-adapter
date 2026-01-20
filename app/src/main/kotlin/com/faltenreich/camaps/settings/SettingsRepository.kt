@@ -1,9 +1,5 @@
 package com.faltenreich.camaps.settings
 
-import android.content.Context
-import android.content.SharedPreferences
-import android.provider.Settings
-
 object SettingsRepository {
 
     private const val KEY_HOME_ASSISTANT_URI = "home_assistant_uri"
@@ -13,64 +9,57 @@ object SettingsRepository {
     private const val KEY_UNIT_TYPE = "unit_type"
     private const val KEY_NOTIFICATION_TIMEOUT_MINUTES = "notification_timeout_minutes"
 
-    private lateinit var sharedPreferences: SharedPreferences
-
-    lateinit var deviceId: String
-
-    fun setup(context: Context) {
-        sharedPreferences = context.getSharedPreferences("app_settings", Context.MODE_PRIVATE)
-        deviceId = Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
-    }
+    private val keyValueStore = KeyValueStore
 
     fun getHomeAssistantUri(): String {
-        return sharedPreferences.getString(KEY_HOME_ASSISTANT_URI, "http://homeassistant.local:8026") ?: ""
+        return keyValueStore.getString(KEY_HOME_ASSISTANT_URI, "http://homeassistant.local:8026") ?: ""
     }
 
     fun saveHomeAssistantUri(uri: String) {
-        sharedPreferences.edit().putString(KEY_HOME_ASSISTANT_URI, uri).apply()
+        keyValueStore.putString(KEY_HOME_ASSISTANT_URI, uri)
     }
 
     fun getHomeAssistantToken(): String {
-        return sharedPreferences.getString(KEY_HOME_ASSISTANT_TOKEN, "") ?: ""
+        return keyValueStore.getString(KEY_HOME_ASSISTANT_TOKEN, "") ?: ""
     }
 
     fun saveHomeAssistantToken(token: String) {
-        sharedPreferences.edit().putString(KEY_HOME_ASSISTANT_TOKEN, token).apply()
+        keyValueStore.putString(KEY_HOME_ASSISTANT_TOKEN, token)
     }
 
     fun getHomeAssistantWebhookId(): String {
-        return sharedPreferences.getString(KEY_HOME_ASSISTANT_WEBHOOK_ID, "") ?: ""
+        return keyValueStore.getString(KEY_HOME_ASSISTANT_WEBHOOK_ID, "") ?: ""
     }
 
     fun saveHomeAssistantWebhookId(webhookId: String) {
-        sharedPreferences.edit().putString(KEY_HOME_ASSISTANT_WEBHOOK_ID, webhookId).apply()
+        keyValueStore.putString(KEY_HOME_ASSISTANT_WEBHOOK_ID, webhookId)
     }
 
-    fun getRegisteredSensorUniqueIds(): MutableSet<String> {
-        return sharedPreferences.getStringSet(KEY_REGISTERED_SENSOR_UNIQUE_IDS, emptySet()) ?: mutableSetOf()
+    fun getRegisteredSensorUniqueIds(): Set<String> {
+        return keyValueStore.getStringSet(KEY_REGISTERED_SENSOR_UNIQUE_IDS, emptySet()) ?: mutableSetOf()
     }
 
     fun saveRegisteredSensorUniqueIds(sensorUniqueIds: Set<String>) {
-        sharedPreferences.edit().putStringSet(KEY_REGISTERED_SENSOR_UNIQUE_IDS, sensorUniqueIds).apply()
+        keyValueStore.putStringSet(KEY_REGISTERED_SENSOR_UNIQUE_IDS, sensorUniqueIds)
     }
 
     fun clearRegisteredSensorUniqueIds() {
-        sharedPreferences.edit().remove(KEY_REGISTERED_SENSOR_UNIQUE_IDS).apply()
+        keyValueStore.putStringSet(KEY_REGISTERED_SENSOR_UNIQUE_IDS, emptySet())
     }
 
     fun getUnitType(): String {
-        return sharedPreferences.getString(KEY_UNIT_TYPE, "mmol/L") ?: "mmol/L"
+        return keyValueStore.getString(KEY_UNIT_TYPE, "mmol/L") ?: "mmol/L"
     }
 
     fun saveUnitType(unitType: String) {
-        sharedPreferences.edit().putString(KEY_UNIT_TYPE, unitType).apply()
+        keyValueStore.putString(KEY_UNIT_TYPE, unitType)
     }
 
     fun getNotificationTimeoutMinutes(): Int {
-        return sharedPreferences.getInt(KEY_NOTIFICATION_TIMEOUT_MINUTES, 0)
+        return keyValueStore.getInt(KEY_NOTIFICATION_TIMEOUT_MINUTES, 0)
     }
 
     fun saveNotificationTimeoutMinutes(minutes: Int) {
-        sharedPreferences.edit().putInt(KEY_NOTIFICATION_TIMEOUT_MINUTES, minutes).apply()
+        keyValueStore.putInt(KEY_NOTIFICATION_TIMEOUT_MINUTES, minutes)
     }
 }
