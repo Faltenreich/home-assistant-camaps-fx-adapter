@@ -17,13 +17,13 @@ import kotlinx.coroutines.launch
 
 class SettingsViewModel : ViewModel() {
 
-    private val settingsRepository = SettingsRepository
+    private val repository = SettingsRepository
 
     private val _state = MutableStateFlow(
         SettingsState(
-            uri = settingsRepository.getHomeAssistantUri(),
-            token = settingsRepository.getHomeAssistantToken(),
-            notificationTimeoutMinutes = settingsRepository.getNotificationTimeoutMinutes().toString(),
+            uri = repository.getHomeAssistantUri() ?: "",
+            token = repository.getHomeAssistantToken() ?: "",
+            notificationTimeoutMinutes = repository.getNotificationTimeoutMinutes()?.toString() ?: "",
             connection = SettingsState.Connection.Idle,
             hasPermission = false,
         )
@@ -32,9 +32,9 @@ class SettingsViewModel : ViewModel() {
 
     fun update(state: SettingsState) {
         _state.update { state }
-        settingsRepository.saveHomeAssistantUri(state.uri)
-        settingsRepository.saveHomeAssistantToken(state.token)
-        settingsRepository.saveNotificationTimeoutMinutes(state.notificationTimeoutMinutes.toIntOrNull()?.coerceAtLeast(0) ?: 0)
+        repository.saveHomeAssistantUri(state.uri)
+        repository.saveHomeAssistantToken(state.token)
+        repository.saveNotificationTimeoutMinutes(state.notificationTimeoutMinutes.toIntOrNull()?.coerceAtLeast(0) ?: 0)
     }
 
     fun checkPermission(context: Context) {
@@ -87,8 +87,8 @@ class SettingsViewModel : ViewModel() {
 
     fun reset() {
         Log.d(TAG, "Resetting Home Assistant registration")
-        settingsRepository.saveHomeAssistantWebhookId("")
-        settingsRepository.clearRegisteredSensorUniqueIds()
+        repository.saveHomeAssistantWebhookId("")
+        repository.clearRegisteredSensorUniqueIds()
         // TODO: Toast.makeText(context, "Home Assistant registration has been reset", Toast.LENGTH_SHORT).show()
         viewModelScope.launch {
             ReinitializationManager.reinitialize()

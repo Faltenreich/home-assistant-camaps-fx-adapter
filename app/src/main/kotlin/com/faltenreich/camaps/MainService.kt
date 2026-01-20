@@ -127,8 +127,7 @@ class MainService : NotificationListenerService() {
 
             notificationTimeoutJob?.cancel()
 
-            val timeoutMinutes = settingsRepository.getNotificationTimeoutMinutes()
-            if (timeoutMinutes > 0) {
+            settingsRepository.getNotificationTimeoutMinutes()?.let { timeoutMinutes ->
                 notificationTimeoutJob = scope.launch {
                     delay(timeoutMinutes.minutes)
                     sendTimeoutNotification(timeoutMinutes)

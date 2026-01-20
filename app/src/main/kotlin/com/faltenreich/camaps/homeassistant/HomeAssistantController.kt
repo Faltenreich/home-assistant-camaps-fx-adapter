@@ -37,10 +37,10 @@ class HomeAssistantController(private val settingsRepository: SettingsRepository
         isDeviceRegistered = false
         Log.d(TAG, "start: Starting Home Assistant registration")
         mainStateProvider.addLog("Starting Home Assistant registration")
-        val uri = settingsRepository.getHomeAssistantUri()
-        val token = settingsRepository.getHomeAssistantToken()
+        val uri = settingsRepository.getHomeAssistantUri() ?: return
+        val token = settingsRepository.getHomeAssistantToken() ?: return
         homeAssistantClient = HomeAssistantClient.getInstance(uri, token)
-        webhookId = settingsRepository.getHomeAssistantWebhookId().takeIf { it.isNotBlank() }
+        webhookId = settingsRepository.getHomeAssistantWebhookId()
         registeredSensorUniqueIds.addAll(settingsRepository.getRegisteredSensorUniqueIds())
 
         if (webhookId == null) {
@@ -115,7 +115,7 @@ class HomeAssistantController(private val settingsRepository: SettingsRepository
         try {
             val response = homeAssistantClient.registerDevice(requestBody)
             webhookId = response.webhookId
-            response.webhookId?.let { settingsRepository.saveHomeAssistantWebhookId(it) }
+            settingsRepository.saveHomeAssistantWebhookId(response.webhookId)
             registeredSensorUniqueIds.clear()
             settingsRepository.clearRegisteredSensorUniqueIds()
             isDeviceRegistered = true
@@ -147,7 +147,9 @@ class HomeAssistantController(private val settingsRepository: SettingsRepository
             homeAssistantClient.registerBinarySensor(requestBody, webhookId)
             mainStateProvider.addLog("Registered dummy sensor")
         } catch (exception: Exception) {
-            mainStateProvider.addLog("Failed to register dummy sensor..")
+            val message = "Failed to register dummy sensor"
+            Log.e(TAG, message, exception)
+            mainStateProvider.addLog(message)
         }
     }
 
