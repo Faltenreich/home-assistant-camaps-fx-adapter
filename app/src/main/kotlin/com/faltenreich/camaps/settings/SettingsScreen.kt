@@ -14,6 +14,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -34,8 +35,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
@@ -43,6 +44,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.faltenreich.camaps.Dimensions
+import com.faltenreich.camaps.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -78,14 +80,18 @@ fun SettingsScreen(
         }
     ) { paddingValues ->
         Column(modifier = Modifier.padding(paddingValues)) {
-            Label("Home Assistant")
+            Label(
+                text = stringResource(R.string.home_assistant),
+            )
             HomeAssistant(
                 state = state,
                 onUpdate = viewModel::update,
                 onTestConnection = viewModel::testConnection,
             )
 
-            Label("Service")
+            Label(
+                text = stringResource(R.string.service),
+            )
             Service(
                 state = state,
                 onUpdate = viewModel::update,
@@ -117,6 +123,32 @@ private fun Label(
 }
 
 @Composable
+private fun InputField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    modifier: Modifier = Modifier,
+    hint: String? = null,
+) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        modifier = modifier.fillMaxWidth(),
+        label = { Text(label) },
+        placeholder = hint?.let { { Text(hint) } },
+        singleLine = true,
+        trailingIcon = {
+            IconButton(onClick = { onValueChange("") }) {
+                Icon(
+                    imageVector = Icons.Default.Clear,
+                    contentDescription = null,
+                )
+            }
+        }
+    )
+}
+
+@Composable
 private fun HomeAssistant(
     state: SettingsState,
     onUpdate: (SettingsState) -> Unit,
@@ -128,28 +160,24 @@ private fun HomeAssistant(
         verticalArrangement = Arrangement.spacedBy(Dimensions.Padding.P_16),
     ) {
         var uri by remember { mutableStateOf(state.uri) }
-        OutlinedTextField(
+        InputField(
             value = uri,
             onValueChange = { input ->
                 uri = input
                 onUpdate(state.copy(uri = input))
             },
-            label = { Text("URI") },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true
+            label = stringResource(R.string.home_assistant_uri),
+            hint = stringResource(R.string.home_assistant_uri_default),
         )
 
         var token by remember { mutableStateOf(state.token) }
-        OutlinedTextField(
+        InputField(
             value = token,
             onValueChange = { input ->
                 token = input
                 onUpdate(state.copy(token = input))
             },
-            label = { Text("Long-Lived Token") },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-            visualTransformation = PasswordVisualTransformation()
+            label = stringResource(R.string.home_assistant_token),
         )
 
         Row(verticalAlignment = Alignment.CenterVertically) {
