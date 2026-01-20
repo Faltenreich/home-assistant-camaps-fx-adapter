@@ -1,4 +1,4 @@
-package com.faltenreich.camaps.dashboard
+package com.faltenreich.camaps
 
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp

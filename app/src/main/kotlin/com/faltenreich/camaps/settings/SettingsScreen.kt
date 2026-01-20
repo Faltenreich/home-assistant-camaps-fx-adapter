@@ -1,6 +1,7 @@
 package com.faltenreich.camaps.settings
 
 import android.app.Activity
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -41,6 +42,7 @@ import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.faltenreich.camaps.Dimensions
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -75,102 +77,152 @@ fun SettingsScreen(
             )
         }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .padding(paddingValues)
-                .padding(16.dp)
+        Column(modifier = Modifier.padding(paddingValues)) {
+            Label("Home Assistant")
+            HomeAssistant(
+                state = state,
+                onUpdate = viewModel::update,
+                onTestConnection = viewModel::testConnection,
+            )
+
+            Label("Service")
+            Service(
+                state = state,
+                onUpdate = viewModel::update,
+                onOpenNotificationSettings = { viewModel.openNotificationSettings(context as Activity) },
+                onRestartService = viewModel::restartService,
+                onReset = viewModel::reset,
+            )
+        }
+    }
+}
+
+@Composable
+private fun Label(
+    text: String,
+    modifier: Modifier = Modifier,
+) {
+    Text(
+        text = text,
+        modifier = modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .padding(
+                horizontal = Dimensions.Padding.P_16,
+                vertical = Dimensions.Padding.P_8,
+            ),
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        style = MaterialTheme.typography.labelLarge,
+    )
+}
+
+@Composable
+private fun HomeAssistant(
+    state: SettingsState,
+    onUpdate: (SettingsState) -> Unit,
+    onTestConnection: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier.padding(Dimensions.Padding.P_16),
+        verticalArrangement = Arrangement.spacedBy(Dimensions.Padding.P_16),
+    ) {
+        var uri by remember { mutableStateOf(state.uri) }
+        OutlinedTextField(
+            value = uri,
+            onValueChange = { input ->
+                uri = input
+                onUpdate(state.copy(uri = input))
+            },
+            label = { Text("URI") },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
+        )
+
+        var token by remember { mutableStateOf(state.token) }
+        OutlinedTextField(
+            value = token,
+            onValueChange = { input ->
+                token = input
+                onUpdate(state.copy(token = input))
+            },
+            label = { Text("Long-Lived Token") },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            visualTransformation = PasswordVisualTransformation()
+        )
+
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Button(
+                onClick = onTestConnection,
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Test Connection")
+            }
+            when (val state = state.connection) {
+                is SettingsState.Connection.Loading -> CircularProgressIndicator(modifier = Modifier.size(24.dp).padding(start = 8.dp))
+                is SettingsState.Connection.Success -> Icon(Icons.Default.Check, contentDescription = "Success", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(start = 8.dp))
+                is SettingsState.Connection.Failure -> Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(start = 8.dp)) {
+                    Icon(Icons.Default.Close, contentDescription = "Failure", tint = MaterialTheme.colorScheme.error)
+                    Text(text = state.message, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(start = 4.dp))
+                }
+                is SettingsState.Connection.Idle -> Unit
+            }
+        }
+    }
+}
+
+@Composable
+private fun Service(
+    state: SettingsState,
+    onUpdate: (SettingsState) -> Unit,
+    onOpenNotificationSettings: () -> Unit,
+    onRestartService: () -> Unit,
+    onReset: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier.padding(Dimensions.Padding.P_16)) {
+        var notificationTimeoutMinutes by remember { mutableStateOf(state.notificationTimeoutMinutes) }
+        OutlinedTextField(
+            value = notificationTimeoutMinutes,
+            onValueChange = { input ->
+                notificationTimeoutMinutes = input
+                onUpdate(state.copy(notificationTimeoutMinutes = input))
+            },
+            label = { Text("Notify if no readings in x minutes") },
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(
+            onClick = onOpenNotificationSettings,
+            modifier = Modifier.fillMaxWidth()
         ) {
-            var uri by remember { mutableStateOf(state.uri) }
-            OutlinedTextField(
-                value = uri,
-                onValueChange = { input ->
-                    uri = input
-                    viewModel.update(state.copy(uri = input))
-                },
-                label = { Text("Home Assistant URI") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            var token by remember { mutableStateOf(state.token) }
-            OutlinedTextField(
-                value = token,
-                onValueChange = { input ->
-                    token = input
-                    viewModel.update(state.copy(token = input))
-                },
-                label = { Text("Long-Lived Token") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                visualTransformation = PasswordVisualTransformation()
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Button(
-                    onClick = viewModel::testConnection,
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text("Test Connection")
-                }
-                when (val state = state.connection) {
-                    is SettingsState.Connection.Loading -> CircularProgressIndicator(modifier = Modifier.size(24.dp).padding(start = 8.dp))
-                    is SettingsState.Connection.Success -> Icon(Icons.Default.Check, contentDescription = "Success", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(start = 8.dp))
-                    is SettingsState.Connection.Failure -> Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(start = 8.dp)) {
-                        Icon(Icons.Default.Close, contentDescription = "Failure", tint = MaterialTheme.colorScheme.error)
-                        Text(text = state.message, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(start = 4.dp))
-                    }
-                    is SettingsState.Connection.Idle -> Unit
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
+                Text("Permissions")
+                Spacer(modifier = Modifier.size(8.dp))
+                if (state.hasPermission) {
+                    Icon(Icons.Default.Check, contentDescription = "Success", tint = MaterialTheme.colorScheme.onPrimary)
+                } else {
+                    Icon(Icons.Default.Close, contentDescription = "Failure", tint = MaterialTheme.colorScheme.onError)
                 }
             }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            var notificationTimeoutMinutes by remember { mutableStateOf(state.notificationTimeoutMinutes) }
-            OutlinedTextField(
-                value = state.notificationTimeoutMinutes,
-                onValueChange = { input ->
-                    notificationTimeoutMinutes = input
-                    viewModel.update(state.copy(notificationTimeoutMinutes = input))
-                },
-                label = { Text("Notify if no readings in x minutes") },
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Button(
-                onClick = { viewModel.openNotificationSettings(context as Activity) },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
-                    Text("Permissions")
-                    Spacer(modifier = Modifier.size(8.dp))
-                    if (state.hasPermission) {
-                        Icon(Icons.Default.Check, contentDescription = "Success", tint = MaterialTheme.colorScheme.onPrimary)
-                    } else {
-                        Icon(Icons.Default.Close, contentDescription = "Failure", tint = MaterialTheme.colorScheme.onError)
-                    }
-                }
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-            Button(
-                onClick = viewModel::restartService,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Restart Service")
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-            Button(
-                onClick = viewModel::reset,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Re-register device")
-            }
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        Button(
+            onClick = onRestartService,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Restart Service")
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        Button(
+            onClick = onReset,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Re-register device")
         }
     }
 }

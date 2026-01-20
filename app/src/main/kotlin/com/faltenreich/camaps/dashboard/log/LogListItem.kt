@@ -13,7 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import com.faltenreich.camaps.dashboard.Dimensions
+import com.faltenreich.camaps.Dimensions
 
 @Composable
 fun LogListItem(

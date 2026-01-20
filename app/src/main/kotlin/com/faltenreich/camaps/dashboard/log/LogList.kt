@@ -7,7 +7,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
-import com.faltenreich.camaps.dashboard.Dimensions
+import com.faltenreich.camaps.Dimensions
 
 @Composable
 fun LogList(
