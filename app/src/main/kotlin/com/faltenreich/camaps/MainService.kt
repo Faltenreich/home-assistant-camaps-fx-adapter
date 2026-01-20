@@ -50,7 +50,7 @@ class MainService : NotificationListenerService() {
             sendPermissionRequiredNotification()
         }
 
-        settingsRepository = SettingsRepository(this)
+        settingsRepository = SettingsRepository
         homeAssistantController = HomeAssistantController(settingsRepository)
         scope.launch {
             ReinitializationManager.onSuccess.collect {

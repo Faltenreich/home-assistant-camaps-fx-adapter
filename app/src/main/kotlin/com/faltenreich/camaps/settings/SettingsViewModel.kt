@@ -1,14 +1,12 @@
 package com.faltenreich.camaps.settings
 
 import android.app.Activity
-import android.app.Application
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.provider.Settings
 import android.util.Log
-import android.widget.Toast
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.faltenreich.camaps.homeassistant.network.HomeAssistantClient
 import io.ktor.client.plugins.ResponseException
@@ -17,9 +15,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class SettingsViewModel(application: Application) : AndroidViewModel(application) {
+class SettingsViewModel : ViewModel() {
 
-    private val settingsRepository = SettingsRepository(application)
+    private val settingsRepository = SettingsRepository
 
     private val _state = MutableStateFlow(
         SettingsState(
@@ -81,8 +79,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
     fun restartService() {
         Log.d(TAG, "Triggering Home Assistant re-initialization")
-        val context = getApplication<Application>().applicationContext
-        Toast.makeText(context, "Re-initializing Home Assistant connection...", Toast.LENGTH_SHORT).show()
+        // TODO: Toast.makeText(context, "Re-initializing Home Assistant connection...", Toast.LENGTH_SHORT).show()
         viewModelScope.launch {
             ReinitializationManager.reinitialize()
         }
@@ -90,10 +87,9 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
     fun reset() {
         Log.d(TAG, "Resetting Home Assistant registration")
-        val context = getApplication<Application>().applicationContext
         settingsRepository.saveHomeAssistantWebhookId("")
         settingsRepository.clearRegisteredSensorUniqueIds()
-        Toast.makeText(context, "Home Assistant registration has been reset", Toast.LENGTH_SHORT).show()
+        // TODO: Toast.makeText(context, "Home Assistant registration has been reset", Toast.LENGTH_SHORT).show()
         viewModelScope.launch {
             ReinitializationManager.reinitialize()
         }
