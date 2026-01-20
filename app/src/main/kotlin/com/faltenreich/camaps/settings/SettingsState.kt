@@ -3,7 +3,7 @@ package com.faltenreich.camaps.settings
 data class SettingsState(
     val uri: String,
     val token: String,
-    val notificationTimeoutMinutes: Int,
+    val notificationTimeoutMinutes: String,
     val connection: Connection,
     val hasPermission: Boolean,
 ) {

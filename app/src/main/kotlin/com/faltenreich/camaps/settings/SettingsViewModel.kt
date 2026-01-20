@@ -25,41 +25,18 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         SettingsState(
             uri = settingsRepository.getHomeAssistantUri(),
             token = settingsRepository.getHomeAssistantToken(),
-            notificationTimeoutMinutes = settingsRepository.getNotificationTimeoutMinutes(),
+            notificationTimeoutMinutes = settingsRepository.getNotificationTimeoutMinutes().toString(),
             connection = SettingsState.Connection.Idle,
             hasPermission = false,
         )
     )
     val state = _state.asStateFlow()
 
-    fun onUriChanged(uri: String) {
-        settingsRepository.saveHomeAssistantUri(uri)
-        _state.update { state ->
-            state.copy(
-                uri = uri,
-                connection = SettingsState.Connection.Idle,
-            )
-        }
-    }
-
-    fun onTokenChanged(token: String) {
-        settingsRepository.saveHomeAssistantToken(token)
-        _state.update { state ->
-            state.copy(
-                token = token,
-                connection = SettingsState.Connection.Idle,
-            )
-        }
-    }
-
-    fun onNotificationTimeoutMinutesChanged(minutes: String) {
-        val minutesAsNumber = minutes.toIntOrNull()?.coerceAtLeast(0) ?: 0
-        settingsRepository.saveNotificationTimeoutMinutes(minutesAsNumber)
-        _state.update { state ->
-            state.copy(
-                notificationTimeoutMinutes = minutesAsNumber,
-            )
-        }
+    fun update(state: SettingsState) {
+        _state.update { state }
+        settingsRepository.saveHomeAssistantUri(state.uri)
+        settingsRepository.saveHomeAssistantToken(state.token)
+        settingsRepository.saveNotificationTimeoutMinutes(state.notificationTimeoutMinutes.toIntOrNull()?.coerceAtLeast(0) ?: 0)
     }
 
     fun checkPermission(context: Context) {

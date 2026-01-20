@@ -27,6 +27,9 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -77,23 +80,35 @@ fun SettingsScreen(
                 .padding(paddingValues)
                 .padding(16.dp)
         ) {
+            var uri by remember { mutableStateOf(state.uri) }
             OutlinedTextField(
-                value = state.uri,
-                onValueChange = viewModel::onUriChanged,
+                value = uri,
+                onValueChange = { input ->
+                    uri = input
+                    viewModel.update(state.copy(uri = input))
+                },
                 label = { Text("Home Assistant URI") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
+
             Spacer(modifier = Modifier.height(16.dp))
+
+            var token by remember { mutableStateOf(state.token) }
             OutlinedTextField(
-                value = state.token,
-                onValueChange = viewModel::onTokenChanged,
+                value = token,
+                onValueChange = { input ->
+                    token = input
+                    viewModel.update(state.copy(token = input))
+                },
                 label = { Text("Long-Lived Token") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 visualTransformation = PasswordVisualTransformation()
             )
+
             Spacer(modifier = Modifier.height(16.dp))
+
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Button(
                     onClick = viewModel::testConnection,
@@ -108,18 +123,26 @@ fun SettingsScreen(
                         Icon(Icons.Default.Close, contentDescription = "Failure", tint = MaterialTheme.colorScheme.error)
                         Text(text = state.message, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(start = 4.dp))
                     }
-                    is SettingsState.Connection.Idle -> { /* Do nothing */ }
+                    is SettingsState.Connection.Idle -> Unit
                 }
             }
+
             Spacer(modifier = Modifier.height(16.dp))
+
+            var notificationTimeoutMinutes by remember { mutableStateOf(state.notificationTimeoutMinutes) }
             OutlinedTextField(
-                value = state.notificationTimeoutMinutes.toString(),
-                onValueChange = viewModel::onNotificationTimeoutMinutesChanged,
+                value = state.notificationTimeoutMinutes,
+                onValueChange = { input ->
+                    notificationTimeoutMinutes = input
+                    viewModel.update(state.copy(notificationTimeoutMinutes = input))
+                },
                 label = { Text("Notify if no readings in x minutes") },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
+
             Spacer(modifier = Modifier.height(16.dp))
+
             Button(
                 onClick = { viewModel.openNotificationSettings(context as Activity) },
                 modifier = Modifier.fillMaxWidth()
