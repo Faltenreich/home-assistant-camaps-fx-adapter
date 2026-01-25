@@ -66,7 +66,7 @@ class MainService : NotificationListenerService() {
 
     override fun onNotificationPosted(statusBarNotification: StatusBarNotification?) {
         Log.d(TAG, "Notification posted")
-        camApsFxController.handleNotification(this, statusBarNotification)
+        camApsFxController.handleNotification(statusBarNotification)
     }
 
     companion object {

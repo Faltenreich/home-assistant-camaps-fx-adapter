@@ -209,8 +209,8 @@ class HomeAssistantController(private val settingsRepository: SettingsRepository
             return
         }
 
-        if (lastSentState?.value == value && lastSentState?.trend == trend) {
-            Log.d(TAG, "Sensor state has not changed, skipping update: $value}$unitOfMeasurement, Trend: $trend")
+        if (lastSentState?.value == value) {
+            Log.d(TAG, "Sensor state has not changed, skipping update: $value $unitOfMeasurement")
             return
         }
 
@@ -227,7 +227,6 @@ class HomeAssistantController(private val settingsRepository: SettingsRepository
                     HomeAssistantUpdateSensorRequestBody.Data(
                         uniqueId = sensorUniqueId,
                         state = value,
-                        attributes = mapOf("trend" to trend?.name)
                     )
                 )
             )
@@ -240,7 +239,7 @@ class HomeAssistantController(private val settingsRepository: SettingsRepository
                 Log.d(TAG, "Sensor updated successfully: $value $unitOfMeasurement")
                 lastUpdateTime = currentTime
                 lastSentState = state
-                mainStateProvider.setHomeAssistantState(HomeAssistantState.UpdatedSensor(HomeAssistantData.BloodSugar(value, unitOfMeasurement, trend)))
+                mainStateProvider.setHomeAssistantState(HomeAssistantState.UpdatedSensor(HomeAssistantData.BloodSugar(value, unitOfMeasurement)))
             } catch (exception: Exception) {
                 Log.e(TAG, "Sensor could not be updated: $exception")
                 mainStateProvider.setHomeAssistantState(

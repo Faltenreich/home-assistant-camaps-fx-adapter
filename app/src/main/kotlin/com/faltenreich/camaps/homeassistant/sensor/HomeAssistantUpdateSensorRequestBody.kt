@@ -22,6 +22,6 @@ data class HomeAssistantUpdateSensorRequestBody(
         @SerialName("unique_id")
         val uniqueId: String,
         @SerialName("attributes")
-        val attributes: Map<String, String?>,
+        val attributes: Map<String, String?> = emptyMap(),
     )
 }
