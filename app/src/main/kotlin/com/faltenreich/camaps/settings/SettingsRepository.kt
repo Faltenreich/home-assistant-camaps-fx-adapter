@@ -6,14 +6,11 @@ object SettingsRepository {
     private const val KEY_HOME_ASSISTANT_TOKEN = "home_assistant_token"
     private const val KEY_HOME_ASSISTANT_WEBHOOK_ID = "home_assistant_webhook_id"
     private const val KEY_REGISTERED_SENSOR_UNIQUE_IDS = "registered_sensor_unique_ids"
-    private const val KEY_NOTIFICATION_TIMEOUT_MINUTES = "notification_timeout_minutes"
-
-    private const val VALUE_HOME_ASSISTANT_URI_DEFAULT = "http://homeassistant.local:8026"
 
     private val keyValueStore = KeyValueStore
 
     fun getHomeAssistantUri(): String? {
-        return keyValueStore.getString(KEY_HOME_ASSISTANT_URI, VALUE_HOME_ASSISTANT_URI_DEFAULT)
+        return keyValueStore.getString(KEY_HOME_ASSISTANT_URI, null)
     }
 
     fun saveHomeAssistantUri(uri: String) {
@@ -46,13 +43,5 @@ object SettingsRepository {
 
     fun clearRegisteredSensorUniqueIds() {
         keyValueStore.putStringSet(KEY_REGISTERED_SENSOR_UNIQUE_IDS, emptySet())
-    }
-
-    fun getNotificationTimeoutMinutes(): Int? {
-        return keyValueStore.getInt(KEY_NOTIFICATION_TIMEOUT_MINUTES).takeIf { it > 0 }
-    }
-
-    fun saveNotificationTimeoutMinutes(minutes: Int) {
-        keyValueStore.putInt(KEY_NOTIFICATION_TIMEOUT_MINUTES, minutes)
     }
 }

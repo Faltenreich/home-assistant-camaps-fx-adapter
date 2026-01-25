@@ -2,6 +2,7 @@
 
 package com.faltenreich.camaps.dashboard
 
+import android.app.Activity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -70,7 +71,7 @@ fun DashboardScreen(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center,
             ) {
-                Button(onClick = { navController.navigate(route = Settings) }) {
+                Button(onClick = { viewModel.openNotificationSettings(context as Activity)}) {
                     Text(stringResource(R.string.settings_open))
                 }
             }

@@ -1,6 +1,5 @@
 package com.faltenreich.camaps.settings
 
-import android.app.Activity
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.imePadding
@@ -20,10 +19,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -35,12 +31,7 @@ fun SettingsScreen(
     navController: NavController,
     viewModel: SettingsViewModel = viewModel(),
 ) {
-    val context = LocalContext.current
     val state by viewModel.state.collectAsStateWithLifecycle()
-
-    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
-        viewModel.checkPermission(context)
-    }
 
     Scaffold(
         topBar = {
@@ -73,13 +64,6 @@ fun SettingsScreen(
             HomeAssistantSettings(
                 state = state,
                 onUpdate = viewModel::update,
-            )
-
-            Label(text = stringResource(R.string.permissions))
-            PermissionSettings(
-                state = state,
-                onUpdate = viewModel::update,
-                onOpenNotificationSettings = { viewModel.openNotificationSettings(context as Activity) },
             )
 
             Label(text = stringResource(R.string.service))

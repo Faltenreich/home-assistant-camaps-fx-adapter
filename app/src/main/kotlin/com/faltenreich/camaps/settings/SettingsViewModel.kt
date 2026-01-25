@@ -1,10 +1,5 @@
 package com.faltenreich.camaps.settings
 
-import android.app.Activity
-import android.content.ComponentName
-import android.content.Context
-import android.content.Intent
-import android.provider.Settings
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -26,9 +21,7 @@ class SettingsViewModel : ViewModel() {
         SettingsState(
             uri = repository.getHomeAssistantUri() ?: "",
             token = repository.getHomeAssistantToken() ?: "",
-            notificationTimeoutMinutes = repository.getNotificationTimeoutMinutes()?.toString() ?: "",
             connection = SettingsState.Connection.Loading,
-            hasPermission = false,
         )
     )
     val state = _state.asStateFlow()
@@ -46,17 +39,6 @@ class SettingsViewModel : ViewModel() {
         _state.update { state }
         repository.saveHomeAssistantUri(state.uri)
         repository.saveHomeAssistantToken(state.token)
-        repository.saveNotificationTimeoutMinutes(state.notificationTimeoutMinutes.toIntOrNull()?.coerceAtLeast(0) ?: 0)
-    }
-
-    fun checkPermission(context: Context) {
-        val componentName = ComponentName(context, "com.faltenreich.camaps.MainService")
-        val enabledListeners = Settings.Secure.getString(context.contentResolver, "enabled_notification_listeners")
-        _state.update { state ->
-            state.copy(
-                hasPermission = enabledListeners?.contains(componentName.flattenToString()) == true,
-            )
-        }
     }
 
     private suspend fun testConnection(state: SettingsState) {
@@ -79,11 +61,6 @@ class SettingsViewModel : ViewModel() {
             Log.e(TAG, "Connection failed: $errorMessage", exception)
             _state.update { state -> state.copy(connection = SettingsState.Connection.Failure(errorMessage)) }
         }
-    }
-
-    fun openNotificationSettings(activity: Activity) {
-        val intent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
-        activity.startActivityForResult(intent, 1001)
     }
 
     fun restartService() {
