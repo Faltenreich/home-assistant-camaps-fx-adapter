@@ -13,6 +13,7 @@
     <string name="permissions_failure">Permission denied</string>
     <string name="service">Service</string>
     <string name="settings">Settings</string>
+    <string name="settings_confirm">Confirm</string>
     <string name="settings_open">Open settings</string>
     <string name="notifications">Notifications</string>
     <string name="notification_channel_name">Background Service</string>

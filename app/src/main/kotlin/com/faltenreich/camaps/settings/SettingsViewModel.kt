@@ -5,7 +5,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.faltenreich.camaps.homeassistant.network.HomeAssistantClient
 import io.ktor.client.plugins.ResponseException
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -26,6 +28,9 @@ class SettingsViewModel : ViewModel() {
     )
     val state = _state.asStateFlow()
 
+    private val _event = MutableSharedFlow<SettingsEvent>()
+    val event = _event.asSharedFlow()
+
     init {
         viewModelScope.launch {
             _state
@@ -37,8 +42,13 @@ class SettingsViewModel : ViewModel() {
 
     fun update(state: SettingsState) {
         _state.update { state }
+    }
+
+    fun confirm() = viewModelScope.launch {
+        val state = _state.value
         repository.saveHomeAssistantUri(state.uri)
         repository.saveHomeAssistantToken(state.token)
+        _event.emit(SettingsEvent.UpdatedSuccessfully)
     }
 
     private suspend fun pingHomeAssistant(state: SettingsState) {
