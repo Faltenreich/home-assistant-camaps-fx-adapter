@@ -11,7 +11,7 @@ import android.widget.TextView
 import androidx.core.graphics.drawable.toBitmap
 import com.faltenreich.camaps.camaps.CamApsFxState
 
-class CamApsFxNotificationMapper {
+class CamApsFxNotificationMapper(private val mapTrendIcon: TrendIconMapper) {
 
     operator fun invoke(context: Context, statusBarNotification: StatusBarNotification): CamApsFxState? {
         val camApsFxNotification = statusBarNotification
@@ -19,6 +19,7 @@ class CamApsFxNotificationMapper {
             ?.notification
             ?: return null
 
+        @Suppress("Deprecation")
         val remoteViews = camApsFxNotification.bigContentView ?: camApsFxNotification.contentView ?: run {
             return CamApsFxState.Error("Missing both bigContentView and contentView")
         }
@@ -37,10 +38,10 @@ class CamApsFxNotificationMapper {
             var detectedTrend = CamApsFxState.BloodSugar.Trend.UNKNOWN
 
             if (trendBitmap != null) {
-                detectedTrend = TrendMappingManager.matchTrend(trendBitmap, context)
+                detectedTrend = mapTrendIcon(context, trendBitmap)
             }
 
-            val value = textViews.mapNotNull { it.replace(',', '.').toFloatOrNull() }.firstOrNull()
+            val value = textViews.firstNotNullOfOrNull { it.replace(',', '.').toFloatOrNull() }
             val unit = textViews.firstOrNull { it.equals("mmol/L", ignoreCase = true) || it.equals("mg/dL", ignoreCase = true) }
 
             return when {

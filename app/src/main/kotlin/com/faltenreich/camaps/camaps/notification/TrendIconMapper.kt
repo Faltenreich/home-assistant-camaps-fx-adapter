@@ -6,16 +6,16 @@ import android.graphics.Color
 import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
+import androidx.core.graphics.get
+import androidx.core.graphics.scale
 import com.faltenreich.camaps.camaps.CamApsFxState
 
-object TrendMappingManager {
+class TrendIconMapper {
 
-    private val TAG = TrendMappingManager::class.java.simpleName
     private val cachedHashes = mutableMapOf<Int, Map<CamApsFxState.BloodSugar.Trend, List<ByteArray>>>()
     private var cachedIconSize = 0
-    private const val HAMMING_DISTANCE_THRESHOLD = 1
 
-    fun matchTrend(bitmap: Bitmap, context: Context): CamApsFxState.BloodSugar.Trend {
+    operator fun invoke(context: Context, bitmap: Bitmap): CamApsFxState.BloodSugar.Trend {
         if (cachedIconSize != bitmap.width) {
             cachedHashes.clear()
             cachedIconSize = bitmap.width
@@ -79,14 +79,14 @@ object TrendMappingManager {
         val croppedBitmap = Bitmap.createBitmap(this, startX, startY, cropWidth, cropHeight)
 
         val size = 12
-        val smallBitmap = Bitmap.createScaledBitmap(croppedBitmap, size, size, true)
+        val smallBitmap = croppedBitmap.scale(size, size)
         val hashBits = BooleanArray(size * size)
         var averageLuminance = 0.0
 
         val luminances = IntArray(size * size)
         for (y in 0 until size) {
             for (x in 0 until size) {
-                val pixel = smallBitmap.getPixel(x, y)
+                val pixel = smallBitmap[x, y]
                 val luminance = (0.299 * Color.red(pixel) + 0.587 * Color.green(pixel) + 0.114 * Color.blue(pixel))
                 luminances[y * size + x] = luminance.toInt()
                 averageLuminance += luminance
@@ -121,5 +121,11 @@ object TrendMappingManager {
             distance += Integer.bitCount((this[i].toInt() xor other[i].toInt()))
         }
         return distance
+    }
+
+    companion object {
+
+        private val TAG = TrendIconMapper::class.java.simpleName
+        private const val HAMMING_DISTANCE_THRESHOLD = 1
     }
 }
