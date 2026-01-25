@@ -14,12 +14,7 @@ class DashboardViewModel(
 
     private val mainState = mainStateProvider.state
 
-    val state = mainState.map { mainState ->
-        DashboardState.Content(
-            serviceState = mainState.serviceState,
-            log = mainState.log,
-        )
-    }.stateIn(
+    val state = mainState.map { DashboardState.Content(log = it.log) }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.Lazily,
         initialValue = DashboardState.Loading,

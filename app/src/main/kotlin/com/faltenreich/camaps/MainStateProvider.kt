@@ -14,9 +14,7 @@ class MainStateProvider {
     private val _state = MutableStateFlow(
         MainState(
             permission = MainState.Permission.Loading,
-            serviceState = MainServiceState.Disconnected,
             camApsFxState = CamApsFxState.Blank,
-            homeAssistantState = HomeAssistantState.Disconnected,
             log = emptyList(),
         )
     )
@@ -30,7 +28,6 @@ class MainStateProvider {
         val logEntry = LogEntryFactory.create(serviceState)
         _state.update { state ->
             state.copy(
-                serviceState = serviceState,
                 log = state.log.addEntry(logEntry)
             )
         }
@@ -50,7 +47,6 @@ class MainStateProvider {
         val logEntry = LogEntryFactory.create(homeAssistantState)
         _state.update { state ->
             state.copy(
-                homeAssistantState = homeAssistantState,
                 log = state.log.addEntry(logEntry)
             )
         }
