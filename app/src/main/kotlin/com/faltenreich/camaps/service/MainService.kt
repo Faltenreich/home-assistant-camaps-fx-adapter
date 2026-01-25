@@ -24,13 +24,14 @@ class MainService : NotificationListenerService() {
 
     private val mainStateProvider = MainStateProvider
     private val camApsFxController = CamApsFxController()
-    private val homeAssistantController = ServiceLocator.homeAssistantController
+    private val homeAssistantController get() = ServiceLocator.homeAssistantController
 
     private val scope = CoroutineScope(Dispatchers.IO)
 
     override fun onCreate() {
         super.onCreate()
         Log.d(TAG, "Service created")
+        ServiceLocator.setup(this)
         scope.launch {
             mainStateProvider.state
                 .map { it.camApsFxState }

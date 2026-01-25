@@ -1,13 +1,12 @@
 package com.faltenreich.camaps.screen.dashboard
 
-import android.app.Activity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -18,10 +17,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -35,12 +31,7 @@ fun DashboardScreen(
     modifier: Modifier = Modifier,
     viewModel: DashboardViewModel = viewModel(),
 ) {
-    val context = LocalContext.current
     val state = viewModel.state.collectAsStateWithLifecycle().value
-
-    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
-        viewModel.checkPermissions(context)
-    }
 
     Scaffold(
         modifier = modifier,
@@ -64,13 +55,11 @@ fun DashboardScreen(
         },
     ) { paddingValues ->
         when (state) {
-            is DashboardState.MissingPermissions -> Box(
+            is DashboardState.Loading -> Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center,
             ) {
-                Button(onClick = { viewModel.openNotificationSettings(context as Activity)}) {
-                    Text(stringResource(R.string.settings_open))
-                }
+                CircularProgressIndicator()
             }
             is DashboardState.Content -> LogList(
                 entries = state.log,

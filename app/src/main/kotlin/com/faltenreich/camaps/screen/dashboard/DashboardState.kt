@@ -1,11 +1,11 @@
 package com.faltenreich.camaps.screen.dashboard
 
-import com.faltenreich.camaps.service.MainServiceState
 import com.faltenreich.camaps.screen.dashboard.log.LogEntry
+import com.faltenreich.camaps.service.MainServiceState
 
 sealed interface DashboardState {
 
-    data object MissingPermissions : DashboardState
+    data object Loading : DashboardState
 
     data class Content(
         val serviceState: MainServiceState,
