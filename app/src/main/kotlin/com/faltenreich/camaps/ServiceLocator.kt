@@ -2,8 +2,8 @@ package com.faltenreich.camaps
 
 import android.content.Context
 import com.faltenreich.camaps.core.data.KeyValueStore
-import com.faltenreich.camaps.homeassistant.HomeAssistantController
-import com.faltenreich.camaps.settings.SettingsRepository
+import com.faltenreich.camaps.service.homeassistant.HomeAssistantController
+import com.faltenreich.camaps.screen.settings.SettingsRepository
 
 object ServiceLocator {
 

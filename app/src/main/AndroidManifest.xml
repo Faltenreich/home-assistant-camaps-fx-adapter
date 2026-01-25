@@ -32,7 +32,7 @@
         </activity>
 
         <service
-            android:name=".MainService"
+            android:name=".service.MainService"
             android:label="Notification Listener"
             android:exported="true"
             android:foregroundServiceType="dataSync"

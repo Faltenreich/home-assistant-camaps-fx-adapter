@@ -7,10 +7,10 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.faltenreich.camaps.dashboard.Dashboard
-import com.faltenreich.camaps.dashboard.DashboardScreen
-import com.faltenreich.camaps.settings.Settings
-import com.faltenreich.camaps.settings.SettingsScreen
+import com.faltenreich.camaps.screen.dashboard.Dashboard
+import com.faltenreich.camaps.screen.dashboard.DashboardScreen
+import com.faltenreich.camaps.screen.settings.Settings
+import com.faltenreich.camaps.screen.settings.SettingsScreen
 
 @Composable
 fun MainScreen() {
