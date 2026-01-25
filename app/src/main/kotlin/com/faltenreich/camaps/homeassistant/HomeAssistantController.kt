@@ -5,7 +5,6 @@ import android.util.Log
 import com.faltenreich.camaps.BuildConfig
 import com.faltenreich.camaps.MainStateProvider
 import com.faltenreich.camaps.camaps.CamApsFxState
-import com.faltenreich.camaps.core.data.KeyValueStore
 import com.faltenreich.camaps.homeassistant.device.HomeAssistantRegisterDeviceRequestBody
 import com.faltenreich.camaps.homeassistant.network.HomeAssistantApi
 import com.faltenreich.camaps.homeassistant.network.HomeAssistantClient
@@ -26,7 +25,7 @@ class HomeAssistantController(private val settingsRepository: SettingsRepository
     private var isDeviceRegistered = false
     private var lastSentState: CamApsFxState.BloodSugar? = null
     private var lastUpdateTime = 0L
-    private val deviceId get() = KeyValueStore.deviceId
+    private val deviceId = settingsRepository.getDeviceId()
 
     suspend fun start() {
         isDeviceRegistered = false

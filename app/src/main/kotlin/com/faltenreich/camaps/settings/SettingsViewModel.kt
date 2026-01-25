@@ -7,6 +7,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.faltenreich.camaps.ServiceLocator
 import com.faltenreich.camaps.homeassistant.network.HomeAssistantClient
 import io.ktor.client.plugins.ResponseException
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -22,9 +23,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
 
-class SettingsViewModel : ViewModel() {
-
-    private val repository = SettingsRepository
+class SettingsViewModel(
+    private val repository: SettingsRepository = ServiceLocator.settingsRepository,
+) : ViewModel() {
 
     var uri by mutableStateOf("")
     var token by mutableStateOf("")

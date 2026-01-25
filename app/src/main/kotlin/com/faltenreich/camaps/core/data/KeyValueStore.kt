@@ -1,6 +1,5 @@
 package com.faltenreich.camaps.core.data
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.provider.Settings
 import androidx.datastore.core.DataStore
@@ -11,18 +10,14 @@ import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-@SuppressLint("StaticFieldLeak")
-object KeyValueStore {
+class KeyValueStore(private val context: Context) {
 
-    private lateinit var context: Context
     private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
-
     // TODO: Remove (from here)
-    lateinit var deviceId: String
-
-    fun setup(context: Context) {
-        this.context = context
-        deviceId = Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
+    val deviceId: String = try {
+        Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID) ?: "deviceId"
+    } catch (_: Throwable) {
+        "deviceId"
     }
 
     suspend fun putString(key: String, value: String) {

@@ -6,8 +6,6 @@ import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Log
 import com.faltenreich.camaps.camaps.CamApsFxController
-import com.faltenreich.camaps.homeassistant.HomeAssistantController
-import com.faltenreich.camaps.settings.SettingsRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
@@ -24,7 +22,7 @@ class MainService : NotificationListenerService() {
 
     private val mainStateProvider = MainStateProvider
     private val camApsFxController = CamApsFxController()
-    private val homeAssistantController = HomeAssistantController(SettingsRepository)
+    private val homeAssistantController = ServiceLocator.homeAssistantController
 
     private val scope = CoroutineScope(Dispatchers.IO)
 

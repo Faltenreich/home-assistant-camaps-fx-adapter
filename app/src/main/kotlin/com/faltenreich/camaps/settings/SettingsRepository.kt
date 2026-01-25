@@ -3,14 +3,7 @@ package com.faltenreich.camaps.settings
 import com.faltenreich.camaps.core.data.KeyValueStore
 import kotlinx.coroutines.flow.Flow
 
-object SettingsRepository {
-
-    private const val KEY_HOME_ASSISTANT_URI = "home_assistant_uri"
-    private const val KEY_HOME_ASSISTANT_TOKEN = "home_assistant_token"
-    private const val KEY_HOME_ASSISTANT_WEBHOOK_ID = "home_assistant_webhook_id"
-    private const val KEY_REGISTERED_SENSOR_UNIQUE_IDS = "registered_sensor_unique_ids"
-
-    private val keyValueStore = KeyValueStore
+class SettingsRepository(private val keyValueStore: KeyValueStore) {
 
     fun getDeviceId(): String {
         return keyValueStore.deviceId
@@ -50,5 +43,13 @@ object SettingsRepository {
 
     suspend fun clearRegisteredSensorUniqueIds() {
         keyValueStore.putStringSet(KEY_REGISTERED_SENSOR_UNIQUE_IDS, emptySet())
+    }
+
+    companion object {
+
+        private const val KEY_HOME_ASSISTANT_URI = "home_assistant_uri"
+        private const val KEY_HOME_ASSISTANT_TOKEN = "home_assistant_token"
+        private const val KEY_HOME_ASSISTANT_WEBHOOK_ID = "home_assistant_webhook_id"
+        private const val KEY_REGISTERED_SENSOR_UNIQUE_IDS = "registered_sensor_unique_ids"
     }
 }
