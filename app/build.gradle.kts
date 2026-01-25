@@ -37,7 +37,10 @@ android {
 kotlin {
     compilerOptions {
         jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
-        optIn.add("kotlinx.coroutines.FlowPreview")
+        optIn.addAll(
+            "androidx.compose.material3.ExperimentalMaterial3Api",
+            "kotlinx.coroutines.FlowPreview",
+        )
     }
 }
 
