@@ -1,6 +1,8 @@
 package com.faltenreich.camaps.settings
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -11,11 +13,10 @@ import com.faltenreich.camaps.Dimensions
 
 @Composable
 fun Label(
-    text: String,
     modifier: Modifier = Modifier,
+    content: @Composable BoxScope.() -> Unit,
 ) {
-    Text(
-        text = text,
+    Box(
         modifier = modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.surfaceVariant)
@@ -23,7 +24,20 @@ fun Label(
                 horizontal = Dimensions.Padding.P_16,
                 vertical = Dimensions.Padding.P_8,
             ),
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        style = MaterialTheme.typography.labelLarge,
+        content = content,
     )
+}
+
+@Composable
+fun Label(
+    text: String,
+    modifier: Modifier = Modifier,
+) {
+    Label(modifier = modifier) {
+        Text(
+            text = text,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.labelLarge,
+        )
+    }
 }
