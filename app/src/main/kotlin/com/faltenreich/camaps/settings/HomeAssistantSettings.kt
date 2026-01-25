@@ -24,10 +24,10 @@ fun HomeAssistantSettings(
         modifier = modifier
             .padding(
                 horizontal = Dimensions.Padding.P_16,
-                vertical = Dimensions.Padding.P_16,
+                vertical = Dimensions.Padding.P_8,
             )
             .animateContentSize(),
-        verticalArrangement = Arrangement.spacedBy(Dimensions.Padding.P_16),
+        verticalArrangement = Arrangement.spacedBy(Dimensions.Padding.P_8),
     ) {
         var uri by remember { mutableStateOf(state.uri) }
         InputField(

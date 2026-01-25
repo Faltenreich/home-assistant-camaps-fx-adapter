@@ -37,7 +37,7 @@ fun StatusIndicator(
 
     Box(
         modifier = modifier,
-        contentAlignment = Alignment.Center,
+        contentAlignment = Alignment.CenterStart,
     ) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(Dimensions.Padding.P_16),

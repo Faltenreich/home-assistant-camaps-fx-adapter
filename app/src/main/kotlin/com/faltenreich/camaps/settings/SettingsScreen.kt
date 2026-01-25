@@ -69,21 +69,21 @@ fun SettingsScreen(
                 .consumeWindowInsets(paddingValues)
                 .imePadding(),
         ) {
-            Label(
-                text = stringResource(R.string.home_assistant),
-            )
+            Label(text = stringResource(R.string.home_assistant))
             HomeAssistantSettings(
                 state = state,
                 onUpdate = viewModel::update,
             )
 
-            Label(
-                text = stringResource(R.string.service),
-            )
-            ServiceSettings(
+            Label(text = stringResource(R.string.permissions))
+            PermissionSettings(
                 state = state,
                 onUpdate = viewModel::update,
                 onOpenNotificationSettings = { viewModel.openNotificationSettings(context as Activity) },
+            )
+
+            Label(text = stringResource(R.string.service))
+            ServiceSettings(
                 onRestartService = viewModel::restartService,
                 onReset = viewModel::reset,
             )
