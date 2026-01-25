@@ -1,4 +1,4 @@
-package com.faltenreich.camaps.settings
+package com.faltenreich.camaps.core.ui
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons

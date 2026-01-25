@@ -1,5 +1,7 @@
 package com.faltenreich.camaps.settings
 
+import com.faltenreich.camaps.core.data.KeyValueStore
+
 object SettingsRepository {
 
     private const val KEY_HOME_ASSISTANT_URI = "home_assistant_uri"

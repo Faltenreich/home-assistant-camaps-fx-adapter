@@ -9,8 +9,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.faltenreich.camaps.Dimensions
-import com.faltenreich.camaps.settings.Label
+import com.faltenreich.camaps.core.ui.Dimensions
+import com.faltenreich.camaps.core.ui.Label
 
 @Composable
 fun LogListItem(

@@ -1,4 +1,4 @@
-package com.faltenreich.camaps.settings
+package com.faltenreich.camaps.core.ui
 
 sealed interface Status {
 

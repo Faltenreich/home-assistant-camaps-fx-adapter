@@ -24,6 +24,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.faltenreich.camaps.R
+import com.faltenreich.camaps.core.ui.Label
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

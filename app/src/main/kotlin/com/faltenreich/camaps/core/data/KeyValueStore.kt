@@ -1,4 +1,4 @@
-package com.faltenreich.camaps.settings
+package com.faltenreich.camaps.core.data
 
 import android.content.Context
 import android.content.SharedPreferences
@@ -23,14 +23,6 @@ object KeyValueStore {
 
     fun getString(key: String, default: String? = null): String? {
         return sharedPreferences.getString(key, default)
-    }
-
-    fun putInt(key: String, value: Int) {
-        sharedPreferences.edit { putInt(key, value) }
-    }
-
-    fun getInt(key: String, default: Int = -1): Int {
-        return sharedPreferences.getInt(key, default)
     }
 
     fun putStringSet(key: String, value: Set<String>) {

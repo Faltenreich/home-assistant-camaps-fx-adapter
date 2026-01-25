@@ -11,7 +11,7 @@ import com.faltenreich.camaps.homeassistant.network.HomeAssistantClient
 import com.faltenreich.camaps.homeassistant.sensor.HomeAssistantRegisterBinarySensorRequestBody
 import com.faltenreich.camaps.homeassistant.sensor.HomeAssistantRegisterSensorRequestBody
 import com.faltenreich.camaps.homeassistant.sensor.HomeAssistantUpdateSensorRequestBody
-import com.faltenreich.camaps.settings.KeyValueStore.deviceId
+import com.faltenreich.camaps.core.data.KeyValueStore.deviceId
 import com.faltenreich.camaps.settings.SettingsRepository
 import io.ktor.client.plugins.ResponseException
 

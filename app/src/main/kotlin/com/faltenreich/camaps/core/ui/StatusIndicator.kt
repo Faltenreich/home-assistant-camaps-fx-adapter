@@ -1,4 +1,4 @@
-package com.faltenreich.camaps.settings
+package com.faltenreich.camaps.core.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,8 +16,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import com.faltenreich.camaps.Colors
-import com.faltenreich.camaps.Dimensions
 
 @Composable
 fun StatusIndicator(

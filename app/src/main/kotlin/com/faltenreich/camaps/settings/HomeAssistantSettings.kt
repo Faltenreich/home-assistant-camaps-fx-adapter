@@ -11,8 +11,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import com.faltenreich.camaps.Dimensions
+import com.faltenreich.camaps.core.ui.Dimensions
 import com.faltenreich.camaps.R
+import com.faltenreich.camaps.core.ui.InputField
+import com.faltenreich.camaps.core.ui.Status
+import com.faltenreich.camaps.core.ui.StatusIndicator
 
 @Composable
 fun HomeAssistantSettings(
@@ -56,6 +59,7 @@ fun HomeAssistantSettings(
                 is SettingsState.Connection.Success -> Status.Success(
                     message = stringResource(R.string.home_assistant_connection_success),
                 )
+
                 is SettingsState.Connection.Failure -> Status.Failure(
                     message = state.connection.message,
                 )

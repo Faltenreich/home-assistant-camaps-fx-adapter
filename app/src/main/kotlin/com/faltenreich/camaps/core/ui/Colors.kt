@@ -1,4 +1,4 @@
-package com.faltenreich.camaps
+package com.faltenreich.camaps.core.ui
 
 import androidx.compose.ui.graphics.Color
 

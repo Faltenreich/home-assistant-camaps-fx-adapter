@@ -1,5 +1,6 @@
 package com.faltenreich.camaps.homeassistant.network
 
+import com.faltenreich.camaps.core.network.NetworkClient
 import com.faltenreich.camaps.homeassistant.device.HomeAssistantRegisterDeviceRequestBody
 import com.faltenreich.camaps.homeassistant.device.HomeAssistantRegisterDeviceResponse
 import com.faltenreich.camaps.homeassistant.sensor.HomeAssistantRegisterBinarySensorRequestBody
