@@ -39,7 +39,7 @@ class HomeAssistantController(private val settingsRepository: SettingsRepository
         mainStateProvider.addLog("Starting Home Assistant registration")
         val uri = settingsRepository.getHomeAssistantUri() ?: return
         val token = settingsRepository.getHomeAssistantToken() ?: return
-        homeAssistantClient = HomeAssistantClient.getInstance(uri, token)
+        homeAssistantClient = HomeAssistantClient(host = uri, token = token)
         webhookId = settingsRepository.getHomeAssistantWebhookId()
         registeredSensorUniqueIds.addAll(settingsRepository.getRegisteredSensorUniqueIds())
 

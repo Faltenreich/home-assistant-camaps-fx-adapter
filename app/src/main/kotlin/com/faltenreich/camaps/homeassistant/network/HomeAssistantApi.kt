@@ -9,7 +9,7 @@ import com.faltenreich.camaps.homeassistant.sensor.HomeAssistantUpdateSensorRequ
 
 interface HomeAssistantApi {
 
-    suspend fun testConnection()
+    suspend fun ping()
 
     suspend fun registerDevice(
         requestBody: HomeAssistantRegisterDeviceRequestBody

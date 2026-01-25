@@ -31,7 +31,7 @@ class SettingsViewModel : ViewModel() {
             _state
                 .debounce(1.seconds)
                 .distinctUntilChanged { old, new -> old.uri == new.uri && old.token == new.token }
-                .collect { update -> testConnection(update) }
+                .collect { update -> pingHomeAssistant(update) }
         }
     }
 
@@ -41,15 +41,12 @@ class SettingsViewModel : ViewModel() {
         repository.saveHomeAssistantToken(state.token)
     }
 
-    private suspend fun testConnection(state: SettingsState) {
+    private suspend fun pingHomeAssistant(state: SettingsState) {
         _state.update { state.copy(connection = SettingsState.Connection.Loading) }
         try {
             Log.d(TAG, "Testing connection to ${state.uri}")
-            val client = HomeAssistantClient.getInstance(
-                host = state.uri,
-                token = state.token,
-            )
-            client.testConnection()
+            val client = HomeAssistantClient(host = state.uri, token = state.token)
+            client.ping()
             _state.update { state -> state.copy(connection = SettingsState.Connection.Success) }
             ReinitializationManager.reinitialize()
             Log.d(TAG, "Connection successful")

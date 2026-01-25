@@ -17,13 +17,44 @@ import io.ktor.http.Url
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 
-class HomeAssistantClient(
+class HomeAssistantClient private constructor(
     private val host: String,
-    private val token: String,
     private val networkClient: NetworkClient,
 ) : HomeAssistantApi {
 
-    override suspend fun testConnection() {
+    constructor(host: String, token: String) : this(
+        host = host,
+        networkClient = NetworkClient(
+            httpClient = HttpClient(OkHttp) {
+                expectSuccess = true
+                defaultRequest {
+                    headers.append("User-Agent", "CamAPS-FX-Adapter")
+                }
+                install(ContentNegotiation) {
+                    json(
+                        Json {
+                            encodeDefaults = true
+                            prettyPrint = true
+                            isLenient = true
+                            ignoreUnknownKeys = true
+                        }
+                    )
+                }
+                install(Auth) {
+                    bearer {
+                        loadTokens {
+                            BearerTokens(
+                                accessToken = token.trim(),
+                                refreshToken = null,
+                            )
+                        }
+                    }
+                }
+            }
+        ),
+    )
+
+    override suspend fun ping() {
         networkClient.get<Unit>(url = Url("$host/api/"))
     }
 
@@ -70,42 +101,5 @@ class HomeAssistantClient(
             url = Url("$host/api/webhook/$webhookId"),
             requestBody = requestBody,
         )
-    }
-
-    companion object {
-        fun getInstance(host: String, token: String): HomeAssistantApi {
-            return HomeAssistantClient(
-                host = host,
-                token = token,
-                networkClient = NetworkClient(
-                    httpClient = HttpClient(OkHttp) {
-                        expectSuccess = true
-                        defaultRequest {
-                            headers.append("User-Agent", "CamAPS-FX-Adapter")
-                        }
-                        install(ContentNegotiation) {
-                            json(
-                                Json {
-                                    encodeDefaults = true
-                                    prettyPrint = true
-                                    isLenient = true
-                                    ignoreUnknownKeys = true
-                                }
-                            )
-                        }
-                        install(Auth) {
-                            bearer {
-                                loadTokens {
-                                    BearerTokens(
-                                        accessToken = token.trim(),
-                                        refreshToken = null,
-                                    )
-                                }
-                            }
-                        }
-                    }
-                ),
-            )
-        }
     }
 }
