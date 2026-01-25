@@ -75,7 +75,6 @@ fun SettingsScreen(
             HomeAssistantSettings(
                 state = state,
                 onUpdate = viewModel::update,
-                onTestConnection = viewModel::testConnection,
             )
 
             Label(

@@ -12,8 +12,11 @@ import com.faltenreich.camaps.homeassistant.network.HomeAssistantClient
 import io.ktor.client.plugins.ResponseException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.seconds
 
 class SettingsViewModel : ViewModel() {
 
@@ -24,14 +27,23 @@ class SettingsViewModel : ViewModel() {
             uri = repository.getHomeAssistantUri() ?: "",
             token = repository.getHomeAssistantToken() ?: "",
             notificationTimeoutMinutes = repository.getNotificationTimeoutMinutes()?.toString() ?: "",
-            connection = SettingsState.Connection.Idle,
+            connection = SettingsState.Connection.Loading,
             hasPermission = false,
         )
     )
     val state = _state.asStateFlow()
 
+    init {
+        viewModelScope.launch {
+            _state
+                .debounce(1.seconds)
+                .distinctUntilChanged { old, new -> old.uri == new.uri && old.token == new.token }
+                .collect { update -> testConnection(update) }
+        }
+    }
+
     fun update(state: SettingsState) {
-        _state.update { state.copy(connection = SettingsState.Connection.Idle) }
+        _state.update { state }
         repository.saveHomeAssistantUri(state.uri)
         repository.saveHomeAssistantToken(state.token)
         repository.saveNotificationTimeoutMinutes(state.notificationTimeoutMinutes.toIntOrNull()?.coerceAtLeast(0) ?: 0)
@@ -47,28 +59,25 @@ class SettingsViewModel : ViewModel() {
         }
     }
 
-    fun testConnection() {
-        viewModelScope.launch {
-            val state = _state.value
-            _state.update { state.copy(connection = SettingsState.Connection.Loading) }
-            try {
-                Log.d(TAG, "Testing connection to ${state.uri} with token ${state.token.take(4)}...")
-                val client = HomeAssistantClient.getInstance(
-                    host = state.uri,
-                    token = state.token,
-                )
-                client.testConnection()
-                _state.update { state -> state.copy(connection = SettingsState.Connection.Success) }
-                ReinitializationManager.reinitialize()
-                Log.d(TAG, "Connection successful")
-            } catch (exception: Exception) {
-                val errorMessage = when (exception) {
-                    is ResponseException -> exception.response.status.value.toString()
-                    else -> exception.message ?: "Unknown error"
-                }
-                Log.e(TAG, "Connection failed: $errorMessage", exception)
-                _state.update { state -> state.copy(connection = SettingsState.Connection.Failure(errorMessage)) }
+    private suspend fun testConnection(state: SettingsState) {
+        _state.update { state.copy(connection = SettingsState.Connection.Loading) }
+        try {
+            Log.d(TAG, "Testing connection to ${state.uri}")
+            val client = HomeAssistantClient.getInstance(
+                host = state.uri,
+                token = state.token,
+            )
+            client.testConnection()
+            _state.update { state -> state.copy(connection = SettingsState.Connection.Success) }
+            ReinitializationManager.reinitialize()
+            Log.d(TAG, "Connection successful")
+        } catch (exception: Exception) {
+            val errorMessage = when (exception) {
+                is ResponseException -> exception.response.status.value.toString()
+                else -> exception.message ?: "Unknown error"
             }
+            Log.e(TAG, "Connection failed: $errorMessage", exception)
+            _state.update { state -> state.copy(connection = SettingsState.Connection.Failure(errorMessage)) }
         }
     }
 

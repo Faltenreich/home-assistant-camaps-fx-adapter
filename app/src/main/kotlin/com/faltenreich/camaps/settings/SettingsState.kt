@@ -10,8 +10,6 @@ data class SettingsState(
 
     sealed interface Connection {
 
-        object Idle : Connection
-
         object Loading : Connection
 
         object Success : Connection
