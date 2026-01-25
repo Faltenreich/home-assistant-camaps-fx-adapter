@@ -11,9 +11,7 @@ import com.faltenreich.camaps.homeassistant.HomeAssistantController
 import com.faltenreich.camaps.settings.SettingsRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlin.time.Duration.Companion.minutes
 
 /**
  * NotificationListenerService breaks between builds during development.
@@ -54,13 +52,7 @@ class MainService : NotificationListenerService() {
 
         scope.launch {
             mainStateProvider.setServiceState(MainServiceState.Connected)
-            try {
-                homeAssistantController.start()
-            } catch (_: Exception) {
-                mainStateProvider.addLog("Failed to connect to Home Assistant. Retrying in 10 minutes.")
-                delay(10.minutes)
-                homeAssistantController.start()
-            }
+            homeAssistantController.start()
         }
     }
 
