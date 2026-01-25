@@ -1,14 +1,16 @@
 package com.faltenreich.camaps.camaps.notification
 
+import android.app.Notification
 import android.content.Context
 import android.graphics.Bitmap
 import android.service.notification.StatusBarNotification
-import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.RemoteViews
 import android.widget.TextView
 import androidx.core.graphics.drawable.toBitmap
+import androidx.core.view.children
 import com.faltenreich.camaps.camaps.CamApsFxState
 
 class CamApsFxNotificationMapper(private val mapTrendIcon: TrendIconMapper) {
@@ -18,10 +20,8 @@ class CamApsFxNotificationMapper(private val mapTrendIcon: TrendIconMapper) {
             .takeIf { it.packageName.startsWith(CAM_APS_FX_PACKAGE_NAME_PREFIX) }
             ?.notification
             ?: return null
-
-        @Suppress("Deprecation")
-        val remoteViews = camApsFxNotification.bigContentView ?: camApsFxNotification.contentView ?: run {
-            return CamApsFxState.Error("Missing both bigContentView and contentView")
+        val remoteViews = camApsFxNotification.remoteViews ?: run {
+            return CamApsFxState.Error("Missing RemoteViews")
         }
 
         try {
@@ -29,52 +29,46 @@ class CamApsFxNotificationMapper(private val mapTrendIcon: TrendIconMapper) {
             val view = remoteViews.apply(remotePackageContext, null)
 
             val textViews = mutableListOf<String>()
-            findTextViews(view, textViews)
+            findTexts(view, textViews)
 
             val extractedBitmaps = mutableListOf<Bitmap>()
-            findImageViewBitmaps(view, extractedBitmaps)
+            findBitmaps(view, extractedBitmaps)
 
             val trendBitmap = extractedBitmaps.getOrNull(1)
-            var detectedTrend = CamApsFxState.BloodSugar.Trend.UNKNOWN
-
-            if (trendBitmap != null) {
-                detectedTrend = mapTrendIcon(context, trendBitmap)
-            }
+            val trend = trendBitmap?.let { mapTrendIcon(context, trendBitmap) } ?: CamApsFxState.BloodSugar.Trend.UNKNOWN
 
             val value = textViews.firstNotNullOfOrNull { it.replace(',', '.').toFloatOrNull() }
-            val unit = textViews.firstOrNull { it.equals("mmol/L", ignoreCase = true) || it.equals("mg/dL", ignoreCase = true) }
+            val unitOfMeasurement = textViews.firstOrNull { it.equals("mmol/L", ignoreCase = true) || it.equals("mg/dL", ignoreCase = true) }
 
             return when {
-                value != null && unit != null -> CamApsFxState.BloodSugar(value, unit, detectedTrend)
+                value != null && unitOfMeasurement != null -> CamApsFxState.BloodSugar(value, unitOfMeasurement, trend)
                 else -> CamApsFxState.Error("Could not determine state from notification: ${textViews.joinToString()}")
             }
-
-        } catch (e: Exception) {
-            Log.e(TAG, "Error processing notification", e)
-            return CamApsFxState.Error("Failed to process notification: ${e.message}")
+        } catch (exception: Exception) {
+            return CamApsFxState.Error("Failed to process notification: ${exception.message}")
         }
     }
 
-    private fun findTextViews(view: View, out: MutableList<String>) {
-        if (view is TextView) {
-            view.text?.toString()?.takeIf { it.isNotBlank() }?.let(out::add)
-        }
-        if (view is ViewGroup) {
-            (0 until view.childCount).forEach { findTextViews(view.getChildAt(it), out) }
+    @Suppress("Deprecation")
+    private val Notification.remoteViews: RemoteViews?
+        get() = bigContentView ?: contentView
+
+    private fun findTexts(view: View, out: MutableList<String>) {
+        when (view) {
+            is TextView -> view.text?.toString()?.takeIf(String::isNotBlank)?.let(out::add)
+            is ViewGroup -> view.children.forEach { findTexts(it, out) }
         }
     }
 
-    private fun findImageViewBitmaps(view: View, out: MutableList<Bitmap>) {
-        if (view is ImageView && view.drawable != null) {
-            out.add(view.drawable.toBitmap())
-        }
-        if (view is ViewGroup) {
-            (0 until view.childCount).forEach { findImageViewBitmaps(view.getChildAt(it), out) }
+    private fun findBitmaps(view: View, out: MutableList<Bitmap>) {
+        when (view) {
+            is ImageView if view.drawable != null -> out.add(view.drawable.toBitmap())
+            is ViewGroup -> view.children.forEach { findBitmaps(it, out) }
         }
     }
 
     companion object {
-        private val TAG = CamApsFxNotificationMapper::class.java.simpleName
+
         private const val CAM_APS_FX_PACKAGE_NAME_PREFIX = "com.camdiab.fx_alert"
     }
 }
