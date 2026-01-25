@@ -3,6 +3,8 @@
     <string name="back">Back</string>
     <string name="cam_aps_fx">Cam APS FX</string>
     <string name="home_assistant">Home Assistant</string>
+    <string name="home_assistant_connection_test">Test</string>
+    <string name="home_assistant_connection_success">Established connection successfully</string>
     <string name="home_assistant_token">Long-lived token</string>
     <string name="home_assistant_uri">URI</string>
     <string name="home_assistant_uri_default">http://homeassistant.local:8123</string>

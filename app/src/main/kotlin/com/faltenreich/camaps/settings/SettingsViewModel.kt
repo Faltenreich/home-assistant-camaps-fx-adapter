@@ -31,7 +31,7 @@ class SettingsViewModel : ViewModel() {
     val state = _state.asStateFlow()
 
     fun update(state: SettingsState) {
-        _state.update { state }
+        _state.update { state.copy(connection = SettingsState.Connection.Idle) }
         repository.saveHomeAssistantUri(state.uri)
         repository.saveHomeAssistantToken(state.token)
         repository.saveNotificationTimeoutMinutes(state.notificationTimeoutMinutes.toIntOrNull()?.coerceAtLeast(0) ?: 0)
