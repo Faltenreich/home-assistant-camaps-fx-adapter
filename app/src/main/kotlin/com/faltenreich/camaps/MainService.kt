@@ -11,45 +11,58 @@ import com.faltenreich.camaps.homeassistant.HomeAssistantController
 import com.faltenreich.camaps.settings.SettingsRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 /**
- * NotificationListenerService breaks between builds during development.
- * This can be fixed by rebooting the device or toggling notification permission.
- * see https://stackoverflow.com/a/37081128/3269827
+ * NotificationListenerService may break between builds during development.
+ * This can be fixed by rebooting the device or toggling notification permissions.
+ * https://stackoverflow.com/a/37081128/3269827
  */
 class MainService : NotificationListenerService() {
 
     private val mainStateProvider = MainStateProvider
     private val camApsFxController = CamApsFxController()
-    private lateinit var homeAssistantController: HomeAssistantController
-    private val settingsRepository: SettingsRepository = SettingsRepository
+    private val homeAssistantController = HomeAssistantController(SettingsRepository)
+
     private val scope = CoroutineScope(Dispatchers.IO)
 
     override fun onCreate() {
         super.onCreate()
-        Log.d(TAG, "onCreate: Service creating")
-        mainStateProvider.addLog("Service creating")
-        homeAssistantController = HomeAssistantController(settingsRepository)
+        Log.d(TAG, "Service created")
+        scope.launch {
+            mainStateProvider.state
+                .map { it.camApsFxState }
+                .distinctUntilChanged()
+                .collectLatest { state ->
+                    when (state) {
+                        is CamApsFxState.Blank -> Unit
+                        is CamApsFxState.Off -> Unit // TODO
+                        is CamApsFxState.Starting -> Unit // TODO
+                        is CamApsFxState.BloodSugar -> {
+                            homeAssistantController.update(state)
+                        }
+                        is CamApsFxState.Error -> Unit // TODO
+                    }
+                }
+        }
     }
 
     override fun onBind(intent: Intent?): IBinder? {
-        Log.d(TAG, "onBind: Service binding")
-        mainStateProvider.addLog("Service binding")
+        Log.d(TAG, "Service bound")
         return super.onBind(intent)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        Log.d(TAG, "onDestroy: Service destroying")
-        mainStateProvider.addLog("Service destroying")
+        Log.d(TAG, "Service destroyed")
     }
 
     override fun onListenerConnected() {
         super.onListenerConnected()
-        Log.d(TAG, "onListenerConnected: Service connected")
-        mainStateProvider.addLog("Service connected")
-
+        Log.d(TAG, "Service connected")
         scope.launch {
             mainStateProvider.setServiceState(MainServiceState.Connected)
             homeAssistantController.start()
@@ -58,19 +71,13 @@ class MainService : NotificationListenerService() {
 
     override fun onListenerDisconnected() {
         super.onListenerDisconnected()
-        Log.d(TAG, "onListenerDisconnected: Service disconnected")
-        mainStateProvider.addLog("Service disconnected. If this was unexpected, try toggling the notification permission.")
+        Log.d(TAG, "Service disconnected")
         mainStateProvider.setServiceState(MainServiceState.Disconnected)
     }
 
     override fun onNotificationPosted(statusBarNotification: StatusBarNotification?) {
-        Log.d(TAG, "onNotificationPosted: $statusBarNotification")
-        val state = camApsFxController.handleNotification(this, statusBarNotification)
-        if (state is CamApsFxState.BloodSugar) {
-            scope.launch {
-                homeAssistantController.update(state)
-            }
-        }
+        Log.d(TAG, "Notification posted")
+        camApsFxController.handleNotification(this, statusBarNotification)
     }
 
     companion object {
