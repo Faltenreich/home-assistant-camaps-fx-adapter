@@ -11,27 +11,20 @@ import com.faltenreich.camaps.homeassistant.network.HomeAssistantClient
 import com.faltenreich.camaps.homeassistant.sensor.HomeAssistantRegisterBinarySensorRequestBody
 import com.faltenreich.camaps.homeassistant.sensor.HomeAssistantRegisterSensorRequestBody
 import com.faltenreich.camaps.homeassistant.sensor.HomeAssistantUpdateSensorRequestBody
-import com.faltenreich.camaps.settings.KeyValueStore
+import com.faltenreich.camaps.settings.KeyValueStore.deviceId
 import com.faltenreich.camaps.settings.SettingsRepository
 import io.ktor.client.plugins.ResponseException
 
 class HomeAssistantController(private val settingsRepository: SettingsRepository) {
+
     private val mainStateProvider = MainStateProvider
     private lateinit var homeAssistantClient: HomeAssistantApi
-    private val deviceId = KeyValueStore.deviceId
+
     private var webhookId: String? = null
     private val registeredSensorUniqueIds = mutableSetOf<String>()
     private var isDeviceRegistered = false
     private var lastSentState: CamApsFxState.BloodSugar? = null
     private var lastUpdateTime = 0L
-
-    private val dummySensorId: String
-        get() = "binary_sensor.camaps_fx_adapter_${deviceId}_dummy_sensor"
-
-    private fun getSensorUniqueId(unit: String): String {
-        val suffix = unit.replace("/", "_")
-        return "${deviceId}_blood_sugar_$suffix".lowercase()
-    }
 
     suspend fun start() {
         isDeviceRegistered = false
@@ -52,6 +45,8 @@ class HomeAssistantController(private val settingsRepository: SettingsRepository
 
     private suspend fun validateWebhook() {
         mainStateProvider.addLog("Validating existing webhook")
+        val deviceId = settingsRepository.getDeviceId()
+        val dummySensorId = "binary_sensor.camaps_fx_adapter_${deviceId}_dummy_sensor"
         Log.d(TAG, "Validating webhook via dummy sensor: $dummySensorId")
 
         try {
@@ -244,6 +239,11 @@ class HomeAssistantController(private val settingsRepository: SettingsRepository
         } else {
             registerSensor(data.unitOfMeasurement, data.value)
         }
+    }
+
+    private fun getSensorUniqueId(unit: String): String {
+        val suffix = unit.replace("/", "_")
+        return "${deviceId}_blood_sugar_$suffix".lowercase()
     }
 
     companion object {

@@ -9,6 +9,10 @@ object SettingsRepository {
 
     private val keyValueStore = KeyValueStore
 
+    fun getDeviceId(): String {
+        return keyValueStore.deviceId
+    }
+
     fun getHomeAssistantUri(): String? {
         return keyValueStore.getString(KEY_HOME_ASSISTANT_URI, null)
     }
