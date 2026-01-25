@@ -33,13 +33,9 @@ class CamApsFxNotificationMapper {
                 text.equals(CAM_APS_FX_UNIT_MASS, ignoreCase = true)
             if (isUnit) text else null
         }.firstOrNull()
-        val isOff = setTextActions.any { (it.value as? String) == "Aus" }
-        val isStarting = setTextActions.any { (it.value as? String) == "Starten" }
 
         return when {
             value != null && unitOfMeasurement != null -> CamApsFxState.BloodSugar(value, unitOfMeasurement)
-            isStarting -> CamApsFxState.Starting
-            isOff -> CamApsFxState.Off
             else -> {
                 val actionsJoined = remoteViewActions.joinToString { action ->
                     "${action.methodName}: ${action.value}"

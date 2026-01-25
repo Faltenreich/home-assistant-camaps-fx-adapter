@@ -190,8 +190,6 @@ class HomeAssistantController(private val settingsRepository: SettingsRepository
     suspend fun update(state: CamApsFxState) {
         when (state) {
             is CamApsFxState.Blank -> Unit
-            is CamApsFxState.Off -> Unit // TODO
-            is CamApsFxState.Starting -> Unit // TODO
             is CamApsFxState.BloodSugar -> update(state)
             is CamApsFxState.Error -> Unit // TODO
         }
