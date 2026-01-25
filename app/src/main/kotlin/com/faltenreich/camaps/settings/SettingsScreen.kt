@@ -65,12 +65,6 @@ fun SettingsScreen(
                 state = state,
                 onUpdate = viewModel::update,
             )
-
-            Label(text = stringResource(R.string.service))
-            ServiceSettings(
-                onRestartService = viewModel::restartService,
-                onReset = viewModel::reset,
-            )
         }
     }
 }

@@ -48,7 +48,6 @@ class SettingsViewModel : ViewModel() {
             val client = HomeAssistantClient(host = state.uri, token = state.token)
             client.ping()
             _state.update { state -> state.copy(connection = SettingsState.Connection.Success) }
-            ReinitializationManager.reinitialize()
             Log.d(TAG, "Connection successful")
         } catch (exception: Exception) {
             val errorMessage = when (exception) {
@@ -57,24 +56,6 @@ class SettingsViewModel : ViewModel() {
             }
             Log.e(TAG, "Connection failed: $errorMessage", exception)
             _state.update { state -> state.copy(connection = SettingsState.Connection.Failure(errorMessage)) }
-        }
-    }
-
-    fun restartService() {
-        Log.d(TAG, "Triggering Home Assistant re-initialization")
-        // TODO: Toast.makeText(context, "Re-initializing Home Assistant connection...", Toast.LENGTH_SHORT).show()
-        viewModelScope.launch {
-            ReinitializationManager.reinitialize()
-        }
-    }
-
-    fun reset() {
-        Log.d(TAG, "Resetting Home Assistant registration")
-        repository.saveHomeAssistantWebhookId("")
-        repository.clearRegisteredSensorUniqueIds()
-        // TODO: Toast.makeText(context, "Home Assistant registration has been reset", Toast.LENGTH_SHORT).show()
-        viewModelScope.launch {
-            ReinitializationManager.reinitialize()
         }
     }
 

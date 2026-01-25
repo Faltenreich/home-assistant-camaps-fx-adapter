@@ -8,7 +8,6 @@ import android.util.Log
 import com.faltenreich.camaps.camaps.CamApsFxController
 import com.faltenreich.camaps.camaps.CamApsFxState
 import com.faltenreich.camaps.homeassistant.HomeAssistantController
-import com.faltenreich.camaps.settings.ReinitializationManager
 import com.faltenreich.camaps.settings.SettingsRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -33,15 +32,7 @@ class MainService : NotificationListenerService() {
         super.onCreate()
         Log.d(TAG, "onCreate: Service creating")
         mainStateProvider.addLog("Service creating")
-
         homeAssistantController = HomeAssistantController(settingsRepository)
-        scope.launch {
-            ReinitializationManager.onSuccess.collect {
-                Log.d(TAG, "Re-initializing Home Assistant connection")
-                mainStateProvider.addLog("Re-initializing Home Assistant connection")
-                homeAssistantController.start()
-            }
-        }
     }
 
     override fun onBind(intent: Intent?): IBinder? {
