@@ -14,6 +14,7 @@ import com.faltenreich.camaps.homeassistant.sensor.HomeAssistantRegisterSensorRe
 import com.faltenreich.camaps.homeassistant.sensor.HomeAssistantUpdateSensorRequestBody
 import com.faltenreich.camaps.settings.SettingsRepository
 import io.ktor.client.plugins.ResponseException
+import kotlinx.coroutines.flow.firstOrNull
 
 class HomeAssistantController(private val settingsRepository: SettingsRepository) {
 
@@ -31,11 +32,12 @@ class HomeAssistantController(private val settingsRepository: SettingsRepository
         isDeviceRegistered = false
         Log.d(TAG, "start: Starting Home Assistant registration")
         mainStateProvider.addLog("Starting Home Assistant registration")
-        val uri = settingsRepository.getHomeAssistantUri() ?: return
-        val token = settingsRepository.getHomeAssistantToken() ?: return
+        // FIXME: Vanishes on first start
+        val uri = settingsRepository.getHomeAssistantUri().firstOrNull() ?: return
+        val token = settingsRepository.getHomeAssistantToken().firstOrNull() ?: return
         homeAssistantClient = HomeAssistantClient(host = uri, token = token)
-        webhookId = settingsRepository.getHomeAssistantWebhookId()
-        registeredSensorUniqueIds.addAll(settingsRepository.getRegisteredSensorUniqueIds())
+        webhookId = settingsRepository.getHomeAssistantWebhookId().firstOrNull()
+        registeredSensorUniqueIds.addAll(settingsRepository.getRegisteredSensorUniqueIds().firstOrNull() ?: emptySet())
 
         if (webhookId == null) {
             registerDevice()

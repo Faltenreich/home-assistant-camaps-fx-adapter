@@ -47,13 +47,16 @@ kotlin {
 dependencies {
     testImplementation(libs.junit)
 
+    implementation(kotlin("reflect"))
+
+    implementation(libs.datastore)
+    implementation(libs.datastore.preferences)
+
     implementation(platform(libs.compose))
     debugImplementation(libs.compose.tooling)
     implementation(libs.material3)
     implementation(libs.material.icons)
     implementation(libs.navigation)
-
-    implementation(kotlin("reflect"))
 
     implementation(libs.ktor.auth)
     implementation(libs.ktor.contentnegotiation)

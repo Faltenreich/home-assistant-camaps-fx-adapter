@@ -1,6 +1,7 @@
 package com.faltenreich.camaps.settings
 
 import com.faltenreich.camaps.core.data.KeyValueStore
+import kotlinx.coroutines.flow.Flow
 
 object SettingsRepository {
 
@@ -15,39 +16,39 @@ object SettingsRepository {
         return keyValueStore.deviceId
     }
 
-    fun getHomeAssistantUri(): String? {
+    fun getHomeAssistantUri(): Flow<String?> {
         return keyValueStore.getString(KEY_HOME_ASSISTANT_URI, null)
     }
 
-    fun saveHomeAssistantUri(uri: String) {
+    suspend fun saveHomeAssistantUri(uri: String) {
         keyValueStore.putString(KEY_HOME_ASSISTANT_URI, uri)
     }
 
-    fun getHomeAssistantToken(): String? {
+    fun getHomeAssistantToken(): Flow<String?> {
         return keyValueStore.getString(KEY_HOME_ASSISTANT_TOKEN)
     }
 
-    fun saveHomeAssistantToken(token: String) {
+    suspend fun saveHomeAssistantToken(token: String) {
         keyValueStore.putString(KEY_HOME_ASSISTANT_TOKEN, token)
     }
 
-    fun getHomeAssistantWebhookId(): String? {
+    fun getHomeAssistantWebhookId(): Flow<String?> {
         return keyValueStore.getString(KEY_HOME_ASSISTANT_WEBHOOK_ID)
     }
 
-    fun saveHomeAssistantWebhookId(webhookId: String) {
+    suspend fun saveHomeAssistantWebhookId(webhookId: String) {
         keyValueStore.putString(KEY_HOME_ASSISTANT_WEBHOOK_ID, webhookId)
     }
 
-    fun getRegisteredSensorUniqueIds(): Set<String> {
-        return keyValueStore.getStringSet(KEY_REGISTERED_SENSOR_UNIQUE_IDS) ?: emptySet()
+    fun getRegisteredSensorUniqueIds(): Flow<Set<String>?> {
+        return keyValueStore.getStringSet(KEY_REGISTERED_SENSOR_UNIQUE_IDS)
     }
 
-    fun saveRegisteredSensorUniqueIds(sensorUniqueIds: Set<String>) {
+    suspend fun saveRegisteredSensorUniqueIds(sensorUniqueIds: Set<String>) {
         keyValueStore.putStringSet(KEY_REGISTERED_SENSOR_UNIQUE_IDS, sensorUniqueIds)
     }
 
-    fun clearRegisteredSensorUniqueIds() {
+    suspend fun clearRegisteredSensorUniqueIds() {
         keyValueStore.putStringSet(KEY_REGISTERED_SENSOR_UNIQUE_IDS, emptySet())
     }
 }

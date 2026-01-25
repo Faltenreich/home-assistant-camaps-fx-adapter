@@ -1,14 +1,17 @@
 [versions]
 android-gradle = "9.0.0"
-navigation = "2.9.6"
+datastore = "1.2.0"
 compose = "2026.01.00"
 junit = "4.13.2"
 kotlin = "2.3.0"
-ktor = "3.3.3"
+ktor = "3.4.0"
+navigation = "2.9.6"
 
 [libraries]
 compose = { module = "androidx.compose:compose-bom", version.ref = "compose" }
 compose-tooling = { module = "androidx.compose.ui:ui-tooling" }
+datastore = { module = "androidx.datastore:datastore", version.ref = "datastore" }
+datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
 junit = { module = "junit:junit", version.ref = "junit" }
 ktor-auth = { module = "io.ktor:ktor-client-auth", version.ref = "ktor" }
 ktor-contentnegotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }

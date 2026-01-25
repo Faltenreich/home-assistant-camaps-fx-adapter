@@ -20,9 +20,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -93,24 +90,16 @@ fun SettingsScreen(
                     .animateContentSize(),
                 verticalArrangement = Arrangement.spacedBy(Dimensions.Padding.P_8),
             ) {
-                var uri by remember { mutableStateOf(state.uri) }
                 InputField(
-                    value = uri,
-                    onValueChange = { input ->
-                        uri = input
-                        viewModel.update(state.copy(uri = input))
-                    },
+                    value = viewModel.uri,
+                    onValueChange = { viewModel.uri = it },
                     label = stringResource(R.string.home_assistant_uri),
                     hint = stringResource(R.string.home_assistant_uri_default),
                 )
 
-                var token by remember { mutableStateOf(state.token) }
                 InputField(
-                    value = token,
-                    onValueChange = { input ->
-                        token = input
-                        viewModel.update(state.copy(token = input))
-                    },
+                    value = viewModel.token,
+                    onValueChange = { viewModel.token = it },
                     label = stringResource(R.string.home_assistant_token),
                 )
 
