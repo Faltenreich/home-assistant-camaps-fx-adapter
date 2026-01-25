@@ -6,7 +6,6 @@ import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Log
 import com.faltenreich.camaps.camaps.CamApsFxController
-import com.faltenreich.camaps.camaps.CamApsFxState
 import com.faltenreich.camaps.homeassistant.HomeAssistantController
 import com.faltenreich.camaps.settings.SettingsRepository
 import kotlinx.coroutines.CoroutineScope
@@ -36,17 +35,7 @@ class MainService : NotificationListenerService() {
             mainStateProvider.state
                 .map { it.camApsFxState }
                 .distinctUntilChanged()
-                .collectLatest { state ->
-                    when (state) {
-                        is CamApsFxState.Blank -> Unit
-                        is CamApsFxState.Off -> Unit // TODO
-                        is CamApsFxState.Starting -> Unit // TODO
-                        is CamApsFxState.BloodSugar -> {
-                            homeAssistantController.update(state)
-                        }
-                        is CamApsFxState.Error -> Unit // TODO
-                    }
-                }
+                .collectLatest(homeAssistantController::update)
         }
     }
 

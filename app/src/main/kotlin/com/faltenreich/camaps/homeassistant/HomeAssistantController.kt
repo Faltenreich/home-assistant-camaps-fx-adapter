@@ -5,13 +5,13 @@ import android.util.Log
 import com.faltenreich.camaps.BuildConfig
 import com.faltenreich.camaps.MainStateProvider
 import com.faltenreich.camaps.camaps.CamApsFxState
+import com.faltenreich.camaps.core.data.KeyValueStore
 import com.faltenreich.camaps.homeassistant.device.HomeAssistantRegisterDeviceRequestBody
 import com.faltenreich.camaps.homeassistant.network.HomeAssistantApi
 import com.faltenreich.camaps.homeassistant.network.HomeAssistantClient
 import com.faltenreich.camaps.homeassistant.sensor.HomeAssistantRegisterBinarySensorRequestBody
 import com.faltenreich.camaps.homeassistant.sensor.HomeAssistantRegisterSensorRequestBody
 import com.faltenreich.camaps.homeassistant.sensor.HomeAssistantUpdateSensorRequestBody
-import com.faltenreich.camaps.core.data.KeyValueStore.deviceId
 import com.faltenreich.camaps.settings.SettingsRepository
 import io.ktor.client.plugins.ResponseException
 
@@ -25,6 +25,7 @@ class HomeAssistantController(private val settingsRepository: SettingsRepository
     private var isDeviceRegistered = false
     private var lastSentState: CamApsFxState.BloodSugar? = null
     private var lastUpdateTime = 0L
+    private val deviceId get() = KeyValueStore.deviceId
 
     suspend fun start() {
         isDeviceRegistered = false
@@ -186,9 +187,19 @@ class HomeAssistantController(private val settingsRepository: SettingsRepository
         }
     }
 
-    suspend fun update(data: CamApsFxState.BloodSugar) {
+    suspend fun update(state: CamApsFxState) {
+        when (state) {
+            is CamApsFxState.Blank -> Unit
+            is CamApsFxState.Off -> Unit // TODO
+            is CamApsFxState.Starting -> Unit // TODO
+            is CamApsFxState.BloodSugar -> update(state)
+            is CamApsFxState.Error -> Unit // TODO
+        }
+    }
+
+    private suspend fun update(state: CamApsFxState.BloodSugar) = with(state) {
         if (!isDeviceRegistered) {
-            Log.w(TAG, "Device not registered, skipping sensor update for ${data.unitOfMeasurement}")
+            Log.w(TAG, "Device not registered, skipping sensor update for $unitOfMeasurement")
             return
         }
 
@@ -198,8 +209,8 @@ class HomeAssistantController(private val settingsRepository: SettingsRepository
             return
         }
 
-        if (lastSentState?.value == data.value && lastSentState?.trend == data.trend) {
-            Log.d(TAG, "Sensor state has not changed, skipping update: ${data.value} ${data.unitOfMeasurement}, Trend: ${data.trend}")
+        if (lastSentState?.value == value && lastSentState?.trend == trend) {
+            Log.d(TAG, "Sensor state has not changed, skipping update: $value}$unitOfMeasurement, Trend: $trend")
             return
         }
 
@@ -208,15 +219,15 @@ class HomeAssistantController(private val settingsRepository: SettingsRepository
             return
         }
 
-        val sensorUniqueId = getSensorUniqueId(data.unitOfMeasurement)
+        val sensorUniqueId = getSensorUniqueId(unitOfMeasurement)
 
         if (sensorUniqueId in registeredSensorUniqueIds) {
             val requestBody = HomeAssistantUpdateSensorRequestBody(
                 data = listOf(
                     HomeAssistantUpdateSensorRequestBody.Data(
                         uniqueId = sensorUniqueId,
-                        state = data.value,
-                        attributes = mapOf("trend" to data.trend?.name)
+                        state = value,
+                        attributes = mapOf("trend" to trend?.name)
                     )
                 )
             )
@@ -226,10 +237,10 @@ class HomeAssistantController(private val settingsRepository: SettingsRepository
                     requestBody = requestBody,
                     webhookId = webhookId,
                 )
-                Log.d(TAG, "Sensor updated successfully: ${data.value} ${data.unitOfMeasurement}")
+                Log.d(TAG, "Sensor updated successfully: $value $unitOfMeasurement")
                 lastUpdateTime = currentTime
-                lastSentState = data
-                mainStateProvider.setHomeAssistantState(HomeAssistantState.UpdatedSensor(HomeAssistantData.BloodSugar(data.value, data.unitOfMeasurement, data.trend)))
+                lastSentState = state
+                mainStateProvider.setHomeAssistantState(HomeAssistantState.UpdatedSensor(HomeAssistantData.BloodSugar(value, unitOfMeasurement, trend)))
             } catch (exception: Exception) {
                 Log.e(TAG, "Sensor could not be updated: $exception")
                 mainStateProvider.setHomeAssistantState(
@@ -237,7 +248,7 @@ class HomeAssistantController(private val settingsRepository: SettingsRepository
                 )
             }
         } else {
-            registerSensor(data.unitOfMeasurement, data.value)
+            registerSensor(unitOfMeasurement, value)
         }
     }
 
