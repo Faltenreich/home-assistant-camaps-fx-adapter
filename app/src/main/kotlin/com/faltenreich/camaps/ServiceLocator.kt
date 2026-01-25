@@ -2,17 +2,30 @@ package com.faltenreich.camaps
 
 import android.content.Context
 import com.faltenreich.camaps.core.data.KeyValueStore
-import com.faltenreich.camaps.service.homeassistant.HomeAssistantController
 import com.faltenreich.camaps.screen.settings.SettingsRepository
+import com.faltenreich.camaps.service.camaps.CamApsFxController
+import com.faltenreich.camaps.service.camaps.notification.CamApsFxNotificationMapper
+import com.faltenreich.camaps.service.homeassistant.HomeAssistantController
 
 object ServiceLocator {
 
-    lateinit var settingsRepository: SettingsRepository
-    lateinit var homeAssistantController: HomeAssistantController
+    lateinit var mainStateProvider: MainStateProvider private set
+    lateinit var settingsRepository: SettingsRepository private set
+    lateinit var camApsFxController: CamApsFxController private set
+    lateinit var homeAssistantController: HomeAssistantController private set
 
     fun setup(context: Context) {
-        val keyValueStore = KeyValueStore(context)
-        settingsRepository = SettingsRepository(keyValueStore)
-        homeAssistantController = HomeAssistantController(settingsRepository)
+        mainStateProvider = MainStateProvider()
+        settingsRepository = SettingsRepository(
+            keyValueStore = KeyValueStore(context),
+        )
+        camApsFxController = CamApsFxController(
+            mainStateProvider = mainStateProvider,
+            mapNotification = CamApsFxNotificationMapper(),
+        )
+        homeAssistantController = HomeAssistantController(
+            mainStateProvider = mainStateProvider,
+            settingsRepository = settingsRepository,
+        )
     }
 }

@@ -5,9 +5,7 @@ import android.os.IBinder
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Log
-import com.faltenreich.camaps.MainStateProvider
 import com.faltenreich.camaps.ServiceLocator
-import com.faltenreich.camaps.service.camaps.CamApsFxController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
@@ -22,8 +20,8 @@ import kotlinx.coroutines.launch
  */
 class MainService : NotificationListenerService() {
 
-    private val mainStateProvider = MainStateProvider
-    private val camApsFxController = CamApsFxController()
+    private val mainStateProvider get() = ServiceLocator.mainStateProvider
+    private val camApsFxController get() = ServiceLocator.camApsFxController
     private val homeAssistantController get() = ServiceLocator.homeAssistantController
 
     private val scope = CoroutineScope(Dispatchers.IO)
@@ -31,7 +29,6 @@ class MainService : NotificationListenerService() {
     override fun onCreate() {
         super.onCreate()
         Log.d(TAG, "Service created")
-        ServiceLocator.setup(this)
         scope.launch {
             mainStateProvider.state
                 .map { it.camApsFxState }

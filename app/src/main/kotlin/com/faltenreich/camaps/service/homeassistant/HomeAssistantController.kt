@@ -4,6 +4,7 @@ import android.os.Build
 import android.util.Log
 import com.faltenreich.camaps.BuildConfig
 import com.faltenreich.camaps.MainStateProvider
+import com.faltenreich.camaps.screen.settings.SettingsRepository
 import com.faltenreich.camaps.service.camaps.CamApsFxState
 import com.faltenreich.camaps.service.homeassistant.device.HomeAssistantRegisterDeviceRequestBody
 import com.faltenreich.camaps.service.homeassistant.network.HomeAssistantApi
@@ -11,13 +12,14 @@ import com.faltenreich.camaps.service.homeassistant.network.HomeAssistantClient
 import com.faltenreich.camaps.service.homeassistant.sensor.HomeAssistantRegisterBinarySensorRequestBody
 import com.faltenreich.camaps.service.homeassistant.sensor.HomeAssistantRegisterSensorRequestBody
 import com.faltenreich.camaps.service.homeassistant.sensor.HomeAssistantUpdateSensorRequestBody
-import com.faltenreich.camaps.screen.settings.SettingsRepository
 import io.ktor.client.plugins.ResponseException
 import kotlinx.coroutines.flow.firstOrNull
 
-class HomeAssistantController(private val settingsRepository: SettingsRepository) {
+class HomeAssistantController(
+    private val mainStateProvider: MainStateProvider,
+    private val settingsRepository: SettingsRepository,
+) {
 
-    private val mainStateProvider = MainStateProvider
     private lateinit var homeAssistantClient: HomeAssistantApi
 
     private var webhookId: String? = null

@@ -9,9 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-object MainStateProvider {
-
-    private const val MAX_LOG_ENTRIES = 200
+class MainStateProvider {
 
     private val _state = MutableStateFlow(
         MainState(
@@ -69,5 +67,10 @@ object MainStateProvider {
 
     private fun List<LogEntry>.addEntry(entry: LogEntry?): List<LogEntry> {
         return if (entry != null) (this + entry).takeLast(MAX_LOG_ENTRIES) else this
+    }
+
+    companion object {
+
+        private const val MAX_LOG_ENTRIES = 200
     }
 }

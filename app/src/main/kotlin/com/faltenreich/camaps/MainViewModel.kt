@@ -8,9 +8,11 @@ import android.provider.Settings
 import androidx.lifecycle.ViewModel
 import com.faltenreich.camaps.service.MainService
 
-class MainViewModel : ViewModel() {
+class MainViewModel(
+    private val mainStateProvider: MainStateProvider = ServiceLocator.mainStateProvider,
+) : ViewModel() {
 
-    val state = MainStateProvider.state
+    val state = mainStateProvider.state
 
     fun checkPermissions(context: Context) {
         val componentName = ComponentName(context, MainService::class.java)
@@ -20,7 +22,7 @@ class MainViewModel : ViewModel() {
         )
         val hasPermission = enabledListeners?.contains(componentName.flattenToString()) == true
         val permissionState = if (hasPermission) MainState.Permission.Granted else MainState.Permission.Denied
-        MainStateProvider.setPermissionState(permissionState)
+        mainStateProvider.setPermissionState(permissionState)
     }
 
     fun openNotificationSettings(activity: Activity) {
