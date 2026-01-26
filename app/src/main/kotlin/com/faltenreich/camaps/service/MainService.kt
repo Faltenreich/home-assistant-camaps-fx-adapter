@@ -20,7 +20,7 @@ import kotlinx.coroutines.launch
  */
 class MainService : NotificationListenerService() {
 
-    private val mainStateProvider get() = ServiceLocator.mainStateProvider
+    private val appStateProvider get() = ServiceLocator.appStateProvider
     private val camApsFxController get() = ServiceLocator.camApsFxController
     private val homeAssistantController get() = ServiceLocator.homeAssistantController
 
@@ -30,7 +30,7 @@ class MainService : NotificationListenerService() {
         super.onCreate()
         Log.d(TAG, "Service created")
         scope.launch {
-            mainStateProvider.state
+            appStateProvider.state
                 .map { it.camApsFxState }
                 .distinctUntilChanged()
                 .collectLatest(homeAssistantController::update)
@@ -51,7 +51,7 @@ class MainService : NotificationListenerService() {
         super.onListenerConnected()
         Log.d(TAG, "Service connected")
         scope.launch {
-            mainStateProvider.setServiceState(MainServiceState.Connected)
+            appStateProvider.setServiceState(MainServiceState.Connected)
             homeAssistantController.start()
         }
     }
@@ -59,7 +59,7 @@ class MainService : NotificationListenerService() {
     override fun onListenerDisconnected() {
         super.onListenerDisconnected()
         Log.d(TAG, "Service disconnected")
-        mainStateProvider.setServiceState(MainServiceState.Disconnected)
+        appStateProvider.setServiceState(MainServiceState.Disconnected)
     }
 
     override fun onNotificationPosted(statusBarNotification: StatusBarNotification?) {

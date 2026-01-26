@@ -39,14 +39,14 @@ fun MainScreen(
         }
 
         when (state.permission) {
-            is MainState.Permission.Loading -> Box(
+            is AppState.Permission.Loading -> Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center,
             ) {
                 CircularProgressIndicator()
             }
 
-            is MainState.Permission.Granted -> NavHost(
+            is AppState.Permission.Granted -> NavHost(
                 navController = navController,
                 startDestination = Dashboard,
                 modifier = Modifier.imePadding(),
@@ -59,7 +59,7 @@ fun MainScreen(
                 }
             }
 
-            is MainState.Permission.Denied -> Box(
+            is AppState.Permission.Denied -> Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center,
             ) {

@@ -8,18 +8,18 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-class MainStateProvider {
+class AppStateProvider {
 
     private val _state = MutableStateFlow(
-        MainState(
-            permission = MainState.Permission.Loading,
+        AppState(
+            permission = AppState.Permission.Loading,
             camApsFxState = CamApsFxState.Blank,
             log = emptyList(),
         )
     )
     val state = _state.asStateFlow()
 
-    fun setPermissionState(permissionState: MainState.Permission) {
+    fun setPermissionState(permissionState: AppState.Permission) {
         _state.update { state -> state.copy(permission = permissionState) }
     }
 
