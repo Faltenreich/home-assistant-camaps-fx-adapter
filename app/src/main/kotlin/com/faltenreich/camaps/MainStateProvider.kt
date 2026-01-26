@@ -1,6 +1,5 @@
 package com.faltenreich.camaps
 
-import com.faltenreich.camaps.screen.dashboard.log.LogEntry
 import com.faltenreich.camaps.screen.dashboard.log.LogEntryFactory
 import com.faltenreich.camaps.service.MainServiceState
 import com.faltenreich.camaps.service.camaps.CamApsFxState
@@ -26,11 +25,7 @@ class MainStateProvider {
 
     fun setServiceState(serviceState: MainServiceState) {
         val logEntry = LogEntryFactory.create(serviceState)
-        _state.update { state ->
-            state.copy(
-                log = state.log.addEntry(logEntry)
-            )
-        }
+        _state.update { it.copy(log = it.log + logEntry) }
     }
 
     fun setCamApsFxState(camApsFxState: CamApsFxState) {
@@ -38,35 +33,12 @@ class MainStateProvider {
         _state.update { state ->
             state.copy(
                 camApsFxState = camApsFxState,
-                log = state.log.addEntry(logEntry)
+                log = logEntry?.let { state.log + logEntry } ?: state.log,
             )
         }
     }
 
     fun setHomeAssistantState(homeAssistantState: HomeAssistantState) {
-        val logEntry = LogEntryFactory.create(homeAssistantState)
-        _state.update { state ->
-            state.copy(
-                log = state.log.addEntry(logEntry)
-            )
-        }
-    }
-
-    fun addLog(message: String) {
-        val logEntry = LogEntryFactory.create(message)
-        _state.update { state ->
-            state.copy(
-                log = state.log.addEntry(logEntry)
-            )
-        }
-    }
-
-    private fun List<LogEntry>.addEntry(entry: LogEntry?): List<LogEntry> {
-        return if (entry != null) (this + entry).takeLast(MAX_LOG_ENTRIES) else this
-    }
-
-    companion object {
-
-        private const val MAX_LOG_ENTRIES = 200
+        _state.update { it.copy(log = it.log + LogEntryFactory.create(homeAssistantState)) }
     }
 }

@@ -20,12 +20,12 @@ object LogEntryFactory {
             is MainServiceState.Disconnected -> LogEntry(
                 dateTime = dateTime,
                 source = source,
-                message = "disconnected",
+                message = "Service disconnected",
             )
             is MainServiceState.Connected -> LogEntry(
                 dateTime = dateTime,
                 source = source,
-                message = "connected",
+                message = "Service connected",
             )
         }
     }
@@ -38,12 +38,12 @@ object LogEntryFactory {
             is CamApsFxState.BloodSugar -> LogEntry(
                 dateTime = dateTime,
                 source = source,
-                message = "sent data: $value $unitOfMeasurement",
+                message = "Notification observed: $value $unitOfMeasurement",
             )
             is CamApsFxState.Error -> LogEntry(
                 dateTime = dateTime,
                 source = source,
-                message = "sent something: $message",
+                message = "Error received: $message",
             )
         }
     }
@@ -55,37 +55,28 @@ object LogEntryFactory {
             is HomeAssistantState.Disconnected -> LogEntry(
                 dateTime = dateTime,
                 source = source,
-                message = "disconnected device",
+                message = "Device disconnected",
             )
             is HomeAssistantState.ConnectedDevice -> LogEntry(
                 dateTime = dateTime,
                 source = source,
-                message = "connected device",
+                message = "Device connected",
             )
             is HomeAssistantState.ConnectedSensor -> LogEntry(
                 dateTime = dateTime,
                 source = source,
-                message = "connected sensor",
+                message = "Sensor connected",
             )
             is HomeAssistantState.UpdatedSensor -> LogEntry(
                 dateTime = dateTime,
                 source = source,
-                message = "sent data: $data"
+                message = "Data updated: $data"
             )
             is HomeAssistantState.Error -> LogEntry(
                 dateTime = dateTime,
                 source = source,
-                message = "received error: $message"
+                message = "Error received: $message"
             )
         }
-    }
-
-    @Deprecated("Replace with state-bound methods")
-    fun create(message: String): LogEntry {
-        return LogEntry(
-            dateTime = createDateTime(),
-            source = "System",
-            message = message,
-        )
     }
 }

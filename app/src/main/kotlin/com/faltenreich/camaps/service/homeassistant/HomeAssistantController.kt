@@ -32,7 +32,6 @@ class HomeAssistantController(
     suspend fun start() {
         isDeviceRegistered = false
         Log.d(TAG, "start: Starting Home Assistant registration")
-        mainStateProvider.addLog("Starting Home Assistant registration")
         // FIXME: Vanishes on first start
         val uri = settingsRepository.getHomeAssistantUri().firstOrNull() ?: return
         val token = settingsRepository.getHomeAssistantToken().firstOrNull() ?: return
@@ -48,7 +47,6 @@ class HomeAssistantController(
     }
 
     private suspend fun validateWebhook() {
-        mainStateProvider.addLog("Validating existing webhook")
         val deviceId = settingsRepository.getDeviceId()
         val dummySensorId = "binary_sensor.camaps_fx_adapter_${deviceId}_dummy_sensor"
         Log.d(TAG, "Validating webhook via dummy sensor: $dummySensorId")
@@ -58,11 +56,11 @@ class HomeAssistantController(
             isDeviceRegistered = true
             mainStateProvider.setHomeAssistantState(HomeAssistantState.ConnectedDevice("Connected with ID: $deviceId"))
             Log.d(TAG, "Webhook is valid.")
-            mainStateProvider.addLog("Dummy sensor already registered")
+            Log.d(TAG, "Dummy sensor already registered")
             if (registeredSensorUniqueIds.isEmpty()) {
-                mainStateProvider.addLog("Waiting for reading to register sensor..")
+                Log.d(TAG, "Waiting for reading to register sensor..")
             } else {
-                mainStateProvider.addLog("Glucose sensor already registered")
+                Log.d(TAG, "Glucose sensor already registered")
             }
         } catch (e: ResponseException) {
             isDeviceRegistered = false
@@ -70,7 +68,7 @@ class HomeAssistantController(
             Log.w(TAG, "Webhook validation failed with status: $statusCode", e)
             when (statusCode) {
                 404, 410 -> {
-                    mainStateProvider.addLog("Webhook is invalid, re-registering device.")
+                    Log.d(TAG, "Webhook is invalid, re-registering device.")
                     registerDevice()
                 }
                 401, 403 -> {
@@ -95,7 +93,6 @@ class HomeAssistantController(
 
     private suspend fun registerDevice() {
         isDeviceRegistered = false
-        mainStateProvider.addLog("Registering device with Home Assistant")
         Log.d(TAG, "Device ID: $deviceId")
         val requestBody = HomeAssistantRegisterDeviceRequestBody(
             deviceId = deviceId,
@@ -133,7 +130,6 @@ class HomeAssistantController(
 
     private suspend fun registerDummySensor() {
         val webhookId = webhookId ?: return
-        mainStateProvider.addLog("Registering dummy sensor")
         val uniqueId = "${deviceId}_dummy_sensor"
         try {
             val requestBody = HomeAssistantRegisterBinarySensorRequestBody(
@@ -144,11 +140,8 @@ class HomeAssistantController(
                 )
             )
             homeAssistantClient.registerBinarySensor(requestBody, webhookId)
-            mainStateProvider.addLog("Registered dummy sensor")
         } catch (exception: Exception) {
-            val message = "Failed to register dummy sensor"
-            Log.e(TAG, message, exception)
-            mainStateProvider.addLog(message)
+            Log.e(TAG, "Failed to register dummy sensor", exception)
         }
     }
 
