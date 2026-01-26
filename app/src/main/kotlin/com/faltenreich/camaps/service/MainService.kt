@@ -53,7 +53,7 @@ class MainService : NotificationListenerService() {
         super.onListenerConnected()
         Log.d(TAG, "Service connected")
         scope.launch {
-            appStateProvider.setServiceState(MainServiceState.Connected)
+            appStateProvider.setState(MainServiceState.Connected)
             homeAssistantController.start()
         }
     }
@@ -61,7 +61,7 @@ class MainService : NotificationListenerService() {
     override fun onListenerDisconnected() {
         super.onListenerDisconnected()
         Log.d(TAG, "Service disconnected")
-        appStateProvider.setServiceState(MainServiceState.Disconnected)
+        appStateProvider.setState(MainServiceState.Disconnected)
     }
 
     override fun onNotificationPosted(statusBarNotification: StatusBarNotification?) {

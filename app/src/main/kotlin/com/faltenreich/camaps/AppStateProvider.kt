@@ -1,5 +1,6 @@
 package com.faltenreich.camaps
 
+import com.faltenreich.camaps.screen.dashboard.log.LogEntry
 import com.faltenreich.camaps.screen.dashboard.log.LogEntryFactory
 import com.faltenreich.camaps.service.MainServiceState
 import com.faltenreich.camaps.service.camaps.CamApsFxEvent
@@ -15,23 +16,19 @@ class AppStateProvider {
     private val _camApsEvent = MutableSharedFlow<CamApsFxEvent>()
     val camApsFxEvent = _camApsEvent.asSharedFlow()
 
-    private val _state = MutableStateFlow(
-        AppState(
-            log = emptyList(),
-        )
-    )
-    val state = _state.asStateFlow()
-
-    fun setServiceState(serviceState: MainServiceState) {
-        _state.update { it.copy(log = it.log + LogEntryFactory.create(serviceState)) }
-    }
+    private val _log = MutableStateFlow<List<LogEntry>>(emptyList())
+    val log = _log.asStateFlow()
 
     suspend fun postEvent(event: CamApsFxEvent) {
-        _state.update { state -> state.copy(log = state.log + LogEntryFactory.create(event)) }
         _camApsEvent.emit(event)
+        _log.update { it + LogEntryFactory.create(event) }
     }
 
-    fun setHomeAssistantState(homeAssistantState: HomeAssistantState) {
-        _state.update { it.copy(log = it.log + LogEntryFactory.create(homeAssistantState)) }
+    fun setState(state: MainServiceState) {
+        _log.update { it + LogEntryFactory.create(state) }
+    }
+
+    fun setState(state: HomeAssistantState) {
+        _log.update { it + LogEntryFactory.create(state) }
     }
 }

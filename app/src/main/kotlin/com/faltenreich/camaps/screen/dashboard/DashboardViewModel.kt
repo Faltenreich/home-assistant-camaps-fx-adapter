@@ -12,11 +12,12 @@ class DashboardViewModel(
     appStateProvider: AppStateProvider = ServiceLocator.appStateProvider,
 ) : ViewModel() {
 
-    private val appState = appStateProvider.state
-
-    val state = appState.map { DashboardState.Content(log = it.log) }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.Lazily,
-        initialValue = DashboardState.Loading,
-    )
+    private val log = appStateProvider.log
+    val state = log
+        .map(DashboardState::Content)
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Lazily,
+            initialValue = DashboardState.Loading,
+        )
 }
