@@ -12,16 +12,11 @@ class AppStateProvider {
 
     private val _state = MutableStateFlow(
         AppState(
-            permission = AppState.Permission.Loading,
             camApsFxState = CamApsFxState.Blank,
             log = emptyList(),
         )
     )
     val state = _state.asStateFlow()
-
-    fun setPermissionState(permissionState: AppState.Permission) {
-        _state.update { state -> state.copy(permission = permissionState) }
-    }
 
     fun setServiceState(serviceState: MainServiceState) {
         val logEntry = LogEntryFactory.create(serviceState)
