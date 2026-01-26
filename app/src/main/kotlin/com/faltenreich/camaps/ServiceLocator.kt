@@ -15,6 +15,9 @@ object ServiceLocator {
     lateinit var homeAssistantController: HomeAssistantController private set
 
     fun setup(context: Context) {
+        if (::appStateProvider.isInitialized) {
+            return
+        }
         appStateProvider = AppStateProvider()
         settingsRepository = SettingsRepository(
             keyValueStore = KeyValueStore(context),

@@ -29,6 +29,9 @@ class MainService : NotificationListenerService() {
     override fun onCreate() {
         super.onCreate()
         Log.d(TAG, "Service created")
+
+        ServiceLocator.setup(this)
+
         scope.launch {
             appStateProvider.state
                 .map { it.camApsFxState }
