@@ -2,9 +2,7 @@ package com.faltenreich.camaps
 
 import com.faltenreich.camaps.screen.dashboard.log.LogEntry
 import com.faltenreich.camaps.screen.dashboard.log.LogEntryFactory
-import com.faltenreich.camaps.service.MainServiceState
 import com.faltenreich.camaps.service.camaps.CamApsFxEvent
-import com.faltenreich.camaps.service.homeassistant.HomeAssistantState
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -24,11 +22,7 @@ class AppStateProvider {
         _log.update { it + LogEntryFactory.create(event) }
     }
 
-    fun setState(state: MainServiceState) {
-        _log.update { it + LogEntryFactory.create(state) }
-    }
-
-    fun setState(state: HomeAssistantState) {
-        _log.update { it + LogEntryFactory.create(state) }
+    fun addLog(logEntry: LogEntry) {
+        _log.update { it + logEntry }
     }
 }

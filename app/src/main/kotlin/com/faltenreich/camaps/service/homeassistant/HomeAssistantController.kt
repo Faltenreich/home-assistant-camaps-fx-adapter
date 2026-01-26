@@ -4,6 +4,7 @@ import android.os.Build
 import android.util.Log
 import com.faltenreich.camaps.AppStateProvider
 import com.faltenreich.camaps.BuildConfig
+import com.faltenreich.camaps.screen.dashboard.log.LogEntryFactory
 import com.faltenreich.camaps.screen.settings.SettingsRepository
 import com.faltenreich.camaps.service.camaps.CamApsFxEvent
 import com.faltenreich.camaps.service.homeassistant.device.HomeAssistantRegisterDeviceRequestBody
@@ -46,6 +47,10 @@ class HomeAssistantController(
         }
     }
 
+    private fun log(state: HomeAssistantState) {
+        appStateProvider.addLog(LogEntryFactory.create(state))
+    }
+
     private suspend fun validateWebhook() {
         val deviceId = settingsRepository.getDeviceId()
         val dummySensorId = "binary_sensor.camaps_fx_adapter_${deviceId}_dummy_sensor"
@@ -54,7 +59,7 @@ class HomeAssistantController(
         try {
             homeAssistantClient.getSensorState(dummySensorId)
             isDeviceRegistered = true
-            appStateProvider.setState(HomeAssistantState.DeviceConnected)
+            log(HomeAssistantState.DeviceConnected)
             Log.d(TAG, "Webhook is valid.")
             Log.d(TAG, "Dummy sensor already registered")
             if (registeredSensorUniqueIds.isEmpty()) {
@@ -72,22 +77,16 @@ class HomeAssistantController(
                     registerDevice()
                 }
                 401, 403 -> {
-                    appStateProvider.setState(
-                        HomeAssistantState.Error("Authentication error. Please check your Home Assistant token.")
-                    )
+                    log(HomeAssistantState.Error("Authentication error. Please check your Home Assistant token."))
                 }
                 else -> {
-                    appStateProvider.setState(
-                        HomeAssistantState.Error("Failed to validate webhook. Status: $statusCode")
-                    )
+                    log(HomeAssistantState.Error("Failed to validate webhook. Status: $statusCode"))
                 }
             }
         } catch (exception: Exception) {
             isDeviceRegistered = false
             Log.e(TAG, "Webhook validation failed", exception)
-            appStateProvider.setState(
-                HomeAssistantState.Error("Failed to validate webhook: ${exception.message}")
-            )
+            log(HomeAssistantState.Error("Failed to validate webhook: ${exception.message}"))
         }
     }
 
@@ -115,13 +114,11 @@ class HomeAssistantController(
             registeredSensorUniqueIds.clear()
             settingsRepository.clearRegisteredSensorUniqueIds()
             isDeviceRegistered = true
-            appStateProvider.setState(HomeAssistantState.DeviceConnected)
+            log(HomeAssistantState.DeviceConnected)
             Log.d(TAG, "Device registered: $response")
         } catch (exception: Exception) {
             Log.e(TAG, "Device could not be registered: $exception")
-            appStateProvider.setState(
-                HomeAssistantState.Error("Failed to register device: ${exception.message}")
-            )
+            log(HomeAssistantState.Error("Failed to register device: ${exception.message}"))
         }
         if (isDeviceRegistered) {
             registerDummySensor()
@@ -147,9 +144,7 @@ class HomeAssistantController(
 
     private suspend fun registerSensor(unit: String, state: Float) {
         val webhookId = webhookId ?: run {
-            appStateProvider.setState(
-                HomeAssistantState.Error("Failed to register sensor for $unit due to missing webhook")
-            )
+            log(HomeAssistantState.Error("Failed to register sensor for $unit due to missing webhook"))
             return
         }
 
@@ -167,19 +162,15 @@ class HomeAssistantController(
             val response = homeAssistantClient.registerSensor(requestBody, webhookId)
             registeredSensorUniqueIds.add(uniqueId)
             settingsRepository.saveRegisteredSensorUniqueIds(registeredSensorUniqueIds)
-            appStateProvider.setState(HomeAssistantState.SensorConnected)
+            log(HomeAssistantState.SensorConnected)
             Log.d(TAG, "Sensor for $unit registered. Response: $response")
         } catch (e: ResponseException) {
             val statusCode = e.response.status.value
             Log.e(TAG, "Sensor for $unit could not be registered. Status: $statusCode", e)
-            appStateProvider.setState(
-                HomeAssistantState.Error("Failed to register sensor for $unit. Status: $statusCode")
-            )
+            log(HomeAssistantState.Error("Failed to register sensor for $unit. Status: $statusCode"))
         } catch (exception: Exception) {
             Log.e(TAG, "Sensor for $unit could not be registered: $exception")
-            appStateProvider.setState(
-                HomeAssistantState.Error("Failed to register sensor for $unit. Message: ${exception.message}")
-            )
+            log(HomeAssistantState.Error("Failed to register sensor for $unit. Message: ${exception.message}"))
         }
     }
 
@@ -232,12 +223,10 @@ class HomeAssistantController(
                 Log.d(TAG, "Sensor updated successfully: $value $unitOfMeasurement")
                 lastUpdateTime = currentTime
                 lastSentState = state
-                appStateProvider.setState(HomeAssistantState.SensorUpdated(HomeAssistantData.BloodSugar(value, unitOfMeasurement)))
+                log(HomeAssistantState.SensorUpdated(HomeAssistantData.BloodSugar(value, unitOfMeasurement)))
             } catch (exception: Exception) {
                 Log.e(TAG, "Sensor could not be updated: $exception")
-                appStateProvider.setState(
-                    HomeAssistantState.Error("Failed to update sensor: $exception")
-                )
+                log(HomeAssistantState.Error("Failed to update sensor: $exception"))
             }
         } else {
             registerSensor(unitOfMeasurement, value)

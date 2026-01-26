@@ -6,6 +6,7 @@ import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Log
 import com.faltenreich.camaps.ServiceLocator
+import com.faltenreich.camaps.screen.dashboard.log.LogEntryFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -53,7 +54,7 @@ class MainService : NotificationListenerService() {
         super.onListenerConnected()
         Log.d(TAG, "Service connected")
         scope.launch {
-            appStateProvider.setState(MainServiceState.Connected)
+            appStateProvider.addLog(LogEntryFactory.create(MainServiceState.Connected))
             homeAssistantController.start()
         }
     }
@@ -61,7 +62,7 @@ class MainService : NotificationListenerService() {
     override fun onListenerDisconnected() {
         super.onListenerDisconnected()
         Log.d(TAG, "Service disconnected")
-        appStateProvider.setState(MainServiceState.Disconnected)
+        appStateProvider.addLog(LogEntryFactory.create(MainServiceState.Disconnected))
     }
 
     override fun onNotificationPosted(statusBarNotification: StatusBarNotification?) {
