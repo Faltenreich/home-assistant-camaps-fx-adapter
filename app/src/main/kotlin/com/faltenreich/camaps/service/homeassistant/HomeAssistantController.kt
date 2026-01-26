@@ -54,7 +54,7 @@ class HomeAssistantController(
         try {
             homeAssistantClient.getSensorState(dummySensorId)
             isDeviceRegistered = true
-            appStateProvider.setHomeAssistantState(HomeAssistantState.ConnectedDevice)
+            appStateProvider.setHomeAssistantState(HomeAssistantState.DeviceConnected)
             Log.d(TAG, "Webhook is valid.")
             Log.d(TAG, "Dummy sensor already registered")
             if (registeredSensorUniqueIds.isEmpty()) {
@@ -115,7 +115,7 @@ class HomeAssistantController(
             registeredSensorUniqueIds.clear()
             settingsRepository.clearRegisteredSensorUniqueIds()
             isDeviceRegistered = true
-            appStateProvider.setHomeAssistantState(HomeAssistantState.ConnectedDevice)
+            appStateProvider.setHomeAssistantState(HomeAssistantState.DeviceConnected)
             Log.d(TAG, "Device registered: $response")
         } catch (exception: Exception) {
             Log.e(TAG, "Device could not be registered: $exception")
@@ -167,7 +167,7 @@ class HomeAssistantController(
             val response = homeAssistantClient.registerSensor(requestBody, webhookId)
             registeredSensorUniqueIds.add(uniqueId)
             settingsRepository.saveRegisteredSensorUniqueIds(registeredSensorUniqueIds)
-            appStateProvider.setHomeAssistantState(HomeAssistantState.ConnectedSensor)
+            appStateProvider.setHomeAssistantState(HomeAssistantState.SensorConnected)
             Log.d(TAG, "Sensor for $unit registered. Response: $response")
         } catch (e: ResponseException) {
             val statusCode = e.response.status.value
@@ -187,7 +187,7 @@ class HomeAssistantController(
         when (state) {
             is CamApsFxState.Blank -> Unit
             is CamApsFxState.BloodSugar -> update(state)
-            is CamApsFxState.Error -> Unit // TODO
+            is CamApsFxState.Unknown -> Unit // TODO
         }
     }
 
@@ -233,7 +233,7 @@ class HomeAssistantController(
                 Log.d(TAG, "Sensor updated successfully: $value $unitOfMeasurement")
                 lastUpdateTime = currentTime
                 lastSentState = state
-                appStateProvider.setHomeAssistantState(HomeAssistantState.UpdatedSensor(HomeAssistantData.BloodSugar(value, unitOfMeasurement)))
+                appStateProvider.setHomeAssistantState(HomeAssistantState.SensorUpdated(HomeAssistantData.BloodSugar(value, unitOfMeasurement)))
             } catch (exception: Exception) {
                 Log.e(TAG, "Sensor could not be updated: $exception")
                 appStateProvider.setHomeAssistantState(

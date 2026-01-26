@@ -9,5 +9,5 @@ sealed interface CamApsFxState {
         val unitOfMeasurement: String,
     ) : CamApsFxState
 
-    data class Error(val message: String) : CamApsFxState
+    data class Unknown(val message: String) : CamApsFxState
 }

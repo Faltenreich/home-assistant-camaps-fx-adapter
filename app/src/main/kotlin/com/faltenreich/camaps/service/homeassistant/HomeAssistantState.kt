@@ -4,11 +4,11 @@ sealed interface HomeAssistantState {
 
     data object Disconnected : HomeAssistantState
 
-    data object ConnectedDevice : HomeAssistantState
+    data object DeviceConnected : HomeAssistantState
 
-    data object ConnectedSensor : HomeAssistantState
+    data object SensorConnected : HomeAssistantState
 
-    data class UpdatedSensor(val data: HomeAssistantData) : HomeAssistantState
+    data class SensorUpdated(val data: HomeAssistantData) : HomeAssistantState
 
     data class Error(val message: String) : HomeAssistantState
 }

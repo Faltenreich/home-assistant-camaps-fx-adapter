@@ -40,10 +40,10 @@ object LogEntryFactory {
                 source = source,
                 message = "Notification observed: $value $unitOfMeasurement",
             )
-            is CamApsFxState.Error -> LogEntry(
+            is CamApsFxState.Unknown -> LogEntry(
                 dateTime = dateTime,
                 source = source,
-                message = "Error received: $message",
+                message = "Unknown observed: $message",
             )
         }
     }
@@ -57,20 +57,20 @@ object LogEntryFactory {
                 source = source,
                 message = "Device disconnected",
             )
-            is HomeAssistantState.ConnectedDevice -> LogEntry(
+            is HomeAssistantState.DeviceConnected -> LogEntry(
                 dateTime = dateTime,
                 source = source,
                 message = "Device connected",
             )
-            is HomeAssistantState.ConnectedSensor -> LogEntry(
+            is HomeAssistantState.SensorConnected -> LogEntry(
                 dateTime = dateTime,
                 source = source,
                 message = "Sensor connected",
             )
-            is HomeAssistantState.UpdatedSensor -> LogEntry(
+            is HomeAssistantState.SensorUpdated -> LogEntry(
                 dateTime = dateTime,
                 source = source,
-                message = "Data updated: $data"
+                message = "Sensor updated: $data"
             )
             is HomeAssistantState.Error -> LogEntry(
                 dateTime = dateTime,

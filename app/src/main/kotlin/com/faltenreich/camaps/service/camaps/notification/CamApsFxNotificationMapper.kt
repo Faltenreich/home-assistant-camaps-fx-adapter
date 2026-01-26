@@ -19,10 +19,10 @@ class CamApsFxNotificationMapper {
             ?.notification
             ?: return null
         val remoteViews = camApsFxNotification.remoteViews ?: run {
-            return CamApsFxState.Error("Missing contentView")
+            return CamApsFxState.Unknown("Missing contentView")
         }
         val remoteViewActions = getRemoteViewActions(remoteViews).takeIf(List<*>::isNotEmpty) ?: run {
-            return CamApsFxState.Error("Missing actions")
+            return CamApsFxState.Unknown("Missing actions")
         }
         val setTextActions = remoteViewActions.filter { it.methodName == "setText" }
 
@@ -40,7 +40,7 @@ class CamApsFxNotificationMapper {
                 val actionsJoined = remoteViewActions.joinToString { action ->
                     "${action.methodName}: ${action.value}"
                 }
-                CamApsFxState.Error(message = "Unknown actions: $actionsJoined")
+                CamApsFxState.Unknown(message = actionsJoined)
             }
         }
     }
