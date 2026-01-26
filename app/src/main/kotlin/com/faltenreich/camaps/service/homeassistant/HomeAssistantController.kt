@@ -5,7 +5,7 @@ import android.util.Log
 import com.faltenreich.camaps.AppStateProvider
 import com.faltenreich.camaps.BuildConfig
 import com.faltenreich.camaps.screen.settings.SettingsRepository
-import com.faltenreich.camaps.service.camaps.CamApsFxState
+import com.faltenreich.camaps.service.camaps.CamApsFxEvent
 import com.faltenreich.camaps.service.homeassistant.device.HomeAssistantRegisterDeviceRequestBody
 import com.faltenreich.camaps.service.homeassistant.network.HomeAssistantApi
 import com.faltenreich.camaps.service.homeassistant.network.HomeAssistantClient
@@ -25,7 +25,7 @@ class HomeAssistantController(
     private var webhookId: String? = null
     private val registeredSensorUniqueIds = mutableSetOf<String>()
     private var isDeviceRegistered = false
-    private var lastSentState: CamApsFxState.BloodSugar? = null
+    private var lastSentState: CamApsFxEvent.BloodSugar? = null
     private var lastUpdateTime = 0L
     private val deviceId = settingsRepository.getDeviceId()
 
@@ -183,15 +183,14 @@ class HomeAssistantController(
         }
     }
 
-    suspend fun update(state: CamApsFxState) {
+    suspend fun update(state: CamApsFxEvent) {
         when (state) {
-            is CamApsFxState.Blank -> Unit
-            is CamApsFxState.BloodSugar -> update(state)
-            is CamApsFxState.Unknown -> Unit // TODO
+            is CamApsFxEvent.BloodSugar -> update(state)
+            is CamApsFxEvent.Unknown -> Unit // TODO
         }
     }
 
-    private suspend fun update(state: CamApsFxState.BloodSugar) = with(state) {
+    private suspend fun update(state: CamApsFxEvent.BloodSugar) = with(state) {
         if (!isDeviceRegistered) {
             Log.w(TAG, "Device not registered, skipping sensor update for $unitOfMeasurement")
             return

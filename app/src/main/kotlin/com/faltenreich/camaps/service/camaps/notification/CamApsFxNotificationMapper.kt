@@ -3,7 +3,7 @@ package com.faltenreich.camaps.service.camaps.notification
 import android.app.Notification
 import android.service.notification.StatusBarNotification
 import android.widget.RemoteViews
-import com.faltenreich.camaps.service.camaps.CamApsFxState
+import com.faltenreich.camaps.service.camaps.CamApsFxEvent
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.isAccessible
 
@@ -13,16 +13,16 @@ class CamApsFxNotificationMapper {
     private val Notification.remoteViews: RemoteViews?
         get() = contentView ?: bigContentView
 
-    operator fun invoke(statusBarNotification: StatusBarNotification): CamApsFxState? {
+    operator fun invoke(statusBarNotification: StatusBarNotification): CamApsFxEvent? {
         val camApsFxNotification = statusBarNotification
             .takeIf { it.packageName.startsWith(CAM_APS_FX_PACKAGE_NAME_PREFIX) }
             ?.notification
             ?: return null
         val remoteViews = camApsFxNotification.remoteViews ?: run {
-            return CamApsFxState.Unknown("Missing contentView")
+            return CamApsFxEvent.Unknown("Missing contentView")
         }
         val remoteViewActions = getRemoteViewActions(remoteViews).takeIf(List<*>::isNotEmpty) ?: run {
-            return CamApsFxState.Unknown("Missing actions")
+            return CamApsFxEvent.Unknown("Missing actions")
         }
         val setTextActions = remoteViewActions.filter { it.methodName == "setText" }
 
@@ -35,12 +35,12 @@ class CamApsFxNotificationMapper {
         }.firstOrNull()
 
         return when {
-            value != null && unitOfMeasurement != null -> CamApsFxState.BloodSugar(value, unitOfMeasurement)
+            value != null && unitOfMeasurement != null -> CamApsFxEvent.BloodSugar(value, unitOfMeasurement)
             else -> {
                 val actionsJoined = remoteViewActions.joinToString { action ->
                     "${action.methodName}: ${action.value}"
                 }
-                CamApsFxState.Unknown(message = actionsJoined)
+                CamApsFxEvent.Unknown(message = actionsJoined)
             }
         }
     }

@@ -9,9 +9,9 @@ class CamApsFxController (
     private val mapNotification: CamApsFxNotificationMapper,
 ){
 
-    fun handleNotification(statusBarNotification: StatusBarNotification?): CamApsFxState? {
+    suspend fun handleNotification(statusBarNotification: StatusBarNotification?): CamApsFxEvent? {
         val state = statusBarNotification?.let { mapNotification(statusBarNotification) } ?: return null
-        appStateProvider.setCamApsFxState(state)
+        appStateProvider.postEvent(state)
         return state
     }
 }

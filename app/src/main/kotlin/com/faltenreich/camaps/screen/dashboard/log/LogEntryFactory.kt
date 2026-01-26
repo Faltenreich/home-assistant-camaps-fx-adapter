@@ -1,7 +1,7 @@
 package com.faltenreich.camaps.screen.dashboard.log
 
 import com.faltenreich.camaps.service.MainServiceState
-import com.faltenreich.camaps.service.camaps.CamApsFxState
+import com.faltenreich.camaps.service.camaps.CamApsFxEvent
 import com.faltenreich.camaps.service.homeassistant.HomeAssistantState
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -30,17 +30,16 @@ object LogEntryFactory {
         }
     }
 
-    fun create(camApsFxState: CamApsFxState): LogEntry? = with(camApsFxState) {
+    fun create(camApsFxEvent: CamApsFxEvent): LogEntry = with(camApsFxEvent) {
         val dateTime = createDateTime()
         val source = "CamAPS FX"
         when (this) {
-            is CamApsFxState.Blank -> null
-            is CamApsFxState.BloodSugar -> LogEntry(
+            is CamApsFxEvent.BloodSugar -> LogEntry(
                 dateTime = dateTime,
                 source = source,
                 message = "Notification observed: $value $unitOfMeasurement",
             )
-            is CamApsFxState.Unknown -> LogEntry(
+            is CamApsFxEvent.Unknown -> LogEntry(
                 dateTime = dateTime,
                 source = source,
                 message = "Unknown observed: $message",

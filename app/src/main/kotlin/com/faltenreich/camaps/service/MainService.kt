@@ -8,9 +8,8 @@ import android.util.Log
 import com.faltenreich.camaps.ServiceLocator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 /**
@@ -24,7 +23,8 @@ class MainService : NotificationListenerService() {
     private val camApsFxController get() = ServiceLocator.camApsFxController
     private val homeAssistantController get() = ServiceLocator.homeAssistantController
 
-    private val scope = CoroutineScope(Dispatchers.IO)
+    private val job = SupervisorJob()
+    private val scope = CoroutineScope(Dispatchers.IO + job)
 
     override fun onCreate() {
         super.onCreate()
@@ -33,10 +33,9 @@ class MainService : NotificationListenerService() {
         ServiceLocator.setup(this)
 
         scope.launch {
-            appStateProvider.state
-                .map { it.camApsFxState }
-                .distinctUntilChanged()
-                .collectLatest(homeAssistantController::update)
+            appStateProvider.camApsFxEvent.collectLatest { event ->
+                homeAssistantController.update(event)
+            }
         }
     }
 
@@ -67,7 +66,9 @@ class MainService : NotificationListenerService() {
 
     override fun onNotificationPosted(statusBarNotification: StatusBarNotification?) {
         Log.d(TAG, "Notification posted")
-        camApsFxController.handleNotification(statusBarNotification)
+        scope.launch {
+            camApsFxController.handleNotification(statusBarNotification)
+        }
     }
 
     companion object {
