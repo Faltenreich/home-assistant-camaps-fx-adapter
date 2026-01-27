@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -20,6 +19,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.faltenreich.camaps.core.ui.Theme
 import com.faltenreich.camaps.screen.dashboard.Dashboard
 import com.faltenreich.camaps.screen.dashboard.DashboardScreen
 import com.faltenreich.camaps.screen.settings.Settings
@@ -29,7 +29,7 @@ import com.faltenreich.camaps.screen.settings.SettingsScreen
 fun MainScreen(
     viewModel: MainViewModel = viewModel(),
 ) {
-    MaterialTheme {
+    Theme {
         val state = viewModel.state.collectAsStateWithLifecycle().value
         val context = LocalContext.current
         val navController = rememberNavController()

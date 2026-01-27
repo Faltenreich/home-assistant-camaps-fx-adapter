@@ -46,8 +46,8 @@ class MainService : NotificationListenerService() {
     }
 
     override fun onDestroy() {
-        super.onDestroy()
         Log.d(TAG, "Service destroyed")
+        super.onDestroy()
     }
 
     override fun onListenerConnected() {
