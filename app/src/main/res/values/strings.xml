@@ -1,7 +1,10 @@
 <resources>
     <string name="app_name">CamAPS FX Adapter</string>
     <string name="back">Back</string>
-    <string name="cam_aps_fx">Cam APS FX</string>
+    <string name="cam_aps_fx">CamAPS FX</string>
+    <string name="cam_aps_fx_app_state">App</string>
+    <string name="cam_aps_fx_app_state_installed">Installed</string>
+    <string name="cam_aps_fx_app_state_missing">Missing</string>
     <string name="home_assistant">Home Assistant</string>
     <string name="home_assistant_connection_test">Test</string>
     <string name="home_assistant_connection_success">Established connection successfully</string>

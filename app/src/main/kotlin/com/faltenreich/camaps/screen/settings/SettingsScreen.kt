@@ -80,6 +80,25 @@ fun SettingsScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(paddingValues),
         ) {
+            Label(text = stringResource(R.string.cam_aps_fx))
+            Column(
+                modifier = Modifier
+                    .padding(
+                        horizontal = Dimensions.Padding.P_16,
+                        vertical = Dimensions.Padding.P_8,
+                    )
+                    .animateContentSize(),
+                verticalArrangement = Arrangement.spacedBy(Dimensions.Padding.P_8),
+            ) {
+                StatusIndicator(
+                    status = if (state.isCamApsFxAppInstalled) {
+                        Status.Success(message = stringResource(R.string.cam_aps_fx_app_state_installed))
+                    } else {
+                        Status.Failure(message = stringResource(R.string.cam_aps_fx_app_state_missing))
+                    },
+                )
+            }
+
             Label(text = stringResource(R.string.home_assistant))
             Column(
                 modifier = Modifier
