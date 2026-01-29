@@ -23,11 +23,11 @@ fun MainScreen(viewModel: MainViewModel = viewModel()) {
                 CircularProgressIndicator()
             }
 
-            is MainState.Authenticated -> DashboardScreen(
+            is MainState.Unauthenticated -> LoginScreen(
                 modifier = Modifier.fillMaxSize(),
             )
 
-            is MainState.Unauthenticated -> LoginScreen(
+            is MainState.Authenticated -> DashboardScreen(
                 modifier = Modifier.fillMaxSize(),
             )
         }
