@@ -4,6 +4,7 @@ import android.app.Notification
 import android.service.notification.StatusBarNotification
 import android.widget.RemoteViews
 import com.faltenreich.camaps.service.camaps.CamApsFxEvent
+import com.faltenreich.camaps.service.camaps.CamApsFxPackageLocator
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.isAccessible
 
@@ -15,7 +16,7 @@ class CamApsFxNotificationMapper {
 
     operator fun invoke(statusBarNotification: StatusBarNotification): CamApsFxEvent? {
         val camApsFxNotification = statusBarNotification
-            .takeIf { it.packageName.startsWith(CAM_APS_FX_PACKAGE_NAME_PREFIX) }
+            .takeIf { it.packageName.startsWith(CamApsFxPackageLocator.CAM_APS_FX_PACKAGE_NAME_PREFIX) }
             ?.notification
             ?: return null
         val remoteViews = camApsFxNotification.remoteViews ?: run {
@@ -72,7 +73,6 @@ class CamApsFxNotificationMapper {
 
     companion object {
 
-        private const val CAM_APS_FX_PACKAGE_NAME_PREFIX = "com.camdiab.fx_alert"
         private const val CAM_APS_FX_UNIT_MOLAR = "mmol/L"
         private const val CAM_APS_FX_UNIT_MASS = "mg/dL"
     }

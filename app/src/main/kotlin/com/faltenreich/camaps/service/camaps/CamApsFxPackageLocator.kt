@@ -22,9 +22,10 @@ class CamApsFxPackageLocator(context: Context) {
 
     companion object {
 
+        const val CAM_APS_FX_PACKAGE_NAME_PREFIX = "com.camdiab.fx_alert"
         private val CAM_APS_FX_PACKAGE_NAMES = listOf(
-            "com.camdiab.fx_alert.mgdl",
-            "com.camdiab.fx_alert.mmoll",
+            "$CAM_APS_FX_PACKAGE_NAME_PREFIX.mgdl",
+            "$CAM_APS_FX_PACKAGE_NAME_PREFIX.mmoll",
         )
     }
 }
