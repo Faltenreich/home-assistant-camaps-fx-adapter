@@ -14,6 +14,7 @@ import com.faltenreich.camaps.screen.login.LoginScreen
 
 @Composable
 fun MainScreen(viewModel: MainViewModel = viewModel()) {
+
     Theme {
         when (viewModel.state.collectAsStateWithLifecycle().value) {
             is MainState.Loading -> Box(

@@ -4,17 +4,21 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import com.faltenreich.camaps.R
 import com.faltenreich.camaps.core.ui.Dimensions
 import com.faltenreich.camaps.core.ui.Label
 
 @Composable
 fun LogListItem(
     entry: LogEntry,
+    onOpenSettings: () -> Unit,
     modifier: Modifier = Modifier,
 ) = with(entry) {
     Column(modifier = modifier) {
@@ -43,5 +47,11 @@ fun LogListItem(
                 vertical = Dimensions.Padding.P_8,
             ),
         )
+        when (entry.issue) {
+            LogEntry.Issue.MISSING_PERMISSION -> Button(onClick = onOpenSettings) {
+                Text(stringResource(R.string.settings_open))
+            }
+            null -> Unit
+        }
     }
 }

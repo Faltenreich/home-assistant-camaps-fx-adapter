@@ -9,13 +9,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.faltenreich.camaps.AppStateProvider
 import com.faltenreich.camaps.ServiceLocator
+import com.faltenreich.camaps.ServiceLocator.appStateProvider
+import com.faltenreich.camaps.screen.dashboard.log.LogEntryFactory
 import com.faltenreich.camaps.screen.login.SettingsRepository
 import com.faltenreich.camaps.service.MainService
-import kotlinx.coroutines.flow.MutableStateFlow
+import com.faltenreich.camaps.service.MainServiceState
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class DashboardViewModel(
@@ -23,20 +24,13 @@ class DashboardViewModel(
     private val settingsRepository: SettingsRepository = ServiceLocator.settingsRepository,
 ) : ViewModel() {
 
-    private val log = appStateProvider.log
-    private val hasPermission = MutableStateFlow(false)
-
-    val state = combine(
-        log,
-        hasPermission,
-    ) { log, hasPermission ->
-        if (hasPermission) DashboardState.Content(log)
-        else DashboardState.MissingPermission
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.Lazily,
-        initialValue = DashboardState.Loading,
-    )
+    val state = appStateProvider.log
+        .map(::DashboardState)
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Lazily,
+            initialValue = DashboardState(log = emptyList()),
+        )
 
     fun checkPermissions(context: Context) {
         val componentName = ComponentName(context, MainService::class.java)
@@ -44,7 +38,10 @@ class DashboardViewModel(
             context.contentResolver,
             "enabled_notification_listeners",
         )
-        hasPermission.update { enabledListeners?.contains(componentName.flattenToString()) == true }
+        val hasPermission = enabledListeners?.contains(componentName.flattenToString()) == true
+        if (!hasPermission) {
+            appStateProvider.addLog(LogEntryFactory.create(MainServiceState.MissingPermission))
+        }
     }
 
     fun openNotificationSettings(activity: Activity) {

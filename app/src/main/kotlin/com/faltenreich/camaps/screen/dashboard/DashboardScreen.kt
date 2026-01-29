@@ -1,13 +1,13 @@
 package com.faltenreich.camaps.screen.dashboard
 
 import android.app.Activity
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -18,20 +18,18 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.faltenreich.camaps.R
-import com.faltenreich.camaps.screen.dashboard.log.LogList
+import com.faltenreich.camaps.screen.dashboard.log.LogListItem
 
 @Composable
 fun DashboardScreen(
@@ -42,7 +40,7 @@ fun DashboardScreen(
     val context = LocalContext.current
     var showLogoutDialog by remember { mutableStateOf(false) }
 
-    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+    LaunchedEffect(Unit) {
         viewModel.checkPermissions(context)
     }
 
@@ -72,27 +70,24 @@ fun DashboardScreen(
             )
         },
     ) { paddingValues ->
-        when (state) {
-            is DashboardState.Loading -> Box(
-                modifier = modifier.padding(paddingValues),
-                contentAlignment = Alignment.Center,
-            ) {
-                CircularProgressIndicator()
-            }
+        val listState = rememberLazyListState()
 
-            is DashboardState.MissingPermission -> Box(
-                modifier = Modifier.padding(paddingValues),
-                contentAlignment = Alignment.Center,
-            ) {
-                Button(onClick = { viewModel.openNotificationSettings(context as Activity) }) {
-                    Text(stringResource(R.string.settings_open))
-                }
+        LaunchedEffect(state.log) {
+            if (state.log.isNotEmpty()) {
+                listState.scrollToItem(state.log.lastIndex)
             }
+        }
 
-            is DashboardState.Content -> LogList(
-                entries = state.log,
-                modifier = modifier.padding(paddingValues),
-            )
+        LazyColumn(
+            modifier = modifier.padding(paddingValues),
+            state = listState,
+        ) {
+            items(state.log) { entry ->
+                LogListItem(
+                    entry = entry,
+                    onOpenSettings = { viewModel.openNotificationSettings(context as Activity) },
+                )
+            }
         }
     }
 
