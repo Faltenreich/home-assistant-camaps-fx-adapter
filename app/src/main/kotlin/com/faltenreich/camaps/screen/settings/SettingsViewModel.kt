@@ -8,13 +8,10 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.faltenreich.camaps.ServiceLocator
-import com.faltenreich.camaps.service.camaps.CamApsFxPackageLocator
 import com.faltenreich.camaps.service.homeassistant.network.HomeAssistantClient
 import io.ktor.client.plugins.ResponseException
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -26,18 +23,16 @@ import kotlin.time.Duration.Companion.seconds
 
 class SettingsViewModel(
     private val repository: SettingsRepository = ServiceLocator.settingsRepository,
-    private val camApsFxPackageLocator: CamApsFxPackageLocator = ServiceLocator.camApsFxPackageLocator,
 ) : ViewModel() {
 
     var uri by mutableStateOf("")
     var token by mutableStateOf("")
-    private val connection = MutableStateFlow<SettingsState.Connection>(SettingsState.Connection.Loading)
+    private val connection = MutableStateFlow<SettingsState.Connection>(SettingsState.Connection.Idle)
 
     val state = combine(
         snapshotFlow { uri },
         snapshotFlow { token },
         connection,
-        snapshotFlow { camApsFxPackageLocator.isCamApsFxAppInstalled() },
         ::SettingsState,
     ).stateIn(
         scope = viewModelScope,
@@ -45,13 +40,9 @@ class SettingsViewModel(
         initialValue = SettingsState(
             uri = "",
             token = "",
-            connection = SettingsState.Connection.Loading,
-            isCamApsFxAppInstalled = false,
+            connection = SettingsState.Connection.Idle,
         )
     )
-
-    private val _event = MutableSharedFlow<SettingsEvent>()
-    val event = _event.asSharedFlow()
 
     init {
         viewModelScope.launch {
@@ -62,12 +53,14 @@ class SettingsViewModel(
             snapshotFlow { uri + token }
                 .debounce(1.seconds)
                 .distinctUntilChanged()
-                .collect { pingHomeAssistant() }
+                .collect {
+                    if (uri.isNotBlank() && token.isNotBlank()) {
+                        pingHomeAssistant() }
+                    }
         }
     }
 
     fun confirm() = viewModelScope.launch {
-        _event.emit(SettingsEvent.UpdatedSuccessfully)
         repository.saveHomeAssistantUri(uri)
         repository.saveHomeAssistantToken(token)
     }

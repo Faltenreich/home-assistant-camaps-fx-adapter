@@ -4,10 +4,11 @@ data class SettingsState(
     val uri: String,
     val token: String,
     val connection: Connection,
-    val isCamApsFxAppInstalled: Boolean,
 ) {
 
     sealed interface Connection {
+
+        data object Idle : Connection
 
         data object Loading : Connection
 

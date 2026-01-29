@@ -6,15 +6,28 @@ import android.content.Context
 import android.content.Intent
 import android.provider.Settings
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.faltenreich.camaps.screen.settings.SettingsRepository
 import com.faltenreich.camaps.service.MainService
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 
-class MainViewModel : ViewModel() {
+class MainViewModel(
+    settingsRepository: SettingsRepository = ServiceLocator.settingsRepository,
+) : ViewModel() {
 
-    private val _state = MutableStateFlow(MainState(permission = MainState.Permission.Loading))
-    val state = _state.asStateFlow()
+    val state = combine(
+        settingsRepository.getHomeAssistantUri(),
+        settingsRepository.getHomeAssistantToken(),
+    ) { (uri, token) ->
+        if (uri != null && token != null) MainState.Authenticated
+        else MainState.Unauthenticated
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.Lazily,
+        initialValue = MainState.Loading,
+    )
 
     fun checkPermissions(context: Context) {
         val componentName = ComponentName(context, MainService::class.java)
@@ -23,8 +36,6 @@ class MainViewModel : ViewModel() {
             "enabled_notification_listeners",
         )
         val hasPermission = enabledListeners?.contains(componentName.flattenToString()) == true
-        val permissionState = if (hasPermission) MainState.Permission.Granted else MainState.Permission.Denied
-        _state.update { it.copy(permission = permissionState) }
     }
 
     fun openNotificationSettings(activity: Activity) {

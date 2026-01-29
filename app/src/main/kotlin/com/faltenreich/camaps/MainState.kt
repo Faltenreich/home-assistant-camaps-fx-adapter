@@ -1,15 +1,10 @@
 package com.faltenreich.camaps
 
-data class MainState(
-    val permission: Permission,
-) {
+sealed interface MainState {
 
-    sealed interface Permission {
+    data object Loading : MainState
 
-        data object Loading : Permission
+    data object Unauthenticated : MainState
 
-        data object Granted : Permission
-
-        data object Denied : Permission
-    }
+    data object Authenticated : MainState
 }

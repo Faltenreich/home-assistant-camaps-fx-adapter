@@ -23,11 +23,13 @@ fun StatusIndicator(
     modifier: Modifier = Modifier,
 ) {
     val color = when (status) {
+        is Status.None,
         is Status.Loading -> Color.Transparent
         is Status.Success -> Colors.Green
         is Status.Failure -> MaterialTheme.colorScheme.error
     }
     val icon = when (status) {
+        is Status.None,
         is Status.Loading -> Icons.Default.Refresh
         is Status.Success -> Icons.Default.Check
         is Status.Failure -> Icons.Default.Clear
@@ -48,6 +50,7 @@ fun StatusIndicator(
             )
             Text(
                 text = when (status) {
+                    is Status.None,
                     is Status.Loading -> ""
                     is Status.Success -> status.message
                     is Status.Failure -> status.message
