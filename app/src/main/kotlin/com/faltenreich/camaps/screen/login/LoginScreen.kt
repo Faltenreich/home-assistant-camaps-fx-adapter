@@ -4,8 +4,10 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.material.icons.Icons
@@ -49,16 +51,19 @@ fun LoginScreen(
             Card {
                 Column(
                     modifier = Modifier
-                        .padding(
-                            horizontal = Dimensions.Padding.P_16,
-                            vertical = Dimensions.Padding.P_8,
-                        )
+                        .padding(all = Dimensions.Padding.P_16)
                         .animateContentSize(),
                     verticalArrangement = Arrangement.spacedBy(
                         space = Dimensions.Padding.P_8,
                         alignment = Alignment.CenterVertically,
                     ),
+                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
+                    Text(
+                        text = stringResource(R.string.home_assistant),
+                        style = MaterialTheme.typography.labelLarge,
+                    )
+
                     InputField(
                         value = viewModel.uri,
                         onValueChange = { viewModel.uri = it },
@@ -71,13 +76,6 @@ fun LoginScreen(
                         onValueChange = { viewModel.token = it },
                         label = stringResource(R.string.home_assistant_token),
                     )
-
-                    Button(
-                        onClick = viewModel::confirm,
-                        enabled = state.connection is LoginState.Connection.Success,
-                    ) {
-                        Text(stringResource(R.string.confirm))
-                    }
 
                     StatusIndicator(
                         status = when (val connection = state.connection) {
@@ -95,6 +93,16 @@ fun LoginScreen(
                         },
                         modifier = Modifier.fillMaxWidth(),
                     )
+
+                    Spacer(modifier = Modifier.height(Dimensions.Padding.P_0))
+
+                    Button(
+                        onClick = viewModel::confirm,
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = state.connection is LoginState.Connection.Success,
+                    ) {
+                        Text(stringResource(R.string.confirm))
+                    }
                 }
             }
         }
