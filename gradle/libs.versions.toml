@@ -1,13 +1,15 @@
 [versions]
+activity-compose = "1.12.3"
 android-gradle = "9.0.0"
 datastore = "1.2.0"
-compose = "2026.01.00"
+compose = "2026.01.01"
 junit = "4.13.2"
 kotlin = "2.3.0"
 ktor = "3.4.0"
-navigation = "2.9.6"
+lifecycle = "2.10.0"
 
 [libraries]
+activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activity-compose" }
 compose = { module = "androidx.compose:compose-bom", version.ref = "compose" }
 compose-tooling = { module = "androidx.compose.ui:ui-tooling" }
 datastore = { module = "androidx.datastore:datastore", version.ref = "datastore" }
@@ -18,9 +20,9 @@ ktor-contentnegotiation = { module = "io.ktor:ktor-client-content-negotiation", 
 ktor-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
 ktor-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
+lifecycle = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
 material3 = { module = "androidx.compose.material3:material3" }
 material-icons = { module = "androidx.compose.material:material-icons-core" }
-navigation = { module = "androidx.navigation:navigation-compose", version.ref = "navigation"}
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "android-gradle" }

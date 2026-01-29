@@ -49,6 +49,7 @@ dependencies {
 
     implementation(kotlin("reflect"))
 
+    implementation(libs.activity.compose)
     implementation(libs.datastore)
     implementation(libs.datastore.preferences)
 
@@ -56,11 +57,11 @@ dependencies {
     debugImplementation(libs.compose.tooling)
     implementation(libs.material3)
     implementation(libs.material.icons)
-    implementation(libs.navigation)
 
     implementation(libs.ktor.auth)
     implementation(libs.ktor.contentnegotiation)
     implementation(libs.ktor.core)
     implementation(libs.ktor.json)
     implementation(libs.ktor.okhttp)
+    implementation(libs.lifecycle)
 }
