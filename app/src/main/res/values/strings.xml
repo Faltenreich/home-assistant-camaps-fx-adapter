@@ -5,6 +5,7 @@
     <string name="cam_aps_fx_app_state">App</string>
     <string name="cam_aps_fx_app_state_installed">Installed</string>
     <string name="cam_aps_fx_app_state_missing">Missing</string>
+    <string name="cancel">Cancel</string>
     <string name="confirm">Confirm</string>
     <string name="home_assistant">Home Assistant</string>
     <string name="home_assistant_connection_test">Test</string>
@@ -13,6 +14,7 @@
     <string name="home_assistant_uri">URI</string>
     <string name="home_assistant_uri_default">http://homeassistant.local:8123</string>
     <string name="logout">Logout</string>
+    <string name="logout_description">This will clear the log and reset your settings.</string>
     <string name="permissions">Permissions</string>
     <string name="permissions_success">Permission granted</string>
     <string name="permissions_failure">Permission denied</string>
