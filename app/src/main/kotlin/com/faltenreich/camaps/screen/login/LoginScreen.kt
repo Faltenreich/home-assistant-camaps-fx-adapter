@@ -1,4 +1,4 @@
-package com.faltenreich.camaps.screen.settings
+package com.faltenreich.camaps.screen.login
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Arrangement
@@ -21,9 +21,9 @@ import com.faltenreich.camaps.core.ui.Status
 import com.faltenreich.camaps.core.ui.StatusIndicator
 
 @Composable
-fun SettingsScreen(
+fun LoginScreen(
     modifier: Modifier = Modifier,
-    viewModel: SettingsViewModel = viewModel(),
+    viewModel: LoginViewModel = viewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
@@ -50,25 +50,28 @@ fun SettingsScreen(
             label = stringResource(R.string.home_assistant_token),
         )
 
+        Button(
+            onClick = viewModel::confirm,
+            enabled = state.connection is LoginState.Connection.Success,
+        ) {
+            Text(stringResource(R.string.confirm))
+        }
+
         StatusIndicator(
             status = when (val connection = state.connection) {
-                is SettingsState.Connection.Idle -> Status.None
+                is LoginState.Connection.Idle -> Status.None
 
-                is SettingsState.Connection.Loading -> Status.Loading
+                is LoginState.Connection.Loading -> Status.Loading
 
-                is SettingsState.Connection.Success -> Status.Success(
+                is LoginState.Connection.Success -> Status.Success(
                     message = stringResource(R.string.home_assistant_connection_success),
                 )
 
-                is SettingsState.Connection.Failure -> Status.Failure(
+                is LoginState.Connection.Failure -> Status.Failure(
                     message = connection.message,
                 )
             },
             modifier = Modifier.fillMaxWidth(),
         )
-
-        Button(onClick = viewModel::confirm) {
-            Text(stringResource(R.string.settings_confirm))
-        }
     }
 }

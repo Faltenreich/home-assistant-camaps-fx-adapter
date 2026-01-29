@@ -1,4 +1,4 @@
-package com.faltenreich.camaps.screen.settings
+package com.faltenreich.camaps.screen.login
 
 import com.faltenreich.camaps.core.data.KeyValueStore
 import kotlinx.coroutines.flow.Flow

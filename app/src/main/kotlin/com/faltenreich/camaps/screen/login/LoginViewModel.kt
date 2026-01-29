@@ -1,4 +1,4 @@
-package com.faltenreich.camaps.screen.settings
+package com.faltenreich.camaps.screen.login
 
 import android.util.Log
 import androidx.compose.runtime.getValue
@@ -21,26 +21,26 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
 
-class SettingsViewModel(
+class LoginViewModel(
     private val repository: SettingsRepository = ServiceLocator.settingsRepository,
 ) : ViewModel() {
 
     var uri by mutableStateOf("")
     var token by mutableStateOf("")
-    private val connection = MutableStateFlow<SettingsState.Connection>(SettingsState.Connection.Idle)
+    private val connection = MutableStateFlow<LoginState.Connection>(LoginState.Connection.Idle)
 
     val state = combine(
         snapshotFlow { uri },
         snapshotFlow { token },
         connection,
-        ::SettingsState,
+        ::LoginState,
     ).stateIn(
         scope = viewModelScope,
         started = SharingStarted.Lazily,
-        initialValue = SettingsState(
+        initialValue = LoginState(
             uri = "",
             token = "",
-            connection = SettingsState.Connection.Idle,
+            connection = LoginState.Connection.Idle,
         )
     )
 
@@ -66,12 +66,12 @@ class SettingsViewModel(
     }
 
     private suspend fun pingHomeAssistant() {
-        connection.update { SettingsState.Connection.Loading }
+        connection.update { LoginState.Connection.Loading }
         try {
             Log.d(TAG, "Testing connection to $uri")
             val client = HomeAssistantClient(host = uri, token = token)
             client.ping()
-            connection.update { SettingsState.Connection.Success }
+            connection.update { LoginState.Connection.Success }
             Log.d(TAG, "Connection successful")
         } catch (exception: Exception) {
             val errorMessage = when (exception) {
@@ -79,11 +79,11 @@ class SettingsViewModel(
                 else -> exception.message ?: "Unknown error"
             }
             Log.e(TAG, "Connection failed: $errorMessage", exception)
-            connection.update { SettingsState.Connection.Failure(errorMessage) }
+            connection.update { LoginState.Connection.Failure(errorMessage) }
         }
     }
 
     companion object {
-        private val TAG = SettingsViewModel::class.java.simpleName
+        private val TAG = LoginViewModel::class.java.simpleName
     }
 }

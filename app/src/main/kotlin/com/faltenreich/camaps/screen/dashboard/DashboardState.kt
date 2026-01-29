@@ -6,6 +6,8 @@ sealed interface DashboardState {
 
     data object Loading : DashboardState
 
+    data object MissingPermission : DashboardState
+
     data class Content(
         val log: List<LogEntry>,
     ) : DashboardState

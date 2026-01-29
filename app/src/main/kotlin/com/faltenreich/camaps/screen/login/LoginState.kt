@@ -1,6 +1,6 @@
-package com.faltenreich.camaps.screen.settings
+package com.faltenreich.camaps.screen.login
 
-data class SettingsState(
+data class LoginState(
     val uri: String,
     val token: String,
     val connection: Connection,

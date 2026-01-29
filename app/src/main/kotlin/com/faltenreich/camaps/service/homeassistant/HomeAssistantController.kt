@@ -5,7 +5,7 @@ import android.util.Log
 import com.faltenreich.camaps.AppStateProvider
 import com.faltenreich.camaps.BuildConfig
 import com.faltenreich.camaps.screen.dashboard.log.LogEntryFactory
-import com.faltenreich.camaps.screen.settings.SettingsRepository
+import com.faltenreich.camaps.screen.login.SettingsRepository
 import com.faltenreich.camaps.service.camaps.CamApsFxEvent
 import com.faltenreich.camaps.service.homeassistant.device.HomeAssistantRegisterDeviceRequestBody
 import com.faltenreich.camaps.service.homeassistant.network.HomeAssistantApi

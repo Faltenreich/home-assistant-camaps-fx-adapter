@@ -17,7 +17,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.faltenreich.camaps.core.ui.Theme
 import com.faltenreich.camaps.screen.dashboard.DashboardScreen
-import com.faltenreich.camaps.screen.settings.SettingsScreen
+import com.faltenreich.camaps.screen.login.LoginScreen
 
 @Composable
 fun MainScreen(viewModel: MainViewModel = viewModel()) {
@@ -49,7 +49,7 @@ fun MainScreen(viewModel: MainViewModel = viewModel()) {
                     modifier = Modifier.padding(paddingValues).fillMaxSize(),
                 )
 
-                is MainState.Unauthenticated -> SettingsScreen(
+                is MainState.Unauthenticated -> LoginScreen(
                     modifier = Modifier.padding(paddingValues).fillMaxSize(),
                 )
             }

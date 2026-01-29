@@ -5,6 +5,7 @@
     <string name="cam_aps_fx_app_state">App</string>
     <string name="cam_aps_fx_app_state_installed">Installed</string>
     <string name="cam_aps_fx_app_state_missing">Missing</string>
+    <string name="confirm">Confirm</string>
     <string name="home_assistant">Home Assistant</string>
     <string name="home_assistant_connection_test">Test</string>
     <string name="home_assistant_connection_success">Established connection successfully</string>
@@ -15,8 +16,6 @@
     <string name="permissions_success">Permission granted</string>
     <string name="permissions_failure">Permission denied</string>
     <string name="service">Service</string>
-    <string name="settings">Settings</string>
-    <string name="settings_confirm">Confirm</string>
     <string name="settings_open">Open settings</string>
     <string name="notifications">Notifications</string>
     <string name="notification_channel_name">Background Service</string>
