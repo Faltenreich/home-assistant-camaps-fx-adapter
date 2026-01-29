@@ -15,7 +15,7 @@ class MainViewModel(
         settingsRepository.getHomeAssistantUri(),
         settingsRepository.getHomeAssistantToken(),
     ) { (uri, token) ->
-        if (uri != null && token != null) MainState.Authenticated
+        if (uri?.isNotBlank() == true && token?.isNotBlank() == true) MainState.Authenticated
         else MainState.Unauthenticated
     }.stateIn(
         scope = viewModelScope,

@@ -12,6 +12,7 @@
     <string name="home_assistant_token">Long-lived token</string>
     <string name="home_assistant_uri">URI</string>
     <string name="home_assistant_uri_default">http://homeassistant.local:8123</string>
+    <string name="logout">Logout</string>
     <string name="permissions">Permissions</string>
     <string name="permissions_success">Permission granted</string>
     <string name="permissions_failure">Permission denied</string>

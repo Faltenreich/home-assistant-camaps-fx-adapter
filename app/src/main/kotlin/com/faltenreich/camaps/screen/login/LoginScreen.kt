@@ -6,10 +6,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -30,12 +32,16 @@ fun LoginScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
+            .safeContentPadding()
             .padding(
                 horizontal = Dimensions.Padding.P_16,
                 vertical = Dimensions.Padding.P_8,
             )
             .animateContentSize(),
-        verticalArrangement = Arrangement.spacedBy(Dimensions.Padding.P_8),
+        verticalArrangement = Arrangement.spacedBy(
+            space = Dimensions.Padding.P_8,
+            alignment = Alignment.CenterVertically,
+        ),
     ) {
         InputField(
             value = viewModel.uri,

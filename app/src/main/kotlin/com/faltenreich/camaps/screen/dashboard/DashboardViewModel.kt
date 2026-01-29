@@ -9,15 +9,18 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.faltenreich.camaps.AppStateProvider
 import com.faltenreich.camaps.ServiceLocator
+import com.faltenreich.camaps.screen.login.SettingsRepository
 import com.faltenreich.camaps.service.MainService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 class DashboardViewModel(
     appStateProvider: AppStateProvider = ServiceLocator.appStateProvider,
+    private val settingsRepository: SettingsRepository = ServiceLocator.settingsRepository,
 ) : ViewModel() {
 
     private val log = appStateProvider.log
@@ -47,6 +50,11 @@ class DashboardViewModel(
     fun openNotificationSettings(activity: Activity) {
         val intent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
         activity.startActivityForResult(intent, ACTIVITY_REQUEST_CODE)
+    }
+
+    fun logout() = viewModelScope.launch {
+        settingsRepository.saveHomeAssistantUri("")
+        settingsRepository.saveHomeAssistantToken("")
     }
 
     companion object {
