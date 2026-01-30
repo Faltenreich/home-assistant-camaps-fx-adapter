@@ -8,8 +8,8 @@ import android.provider.Settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.faltenreich.camaps.AppStateProvider
-import com.faltenreich.camaps.ServiceLocator
 import com.faltenreich.camaps.ServiceLocator.appStateProvider
+import com.faltenreich.camaps.locate
 import com.faltenreich.camaps.screen.dashboard.log.LogEntryFactory
 import com.faltenreich.camaps.screen.login.SettingsRepository
 import com.faltenreich.camaps.service.MainService
@@ -20,8 +20,8 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class DashboardViewModel(
-    appStateProvider: AppStateProvider = ServiceLocator.appStateProvider,
-    private val settingsRepository: SettingsRepository = ServiceLocator.settingsRepository,
+    appStateProvider: AppStateProvider = locate(),
+    private val settingsRepository: SettingsRepository = locate(),
 ) : ViewModel() {
 
     val state = appStateProvider.log

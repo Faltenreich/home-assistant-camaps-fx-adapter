@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 
 class MainViewModel(
-    settingsRepository: SettingsRepository = ServiceLocator.settingsRepository,
+    settingsRepository: SettingsRepository = locate(),
 ) : ViewModel() {
 
     val state = combine(

@@ -5,8 +5,12 @@ import android.os.IBinder
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Log
+import com.faltenreich.camaps.AppStateProvider
 import com.faltenreich.camaps.ServiceLocator
+import com.faltenreich.camaps.locate
 import com.faltenreich.camaps.screen.dashboard.log.LogEntryFactory
+import com.faltenreich.camaps.service.camaps.CamApsFxController
+import com.faltenreich.camaps.service.homeassistant.HomeAssistantController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -20,9 +24,9 @@ import kotlinx.coroutines.launch
  */
 class MainService : NotificationListenerService() {
 
-    private val appStateProvider get() = ServiceLocator.appStateProvider
-    private val camApsFxController get() = ServiceLocator.camApsFxController
-    private val homeAssistantController get() = ServiceLocator.homeAssistantController
+    private val appStateProvider: AppStateProvider get() = locate()
+    private val camApsFxController: CamApsFxController get() = locate()
+    private val homeAssistantController: HomeAssistantController get() = locate()
 
     private val job = SupervisorJob()
     private val scope = CoroutineScope(Dispatchers.IO + job)

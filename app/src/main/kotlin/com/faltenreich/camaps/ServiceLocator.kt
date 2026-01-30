@@ -10,11 +10,11 @@ import com.faltenreich.camaps.service.homeassistant.HomeAssistantController
 
 object ServiceLocator {
 
-    lateinit var appStateProvider: AppStateProvider private set
-    lateinit var settingsRepository: SettingsRepository private set
-    lateinit var homeAssistantController: HomeAssistantController private set
-    lateinit var camApsFxController: CamApsFxController private set
-    lateinit var camApsFxPackageLocator: CamApsFxPackageLocator private set
+    lateinit var appStateProvider: AppStateProvider
+    lateinit var settingsRepository: SettingsRepository
+    lateinit var homeAssistantController: HomeAssistantController
+    lateinit var camApsFxController: CamApsFxController
+    lateinit var camApsFxPackageLocator: CamApsFxPackageLocator
 
     fun setup(context: Context) {
         if (::appStateProvider.isInitialized) { return }
@@ -33,4 +33,15 @@ object ServiceLocator {
         )
         camApsFxPackageLocator = CamApsFxPackageLocator(context)
     }
+}
+
+inline fun <reified T> locate(): T = with(ServiceLocator) {
+    when (T::class) {
+        AppStateProvider::class -> appStateProvider
+        SettingsRepository::class -> settingsRepository
+        HomeAssistantController::class -> homeAssistantController
+        CamApsFxController::class -> camApsFxController
+        CamApsFxPackageLocator::class -> camApsFxPackageLocator
+        else -> error("")
+    } as T
 }
