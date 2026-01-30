@@ -41,6 +41,7 @@ fun DashboardScreen(
     var showLogoutDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
+        viewModel.checkApps()
         viewModel.checkPermissions(context)
     }
 
@@ -85,6 +86,7 @@ fun DashboardScreen(
             items(state.log) { entry ->
                 LogListItem(
                     entry = entry,
+                    onInstallApp = { viewModel.installApp(context) },
                     onOpenSettings = { viewModel.openNotificationSettings(context as Activity) },
                 )
             }

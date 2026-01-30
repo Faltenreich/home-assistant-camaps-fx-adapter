@@ -2,6 +2,8 @@
     <string name="app_name">CamAPS FX Adapter</string>
     <string name="back">Back</string>
     <string name="cam_aps_fx">CamAPS FX</string>
+    <string name="cam_aps_fx_app_install">Open Google Play</string>
+    <string name="cam_aps_fx_app_url">https://play.google.com/store/apps/dev?id=9219656687986185420</string>
     <string name="cam_aps_fx_app_state">App</string>
     <string name="cam_aps_fx_app_state_installed">Installed</string>
     <string name="cam_aps_fx_app_state_missing">Missing</string>

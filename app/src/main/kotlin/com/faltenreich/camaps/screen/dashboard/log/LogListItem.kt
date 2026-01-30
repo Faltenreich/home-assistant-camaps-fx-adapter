@@ -19,6 +19,7 @@ import com.faltenreich.camaps.core.ui.Label
 @Composable
 fun LogListItem(
     entry: LogEntry,
+    onInstallApp: () -> Unit,
     onOpenSettings: () -> Unit,
     modifier: Modifier = Modifier,
 ) = with(entry) {
@@ -59,6 +60,9 @@ fun LogListItem(
                 modifier = Modifier.weight(1f),
             )
             when (entry.issue) {
+                LogEntry.Issue.MISSING_APP -> ElevatedButton(onClick = onInstallApp) {
+                    Text(stringResource(R.string.cam_aps_fx_app_install))
+                }
                 LogEntry.Issue.MISSING_PERMISSION -> ElevatedButton(onClick = onOpenSettings) {
                     Text(stringResource(R.string.settings_open))
                 }

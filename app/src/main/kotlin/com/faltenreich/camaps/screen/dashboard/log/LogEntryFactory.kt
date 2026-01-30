@@ -17,6 +17,12 @@ object LogEntryFactory {
         val dateTime = createDateTime()
         val source = "Service"
         when (this) {
+            is MainServiceState.MissingApp -> LogEntry(
+                dateTime = dateTime,
+                source = source,
+                message = "Missing app",
+                issue = LogEntry.Issue.MISSING_APP,
+            )
             is MainServiceState.MissingPermission -> LogEntry(
                 dateTime = dateTime,
                 source = source,

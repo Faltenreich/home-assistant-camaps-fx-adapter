@@ -9,6 +9,7 @@ data class LogEntry(
 
     enum class Issue {
 
+        MISSING_APP,
         MISSING_PERMISSION,
     }
 }

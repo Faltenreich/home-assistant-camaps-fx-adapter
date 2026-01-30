@@ -2,6 +2,8 @@ package com.faltenreich.camaps.service
 
 sealed interface MainServiceState {
 
+    data object MissingApp : MainServiceState
+
     data object MissingPermission: MainServiceState
 
     data object Disconnected : MainServiceState
