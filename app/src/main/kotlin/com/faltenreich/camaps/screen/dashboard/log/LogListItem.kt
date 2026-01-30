@@ -3,8 +3,9 @@ package com.faltenreich.camaps.screen.dashboard.log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
+import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,7 +22,10 @@ fun LogListItem(
     onOpenSettings: () -> Unit,
     modifier: Modifier = Modifier,
 ) = with(entry) {
-    Column(modifier = modifier) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
         Label {
             Row(
                 horizontalArrangement = Arrangement.spacedBy(Dimensions.Padding.P_4),
@@ -40,18 +44,26 @@ fun LogListItem(
                 )
             }
         }
-        Text(
-            text = message,
-            modifier = Modifier.padding(
-                horizontal = Dimensions.Padding.P_16,
-                vertical = Dimensions.Padding.P_8,
-            ),
-        )
-        when (entry.issue) {
-            LogEntry.Issue.MISSING_PERMISSION -> Button(onClick = onOpenSettings) {
-                Text(stringResource(R.string.settings_open))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    horizontal = Dimensions.Padding.P_16,
+                    vertical = Dimensions.Padding.P_8,
+                ),
+            horizontalArrangement = Arrangement.spacedBy(Dimensions.Padding.P_4),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = message,
+                modifier = Modifier.weight(1f),
+            )
+            when (entry.issue) {
+                LogEntry.Issue.MISSING_PERMISSION -> ElevatedButton(onClick = onOpenSettings) {
+                    Text(stringResource(R.string.settings_open))
+                }
+                null -> Unit
             }
-            null -> Unit
         }
     }
 }
