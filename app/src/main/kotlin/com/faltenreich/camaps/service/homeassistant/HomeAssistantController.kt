@@ -4,8 +4,8 @@ import android.os.Build
 import android.util.Log
 import com.faltenreich.camaps.AppStateProvider
 import com.faltenreich.camaps.BuildConfig
+import com.faltenreich.camaps.core.data.SettingsRepository
 import com.faltenreich.camaps.screen.dashboard.log.LogEntryFactory
-import com.faltenreich.camaps.screen.login.SettingsRepository
 import com.faltenreich.camaps.service.camaps.CamApsFxEvent
 import com.faltenreich.camaps.service.homeassistant.device.HomeAssistantRegisterDeviceRequestBody
 import com.faltenreich.camaps.service.homeassistant.network.HomeAssistantApi
@@ -32,13 +32,11 @@ class HomeAssistantController(
 
     suspend fun start() {
         isDeviceRegistered = false
-        Log.d(TAG, "start: Starting Home Assistant registration")
-        // FIXME: Vanishes on first start
-        val uri = settingsRepository.getHomeAssistantUri().firstOrNull() ?: return
-        val token = settingsRepository.getHomeAssistantToken().firstOrNull() ?: return
-        homeAssistantClient = HomeAssistantClient(host = uri, token = token)
-        webhookId = settingsRepository.getHomeAssistantWebhookId().firstOrNull()
-        registeredSensorUniqueIds.addAll(settingsRepository.getRegisteredSensorUniqueIds().firstOrNull() ?: emptySet())
+        Log.d(TAG, "Home Assistant registration started")
+        val settings = settingsRepository.getSettings().firstOrNull()?.homeAssistant ?: return
+        homeAssistantClient = HomeAssistantClient(host = settings.uri, token = settings.token)
+        webhookId = settings.webhookId
+        registeredSensorUniqueIds.addAll(settings.registeredSensorUniqueIds)
 
         if (webhookId == null) {
             registerDevice()

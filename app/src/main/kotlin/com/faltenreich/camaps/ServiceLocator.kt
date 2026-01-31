@@ -2,7 +2,7 @@ package com.faltenreich.camaps
 
 import android.content.Context
 import com.faltenreich.camaps.core.data.KeyValueStore
-import com.faltenreich.camaps.screen.login.SettingsRepository
+import com.faltenreich.camaps.core.data.SettingsRepository
 import com.faltenreich.camaps.service.camaps.CamApsFxController
 import com.faltenreich.camaps.service.camaps.CamApsFxPackageLocator
 import com.faltenreich.camaps.service.camaps.notification.CamApsFxNotificationMapper

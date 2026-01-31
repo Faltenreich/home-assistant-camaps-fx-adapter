@@ -7,6 +7,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.faltenreich.camaps.core.data.SettingsRepository
 import com.faltenreich.camaps.locate
 import com.faltenreich.camaps.service.homeassistant.network.HomeAssistantClient
 import io.ktor.client.plugins.ResponseException
@@ -22,7 +23,7 @@ import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
 
 class LoginViewModel(
-    private val repository: SettingsRepository = locate(),
+    private val settingsRepository: SettingsRepository = locate(),
 ) : ViewModel() {
 
     var uri by mutableStateOf("")
@@ -46,8 +47,9 @@ class LoginViewModel(
 
     init {
         viewModelScope.launch {
-            uri = repository.getHomeAssistantUri().firstOrNull() ?: ""
-            token = repository.getHomeAssistantToken().firstOrNull() ?: ""
+            val settings = settingsRepository.getSettings().firstOrNull()
+            uri = settings?.homeAssistant?.uri ?: ""
+            token = settings?.homeAssistant?.token ?: ""
         }
         viewModelScope.launch {
             snapshotFlow { uri + token }
@@ -61,8 +63,8 @@ class LoginViewModel(
     }
 
     fun confirm() = viewModelScope.launch {
-        repository.saveHomeAssistantUri(uri)
-        repository.saveHomeAssistantToken(token)
+        settingsRepository.saveHomeAssistantUri(uri)
+        settingsRepository.saveHomeAssistantToken(token)
     }
 
     private suspend fun pingHomeAssistant() {

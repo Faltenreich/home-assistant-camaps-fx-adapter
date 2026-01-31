@@ -1,40 +1,44 @@
-package com.faltenreich.camaps.screen.login
+package com.faltenreich.camaps.core.data
 
-import com.faltenreich.camaps.core.data.KeyValueStore
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 
 class SettingsRepository(private val keyValueStore: KeyValueStore) {
 
-    fun getDeviceId(): String {
-        return keyValueStore.deviceId
+    fun getSettings(): Flow<Settings> = combine(
+        keyValueStore.getString(KEY_HOME_ASSISTANT_URI, null),
+        keyValueStore.getString(KEY_HOME_ASSISTANT_TOKEN),
+        keyValueStore.getString(KEY_HOME_ASSISTANT_WEBHOOK_ID),
+        keyValueStore.getStringSet(KEY_REGISTERED_SENSOR_UNIQUE_IDS),
+    ) { uri, token, webhookId, registeredSensorUniqueIds ->
+        Settings(
+            homeAssistant = if (uri != null && token != null) {
+                Settings.HomeAssistant(
+                    uri = uri,
+                    token = token,
+                    webhookId = webhookId,
+                    registeredSensorUniqueIds = registeredSensorUniqueIds ?: emptySet(),
+                )
+            } else {
+                null
+            },
+        )
     }
 
-    fun getHomeAssistantUri(): Flow<String?> {
-        return keyValueStore.getString(KEY_HOME_ASSISTANT_URI, null)
+    fun getDeviceId(): String {
+        return keyValueStore.deviceId
     }
 
     suspend fun saveHomeAssistantUri(uri: String) {
         keyValueStore.putString(KEY_HOME_ASSISTANT_URI, uri)
     }
 
-    fun getHomeAssistantToken(): Flow<String?> {
-        return keyValueStore.getString(KEY_HOME_ASSISTANT_TOKEN)
-    }
-
     suspend fun saveHomeAssistantToken(token: String) {
         keyValueStore.putString(KEY_HOME_ASSISTANT_TOKEN, token)
     }
 
-    fun getHomeAssistantWebhookId(): Flow<String?> {
-        return keyValueStore.getString(KEY_HOME_ASSISTANT_WEBHOOK_ID)
-    }
-
     suspend fun saveHomeAssistantWebhookId(webhookId: String) {
         keyValueStore.putString(KEY_HOME_ASSISTANT_WEBHOOK_ID, webhookId)
-    }
-
-    fun getRegisteredSensorUniqueIds(): Flow<Set<String>?> {
-        return keyValueStore.getStringSet(KEY_REGISTERED_SENSOR_UNIQUE_IDS)
     }
 
     suspend fun saveRegisteredSensorUniqueIds(sensorUniqueIds: Set<String>) {

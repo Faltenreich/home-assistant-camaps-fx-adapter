@@ -13,7 +13,7 @@ import com.faltenreich.camaps.R
 import com.faltenreich.camaps.ServiceLocator.appStateProvider
 import com.faltenreich.camaps.locate
 import com.faltenreich.camaps.screen.dashboard.log.LogEntryFactory
-import com.faltenreich.camaps.screen.login.SettingsRepository
+import com.faltenreich.camaps.core.data.SettingsRepository
 import com.faltenreich.camaps.service.MainService
 import com.faltenreich.camaps.service.MainServiceState
 import com.faltenreich.camaps.service.camaps.CamApsFxPackageLocator
