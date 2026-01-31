@@ -5,20 +5,6 @@
 This app reads blood sugar values from CamAPS FX by observing its notifications and sends them to the HomeAssistant API.
 This project serves as showcase for a blog post on
 [writingbits.de](https://writingbits.de/2025/01/06/reading-android-notifications-with-custom-views-using-reflection.html).
-This app will run in the background and constantly send your readings to home assistant.
-Support for mmol/L and mg/dL.
-
-### Build
-
-debug-app.apk: `gradlew.bat assembleDebug`
-
-### Setup
-
-1. Compile and run project
-2. Configure settings in app for home assistant uri and long lived access token.
-    - Default Home Assistant instance will be used: http://homeassistant.local:8123, set this to your Home Assistant URI
-    - Create a [long-lived access token](https://developers.home-assistant.io/docs/auth_api/#long-lived-access-token) for Home Assistant
-3. Allow notification access permissions
 
 ### Third-party licenses
 
