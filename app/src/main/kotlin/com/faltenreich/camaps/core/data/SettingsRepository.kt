@@ -6,21 +6,21 @@ import kotlinx.coroutines.flow.combine
 class SettingsRepository(private val keyValueStore: KeyValueStore) {
 
     fun getSettings(): Flow<Settings> = combine(
-        keyValueStore.getString(KEY_HOME_ASSISTANT_URI, null),
+        keyValueStore.getString(KEY_HOME_ASSISTANT_URI),
         keyValueStore.getString(KEY_HOME_ASSISTANT_TOKEN),
         keyValueStore.getString(KEY_HOME_ASSISTANT_WEBHOOK_ID),
         keyValueStore.getStringSet(KEY_REGISTERED_SENSOR_UNIQUE_IDS),
     ) { uri, token, webhookId, registeredSensorUniqueIds ->
         Settings(
-            homeAssistant = if (uri != null && token != null) {
+            homeAssistant = if (uri.isNullOrBlank() || token.isNullOrBlank()) {
+                null
+            } else {
                 Settings.HomeAssistant(
                     uri = uri,
                     token = token,
                     webhookId = webhookId,
                     registeredSensorUniqueIds = registeredSensorUniqueIds ?: emptySet(),
                 )
-            } else {
-                null
             },
         )
     }
