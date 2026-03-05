@@ -59,12 +59,14 @@ class CamApsFxNotificationMapper {
         val memberProperties = from::class.memberProperties
 
         val methodNameProperty = memberProperties
-            .firstOrNull { it.name == "mMethodName" }
+            .firstOrNull { it.name == "mMethodName" || it.name == "methodName" }
             ?: return null
         methodNameProperty.isAccessible = true
         val methodName = methodNameProperty.getter.call(from) as? String ?: return null
 
-        val valueProperty = memberProperties.firstOrNull { it.name == "mValue" } ?: return null
+        val valueProperty = memberProperties
+            .firstOrNull { it.name == "mValue" || it.name == "value" }
+            ?: return null
         valueProperty.isAccessible = true
         val value = valueProperty.getter.call(from)
 
